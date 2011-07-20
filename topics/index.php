@@ -10,4 +10,15 @@ $time = microtime(true);
 bibliographie_topics_traverse(1);
 echo microtime(true)-$time;
 
+?>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+$(function(){
+	$('.topic_subtopics').hide();
+});
+	/* <![CDATA[ */
+</script>
+<?php
+
 require BIBLIOGRAPHIE_ROOT_PATH.'/_footer.php';

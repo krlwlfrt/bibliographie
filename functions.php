@@ -10,3 +10,5 @@ if(mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPH
 
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	exit('Sorry, but we have no access to the database.');
+
+ob_start();
