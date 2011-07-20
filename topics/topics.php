@@ -1,5 +1,5 @@
 <?php
-function bibliographie_topics_traverse ($startTopic, $maxdepth = -1, $depth = 0, $walkedBy = array()) {
+function bibliographie_topics_traverse ($startTopic, $maxdepth = -1, $depth = 0, &$walkedBy = array()) {
 	$topics = mysql_query("SELECT * FROM
 	`a2topictopiclink` relations,
 	`a2topics` topics
@@ -8,7 +8,9 @@ LEFT JOIN (
 ) AS subtopics ON topics.`topic_id` = subtopics.`target_topic_id`
 WHERE
 	relations.`source_topic_id` = topics.`topic_id` AND
-	relations.`target_topic_id` = ".((int) $startTopic));
+	relations.`target_topic_id` = ".((int) $startTopic)."
+ORDER BY
+	topics.`name`");
 
 	if(mysql_num_rows($topics) > 0){
 		echo '<ul>'.PHP_EOL;
