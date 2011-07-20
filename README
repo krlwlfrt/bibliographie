@@ -1,1 +1,10 @@
 Intents to be a bibliography management tool that derives from the database scheme of aigaion2.
+
+All you need is a yet existant aigaion2 database and a config file that you put in the root of this app.
+The file should look something like that:
+
+<?php
+define('BIBLIOGRAPHIE_MYSQL_HOST', 'host');
+define('BIBLIOGRAPHIE_MYSQL_USER', 'user');
+define('BIBLIOGRAPHIE_MYSQL_PASSWORD', 'password');
+define('BIBLIOGRAPHIE_MYSQL_DATABASE', 'database');
