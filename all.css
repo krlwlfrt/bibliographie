@@ -9,10 +9,49 @@ body {
 }
 
 ul {
-	list-style-type: circle;
+	list-style-type: square;
 	margin-left: 2em;
 }
 
 li {
 	padding: 0.1em;
+}
+
+h2, h3, h4, h5, h6 {
+	margin: 1em 0;
+}
+
+p {
+	margin: 10px 0;
+}
+
+#wrapper {
+	border: 1px solid #000;
+	margin: 10px auto;
+	width: 1000px;
+}
+
+#header {
+	background: #000;
+	color: #fff;
+	padding: 10px;
+}
+
+#menu {
+	float: left;
+	padding-left: 10px;
+	width: 180px;
+}
+
+#content {
+	float: right;
+	padding-right: 10px;
+	width: 800px;
+}
+
+#footer {
+	border-top: 1px solid #000;
+	margin-top: 10px;
+	padding: 10px;
+	text-align: right;
 }

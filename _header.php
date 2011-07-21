@@ -8,4 +8,12 @@
 
 
 	<body id="top">
-		<div>
+		<div id="wrapper">
+			<div id="header"><h1>bibliographie</h1></div>
+
+			<div id="menu">
+				<h3>Topics</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph">Show topic graph</a>
+			</div>
+
+			<div id="content">
