@@ -20,3 +20,12 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	exit('Sorry, but we have no access to the database.');
 
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
+
+/**
+ * Check if a string is an url.
+ * @param string $url String that shall be checked
+ * @return bool Wether the string was an URL or not.
+ */
+function is_url ($url) {
+	return preg_match('!(([\w]+:)?//)?(([\d\w]|%[a-fA-f\d]{2,2})+(:([\d\w]|%[a-fA-f\d]{2,2})+)?@)?([\d\w][-\d\w]{0,253}[\d\w]\.)+[\w]{2,4}(:[\d]+)?(/([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)*(\?(&?([-+_~.\d\w]|%[a-fA-f\d]{2,2})=?)*)?(#([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)?!', $url);
+}

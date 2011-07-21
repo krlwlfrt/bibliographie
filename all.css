@@ -18,7 +18,7 @@ li {
 }
 
 h2, h3, h4, h5, h6 {
-	margin: 1em 0;
+	margin: 10px 0 5px 0;
 }
 
 p {
@@ -51,7 +51,18 @@ a:hover {
 #menu {
 	float: left;
 	padding-left: 10px;
-	width: 180px;
+	width: 170px;
+}
+
+#menu a {
+	display: block;
+	padding: 2px;
+	text-decoration: none;
+}
+
+#menu a:hover {
+	background: #0a0;
+	color: #fff;
 }
 
 #content {
@@ -66,4 +77,40 @@ a:hover {
 	margin-top: 10px;
 	padding: 10px;
 	text-align: right;
+}
+
+form .unit {
+	padding: 10px 0;
+}
+
+label.block {
+	display: block;
+	margin: 5px 0 5px 5px;
+}
+
+input, textarea {
+	background: #eee;
+	border: 1px solid #aaa;
+	color: #000;
+	padding: 0;
+}
+
+form .submit {
+	text-align: right;
+}
+
+p.success {
+	background: #afa;
+	border: 1px solid #0a0;
+	color: #000;
+	font-weight: bold;
+	padding: 5px;
+}
+
+p.error {
+	background: #faa;
+	border: 1px solid #f00;
+	color: #000;
+	font-weight: bold;
+	padding: 5px;
 }

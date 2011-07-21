@@ -56,7 +56,7 @@ ORDER BY
 	return $cache;
 }
 
-function bibliographie_topics_traverse_cache ($cache, $depth = 0, $walkedBy = array()) {
+function bibliographie_topics_traverse_cache ($cache, $depth = 0, &$walkedBy = array()) {
 	global $bibliographie_topics_graph_depth;
 
 	if($depth > $bibliographie_topics_graph_depth)
@@ -84,9 +84,20 @@ function bibliographie_topics_traverse_cache ($cache, $depth = 0, $walkedBy = ar
 				echo $topic->name;
 			echo '</li>'.PHP_EOL;
 
-			$walkedBy[] = $topic->topic_id;
 			$i++;
 		}
 		echo '</ul>'.PHP_EOL;
 	}
+}
+
+function bibliographie_topics_create_topic ($name, $description, $url) {
+	return mysql_query("INSERT INTO `a2topics` (
+	`name`,
+	`description`,
+	`url`
+) VALUES (
+	'".mysql_real_escape_string(stripslashes($name))."',
+	'".mysql_real_escape_string(stripslashes($description))."',
+	'".mysql_real_escape_string(stripslashes($url))."'
+)");
 }

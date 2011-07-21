@@ -14,6 +14,7 @@
 			<div id="menu">
 				<h3>Topics</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph">Show topic graph</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=createTopic">Create topic</a>
 			</div>
 
 			<div id="content">
