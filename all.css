@@ -25,14 +25,25 @@ p {
 	margin: 10px 0;
 }
 
+a {
+	background: transparent;
+	color: #0a0;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
 #wrapper {
-	border: 1px solid #000;
+	border: 1px solid #7c7;
 	margin: 10px auto;
 	width: 1000px;
 }
 
 #header {
-	background: #000;
+	background: #7c7;
 	color: #fff;
 	padding: 10px;
 }
@@ -50,7 +61,8 @@ p {
 }
 
 #footer {
-	border-top: 1px solid #000;
+	background: #8d8;
+	color: #000;
 	margin-top: 10px;
 	padding: 10px;
 	text-align: right;

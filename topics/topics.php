@@ -27,24 +27,27 @@ ORDER BY
 
 			$cache[$i] = array (
 				'topic_id' => $topic->topic_id,
-				'name' => $topic->name
+				'name' => htmlentities($topic->name)
 			);
 
+			if(!array_key_exists($topic->topic_id, $walkedBy))
+				$walkedBy[$topic->topic_id] = 1;
+			else
+				$walkedBy[$topic->topic_id]++;
+
 			echo '<li>';
-			if(!in_array($topic->topic_id, $walkedBy)){
-				if($topic->amount_of_subtopics > 0){
-					echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'" onclick="$(\'#topic_'.((int) $topic->topic_id).'_subtopics\').toggle()">'.$topic->name.'</a>';
-					echo '<div id="topic_'.((int) $topic->topic_id).'_subtopics" class="topic_subtopics">';
-					if(($depth + 1) < $maxdepth or $maxdepth == -1)
-						$cache[$i]['subtopics'] = bibliographie_topics_traverse($topic->topic_id, $maxdepth, ($depth + 1), $walkedBy);
-					echo '</div>';
-				}else
-					echo $topic->name;
+
+			if($topic->amount_of_subtopics > 0){
+				echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'" onclick="$(\'#topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics\').toggle()">'.$topic->name.'</a>';
+				echo '<div id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics" class="topic_subtopics">';
+				if(($depth + 1) < $maxdepth or $maxdepth == -1)
+					$cache[$i]['subtopics'] = bibliographie_topics_traverse($topic->topic_id, $maxdepth, ($depth + 1), $walkedBy);
+				echo '</div>';
 			}else
-				echo $topic->name.' (Sorry but we did walk by this topic yet earlier in the graph.)';
+				echo $topic->name;
+
 			echo '</li>'.PHP_EOL;
 
-			$walkedBy[] = $topic->topic_id;
 			$i++;
 		}
 		echo '</ul>'.PHP_EOL;
@@ -66,17 +69,19 @@ function bibliographie_topics_traverse_cache ($cache, $depth = 0, $walkedBy = ar
 			if(isset($topic->subtopics))
 				$topic->amount_of_subtopics = count($topic->subtopics);
 
+			if(!array_key_exists($topic->topic_id, $walkedBy))
+				$walkedBy[$topic->topic_id] = 1;
+			else
+				$walkedBy[$topic->topic_id]++;
+
 			echo '<li>';
-			if(!in_array($topic->topic_id, $walkedBy)){
-				if($topic->amount_of_subtopics > 0){
-					echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'" onclick="$(\'#topic_'.((int) $topic->topic_id).'_subtopics\').toggle()">'.$topic->name.'</a>';
-					echo '<div id="topic_'.((int) $topic->topic_id).'_subtopics" class="topic_subtopics">';
-					bibliographie_topics_traverse_cache($topic->subtopics, ($depth + 1), $walkedBy);
-					echo '</div>';
-				}else
-					echo $topic->name;
+			if($topic->amount_of_subtopics > 0){
+				echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'" onclick="$(\'#topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics\').toggle()">'.$topic->name.'</a>';
+				echo '<div id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics" class="topic_subtopics">';
+				bibliographie_topics_traverse_cache($topic->subtopics, ($depth + 1), $walkedBy);
+				echo '</div>';
 			}else
-				echo $topic->name.' (Sorry but we did walk by this topic yet earlier in the graph.)';
+				echo $topic->name;
 			echo '</li>'.PHP_EOL;
 
 			$walkedBy[] = $topic->topic_id;
