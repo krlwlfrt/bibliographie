@@ -16,6 +16,10 @@
 				<h3>Topics</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph"><?php echo bibliographie_get_icon('sitemap')?> Show topic graph</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=createTopic"><?php echo bibliographie_get_icon('folder-add')?> Create topic</a>
+
+				<h3>Authors</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=showList"><?php echo bibliographie_get_icon('group')?> Show authors</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=createAuthor"><?php echo bibliographie_get_icon('user-add')?> Create author</a>
 			</div>
 
 			<div id="content">

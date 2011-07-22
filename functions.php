@@ -21,6 +21,11 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
 
+mysql_query("SET NAMES 'utf8'");
+mysql_query("SET CHARACTER SET 'utf8'");
+
+header('Content-Type: text/html; charset=UTF-8');
+
 $title = 'bibliographie';
 
 /**

@@ -6,7 +6,6 @@ require dirname(__FILE__).'/topics.php';
 ?>
 
 <h2>Topics</h2>
-
 <?php
 switch($_GET['task']){
 	case 'createTopic':
@@ -61,6 +60,7 @@ switch($_GET['task']){
 	break;
 
 	case 'showGraph':
+	default:
 		$bibliographie_topics_graph_depth = (int) 0;
 
 		$top = (int) 1;
@@ -97,8 +97,6 @@ switch($_GET['task']){
 
 		echo '<p>depth: '.$bibliographie_topics_graph_depth.'</p>';
 	break;
-
-	default:
 }
 ?>
 
