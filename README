@@ -8,3 +8,5 @@ define('BIBLIOGRAPHIE_MYSQL_HOST', 'host');
 define('BIBLIOGRAPHIE_MYSQL_USER', 'user');
 define('BIBLIOGRAPHIE_MYSQL_PASSWORD', 'password');
 define('BIBLIOGRAPHIE_MYSQL_DATABASE', 'database');
+
+define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');

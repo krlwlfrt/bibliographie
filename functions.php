@@ -21,6 +21,8 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
 
+$title = 'bibliographie';
+
 /**
  * Check if a string is an url.
  * @param string $url String that shall be checked
@@ -28,4 +30,8 @@ define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
  */
 function is_url ($url) {
 	return preg_match('!(([\w]+:)?//)?(([\d\w]|%[a-fA-f\d]{2,2})+(:([\d\w]|%[a-fA-f\d]{2,2})+)?@)?([\d\w][-\d\w]{0,253}[\d\w]\.)+[\w]{2,4}(:[\d]+)?(/([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)*(\?(&?([-+_~.\d\w]|%[a-fA-f\d]{2,2})=?)*)?(#([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)?!', $url);
+}
+
+function bibliographie_get_icon ($name) {
+	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'"> </span>';
 }

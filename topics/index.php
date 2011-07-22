@@ -10,6 +10,7 @@ require dirname(__FILE__).'/topics.php';
 <?php
 switch($_GET['task']){
 	case 'createTopic':
+		$title = 'Create topic';
 ?>
 
 <h3>Create topic</h3>
@@ -41,15 +42,15 @@ switch($_GET['task']){
 <form action="?task=createTopic" method="post">
 	<div class="unit">
 		<label for="name" class="block">Name</label>
-		<input type="text" id="name" name="name" value="<?php echo $_POST['name']?>" style="width: 100%" />
+		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 100%" />
 	</div>
 	<div class="unit">
 		<label for="description" class="block">Description</label>
-		<textarea id="description" name="description" rows="6" cols="40" style="width: 100%"><?php echo $_POST['description']?></textarea>
+		<textarea id="description" name="description" rows="6" cols="40" style="width: 100%"><?php echo htmlspecialchars($_POST['description'])?></textarea>
 	</div>
 	<div class="unit">
 		<label for="url" class="block">URL</label>
-		<input type="text" id="url" name="url" value="<?php echo $_POST['url']?>" style="width: 100%" />
+		<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" />
 	</div>
 	<div class="submit">
 		<input type="submit" value="save" />
@@ -90,7 +91,7 @@ switch($_GET['task']){
 			fclose($file);
 		}else{
 			$cache = json_decode(file_get_contents($cacheFile));
-			echo '<p>This is the cached version with timestamp '.date('r', filemtime($cacheFile)).'.<br /><a href="?task=showGraph&ditchCache=1&top='.$top.'">Reload from database.</a></p>';
+			echo '<p>This is the cached version with timestamp '.date('r', filemtime($cacheFile)).'.<br /><a href="?task=showGraph&ditchCache=1&top='.((int) $top).'">Reload from database.</a></p>';
 			bibliographie_topics_traverse_cache($cache);
 		}
 

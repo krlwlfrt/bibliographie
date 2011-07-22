@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
 	<head>
-		<title>bibliographie</title>
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/all.css" />
+		<title><?php echo strip_tags($title)?> | bibliographie</title>
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/all.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/silk-icons.css" />
 		<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 	</head>
 
@@ -13,8 +14,8 @@
 
 			<div id="menu">
 				<h3>Topics</h3>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph">Show topic graph</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=createTopic">Create topic</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph"><?php echo bibliographie_get_icon('sitemap')?> Show topic graph</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=createTopic"><?php echo bibliographie_get_icon('folder-add')?> Create topic</a>
 			</div>
 
 			<div id="content">
