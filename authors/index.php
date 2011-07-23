@@ -25,7 +25,7 @@ switch($_GET['task']){
 				$errors[] = 'The mail address you filled is not valid.';
 
 			if(count($errors) == 0){
-				if(bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['instiute'])){
+				if(bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
 					echo '<p class="success">Author has been created!</p>';
 					$created = true;
 				}else

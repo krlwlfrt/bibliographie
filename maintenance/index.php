@@ -49,21 +49,27 @@ switch($_GET['task']){
 
 <table class="dataContainer">
 	<tr>
-		<th style="width: 10%">#</th>
-		<th style="width: 30%">Time</th>
-		<th style="width: 10%">Category</th>
-		<th style="width: 10%">Action</th>
+		<th style="width: 40%">Classification</th>
+		<th style="width: 20%">Action</th>
 		<th style="width: 40%">Data</th>
 	</tr>
 <?php
 				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
+				$categoryIcons = array (
+					'topics' => 'folder',
+					'authors' => 'user'
+				);
+				$actionIcons = array (
+					'create' => 'add'
+				);
 				foreach($logContent as $logRow){
+
 					$logRow = json_decode($logRow);
 					echo '<tr>';
-					echo '<td>'.$logRow->id.'</td>';
-					echo '<td>'.$logRow->time.'</td>';
-					echo '<td>'.$logRow->category.'</td>';
-					echo '<td>'.$logRow->action.'</td>';
+					echo '<td>logged action <strong>#'.$logRow->id.'</strong><br />';
+					echo '<em>'.$logRow->time.'</em></td>';
+					echo '<td><strong>'.bibliographie_icon_get($categoryIcons[$logRow->category]).' '.$logRow->category.'</strong><br />';
+					echo '<strong>'.bibliographie_icon_get($actionIcons[$logRow->action]).' '.$logRow->action.'</strong></td>';
 					echo '<td><pre>'.print_r(json_decode($logRow->data), true).'</pre></td>';
 					echo '</tr>';
 				}

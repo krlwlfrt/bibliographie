@@ -56,7 +56,7 @@ function is_mail ($mail) {
  * @param string $name Identification of the icon.
  * @return string HTML-snippet
  */
-function bibliographie_get_icon ($name) {
+function bibliographie_icon_get ($name) {
 	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'"> </span>';
 }
 
