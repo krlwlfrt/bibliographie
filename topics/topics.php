@@ -27,7 +27,7 @@ ORDER BY
 
 			$cache[$i] = array (
 				'topic_id' => $topic->topic_id,
-				'name' => htmlentities($topic->name)
+				'name' => $topic->name
 			);
 
 			if(!array_key_exists($topic->topic_id, $walkedBy))
@@ -107,7 +107,7 @@ function bibliographie_topics_create_topic ($name, $description, $url) {
 		'description' => $description,
 		'url' => $url
 	));
-	
+
 	if($return)
 		bibliographie_log('topics', 'create', $data);
 
