@@ -12,6 +12,8 @@ require dirname(__FILE__).'/config.php';
 
 if(!is_dir(dirname(__FILE__).'/cache'))
 	mkdir(dirname(__FILE__).'/cache', 0755);
+if(!is_dir(dirname(__FILE__).'/logs'))
+	mkdir(dirname(__FILE__).'/logs', 0755);
 
 if(mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD))
 	if(mysql_select_db(BIBLIOGRAPHIE_MYSQL_DATABASE))
@@ -56,4 +58,19 @@ function is_mail ($mail) {
  */
 function bibliographie_get_icon ($name) {
 	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'"> </span>';
+}
+
+function bibliographie_log ($category, $action, $data) {
+	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
+
+	$addFile = json_encode(array(
+		'time' => date('r'),
+		'category' => $category,
+		'action' => $action,
+		'data' => $data
+	));
+
+	fwrite($logFile, $addFile.PHP_EOL);
+
+	fclose($logFile);
 }

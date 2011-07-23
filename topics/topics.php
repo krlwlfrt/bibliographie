@@ -91,7 +91,7 @@ function bibliographie_topics_traverse_cache ($cache, $depth = 0, &$walkedBy = a
 }
 
 function bibliographie_topics_create_topic ($name, $description, $url) {
-	return mysql_query("INSERT INTO `a2topics` (
+	$return = mysql_query("INSERT INTO `a2topics` (
 	`name`,
 	`description`,
 	`url`
@@ -100,4 +100,16 @@ function bibliographie_topics_create_topic ($name, $description, $url) {
 	'".mysql_real_escape_string(stripslashes($description))."',
 	'".mysql_real_escape_string(stripslashes($url))."'
 )");
+
+	$data = json_encode(array(
+		'topic_id' => mysql_insert_id(),
+		'name' => $name,
+		'description' => $description,
+		'url' => $url
+	));
+	
+	if($return)
+		bibliographie_log('topics', 'create', $data);
+
+	return $return;
 }
