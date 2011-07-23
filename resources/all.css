@@ -83,6 +83,10 @@ form .unit {
 	padding: 10px 0;
 }
 
+label {
+	font-weight: bold;
+}
+
 label.block {
 	display: block;
 	margin: 5px 0 5px 5px;

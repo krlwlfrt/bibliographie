@@ -29,7 +29,7 @@ switch($_GET['task']){
 					echo '<p class="success">Topic has been created!</p>';
 					$created = true;
 				}else
-					echo '<p class="failure">Topic could not have been created. '.mysql_error().'</p>';
+					echo '<p class="error">Topic could not have been created. '.mysql_error().'</p>';
 			}else
 				foreach($errors as $error)
 					echo '<p class="error">'.$error.'</p>';
@@ -38,9 +38,9 @@ switch($_GET['task']){
 		if(!$created){
 ?>
 
-<form action="?task=createTopic" method="post">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=createTopic'?>" method="post">
 	<div class="unit">
-		<label for="name" class="block">Name</label>
+		<label for="name" class="block">Name*</label>
 		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 100%" />
 	</div>
 	<div class="unit">
