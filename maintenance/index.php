@@ -16,7 +16,7 @@ switch($_GET['task']){
 <h3>Parse logs</h3>
 <?php
 		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs', true);
-		if(count($logContent > 2)){
+		if(count($logContent) > 2){
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/maintenance/'?>" method="get">
@@ -40,7 +40,8 @@ switch($_GET['task']){
 	</div>
 </form>
 <?php
-		}
+		}else
+			echo '<p class="error">We have no log files!</p>';
 
 		if(!empty($_GET['logFile'])){
 			if(mb_strpos($_GET['logFile'], '..') === false and mb_strpos($_GET['logFile'], '/') === false and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile'])){
@@ -48,16 +49,18 @@ switch($_GET['task']){
 
 <table class="dataContainer">
 	<tr>
+		<th style="width: 10%">#</th>
 		<th style="width: 30%">Time</th>
 		<th style="width: 10%">Category</th>
 		<th style="width: 10%">Action</th>
-		<th style="width: 50%">Data</th>
+		<th style="width: 40%">Data</th>
 	</tr>
 <?php
 				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
 				foreach($logContent as $logRow){
 					$logRow = json_decode($logRow);
 					echo '<tr>';
+					echo '<td>'.$logRow->id.'</td>';
 					echo '<td>'.$logRow->time.'</td>';
 					echo '<td>'.$logRow->category.'</td>';
 					echo '<td>'.$logRow->action.'</td>';

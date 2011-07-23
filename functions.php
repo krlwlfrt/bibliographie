@@ -62,9 +62,21 @@ function bibliographie_get_icon ($name) {
 
 function bibliographie_log ($category, $action, $data) {
 	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
+	$time = date('r');
+
+	mysql_query("INSERT INTO `log` (
+	`log_file`,
+	`log_time`
+) VALUES (
+	'".mysql_real_escape_string(stripslashes('log_'.date('W_Y').'.log'))."',
+	'".mysql_real_escape_string(stripslashes($time))."'
+)");
+
+	echo mysql_error();
 
 	$addFile = json_encode(array(
-		'time' => date('r'),
+		'id' => mysql_insert_id(),
+		'time' => $time,
 		'category' => $category,
 		'action' => $action,
 		'data' => $data
