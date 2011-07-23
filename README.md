@@ -35,6 +35,8 @@ DROP TABLE a2aigaiongeneral, a2availablerights, a2changehistory, a2config, a2gro
 ```
 
 ## Add new table ##
+This is a new table we need to cross reference with the file log.
+
 ```sql
 CREATE TABLE `log` (
 	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
