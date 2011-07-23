@@ -17,6 +17,7 @@ define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
 ```
 
 ## Drop unnecessary aigaion2 tables ##
+Since we do not implement such neat user priviliges we don't need all of that stuff!
 * a2aigaiongeneral
 * a2availablerights
 * a2changehistory
@@ -27,6 +28,8 @@ define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
 * a2rightsprofiles
 * a2usergrouplink
 * a2userrights
+```sql
+DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`
 
 ## Add new table ##
 ```sql
