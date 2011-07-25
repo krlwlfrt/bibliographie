@@ -3,7 +3,7 @@ Intents to be a bibliography management tool that derives from the database sche
 # Get it running #
 ## Config file ##
 
-All you need is a yet existant aigaion2 database and a config file name 'config.php' that you put in the root of this app.
+All you need is a yet existant aigaion2 database and a config file named 'config.php' that you put in the root of this app.
 The file should look something like that:
 
 ```php
@@ -14,6 +14,8 @@ define('BIBLIOGRAPHIE_MYSQL_PASSWORD', 'password');
 define('BIBLIOGRAPHIE_MYSQL_DATABASE', 'database');
 
 define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
+
+define('BIBLIOGRAPHIE_CACHING', true);
 ```
 
 ## Drop unnecessary aigaion2 tables ##

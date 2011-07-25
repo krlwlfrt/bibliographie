@@ -58,6 +58,39 @@ switch($_GET['task']){
 		}
 	break;
 
+	case 'showTopic':
+		$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
+		if(mysql_num_rows($topic) == 1){
+			$topic = mysql_fetch_object($topic);
+			$title = 'Topic: '.htmlspecialchars($topic->name);
+
+			$directPublications = mysql_num_rows(mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `topic_id` = ".((int) $topic->topic_id)));
+			$indirectPublications = (int) 0;
+
+			$subtopicsArray = bibliographie_topics_get_subtopics($topic->topic_id);
+			if(count($subtopicsArray) > 0){
+				$mysqlString = '';
+				foreach($subtopicsArray as $subtopic){
+					if(!empty($mysqlString))
+						$mysqlString .= " OR ";
+
+					$mysqlString .= "`topic_id` = ".((int) $subtopic);
+				}
+				$indirectPublications = mysql_num_rows(mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE ".$mysqlString));
+			}
+
+?>
+
+<h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3>
+<ul>
+	<li><a href="">Show publications (<?php echo $directPublications?>)</a></li>
+	<li><a href="">Show publications in subtopics (<?php echo $indirectPublications?>)</a></li>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph&topic_id=<?php echo $topic->topic_id?>">Show subgraph</a></li>
+</ul>
+<?php
+		}
+	break;
+
 	case 'showGraph':
 	default:
 		$bibliographie_topics_graph_depth = (int) 0;
@@ -65,34 +98,37 @@ switch($_GET['task']){
 		$top = (int) 1;
 		$cacheFile = BIBLIOGRAPHIE_ROOT_PATH.'/cache/bibliographie_topics_graph.json';
 		$title = 'Topic graph';
-		if(!empty($_GET['top']) and is_numeric($_GET['top']) and $_GET['top'] != '1'){
-			$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['top']));
+		if(!empty($_GET['topic_id']) and is_numeric($_GET['topic_id']) and $_GET['topic_id'] != '1'){
+			$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
 			if(mysql_num_rows($topic) == 1){
 				$topic = mysql_fetch_object($topic);
 
-				$top = (int) $_GET['top'];
+				$top = (int) $_GET['topic_id'];
 				$cacheFile = BIBLIOGRAPHIE_ROOT_PATH.'/cache/bibliographie_topics_graph_'.$top.'.json';
 				$title = 'Topic subgraph for <em>'.$topic->name.'</em>';
 			}
 		}
 
-		echo '<a href="javascript:;" onclick="$(\'.topic_subtopics\').show();">Open</a> '.
-			'<a href="javascript:;"onclick="$(\'.topic_subtopics\').hide();">Close</a> '.
-			'all subtopics';
+		echo '<span style="float: right"><a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a> '.
+			'<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a> '.
+			'all subtopics</span>';
 		echo '<h3>'.$title.'</h3>';
 
+		echo '<div class="bibliographie_topics_topic_graph">';
 		if(!file_exists($cacheFile) or $_GET['ditchCache'] == 1){
 			$cache = bibliographie_topics_traverse($top);
 
-			$file = fopen($cacheFile, 'w+');
-			chmod($cacheFile, 0755);
-			fwrite($file, json_encode($cache));
-			fclose($file);
+			if(BIBLIOGRAPHIE_CACHING){
+				$file = fopen($cacheFile, 'w+');
+				fwrite($file, json_encode($cache));
+				fclose($file);
+			}
 		}else{
 			$cache = json_decode(file_get_contents($cacheFile));
-			echo '<p>This is the cached version with timestamp '.date('r', filemtime($cacheFile)).'.<br /><a href="?task=showGraph&ditchCache=1&top='.((int) $top).'">Reload from database.</a></p>';
+			echo '<p>This is the cached version with timestamp '.date('r', filemtime($cacheFile)).'. <a href="?task=showGraph&ditchCache=1&top='.((int) $top).'">Reload from database.</a></p>';
 			bibliographie_topics_traverse_cache($cache);
 		}
+		echo '</div>';
 
 		echo '<p>depth: '.$bibliographie_topics_graph_depth.'</p>';
 	break;
@@ -101,9 +137,25 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-$(function(){
-	$('.topic_subtopics').hide();
-});
+function bibliographie_topics_toggle_visibility_of_subtopics (topic_id, repeat_id) {
+	if($('#topic_'+topic_id+'_'+repeat_id+'_subtopics').is(':visible')){
+		$('#topic_'+topic_id+'_'+repeat_id+'_subtopics').hide();
+		$('#topic_'+topic_id+'_'+repeat_id+' span').removeClass('silk-icon-bullet-toggle-minus').addClass('silk-icon-bullet-toggle-plus');
+	}else{
+		$('#topic_'+topic_id+'_'+repeat_id+'_subtopics').show();
+		$('#topic_'+topic_id+'_'+repeat_id+' span').removeClass('silk-icon-bullet-toggle-plus').addClass('silk-icon-bullet-toggle-minus');
+	}
+}
+
+function bibliographie_topics_toggle_visiblity_of_all (expand) {
+	if(expand == true){
+		$('.topic_subtopics').show();
+		$('.topic span').removeClass('silk-icon-bullet-toggle-plus').addClass('silk-icon-bullet-toggle-minus');
+	}else{
+		$('.topic_subtopics').hide();
+		$('.topic span').removeClass('silk-icon-bullet-toggle-minus').addClass('silk-icon-bullet-toggle-plus');
+	}
+}
 	/* <![CDATA[ */
 </script>
 <?php

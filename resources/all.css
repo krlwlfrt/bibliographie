@@ -10,7 +10,7 @@ body {
 
 ul {
 	list-style-type: square;
-	margin-left: 2em;
+	margin-left: 20px;
 }
 
 li {
@@ -43,6 +43,10 @@ strong {
 em {
 	font-style: italic;
 	font-size: 0.8em;
+}
+
+h2 em, h3 em, h4 em, h5 em, h6 em {
+	font-size: 1em;
 }
 
 #wrapper {
@@ -168,4 +172,16 @@ p.error {
 .dataContainer tr:nth-child(even) {
 	background: #fff;
 	color: #000;
+}
+
+.bibliographie_topics_topic_graph ul {
+	list-style-type: none;
+	margin-left: 20px;
+}
+
+.silk-icon-equivalent {
+	display:inline-block;
+	height: 16px;
+	margin: 0 1px;
+	width: 16px;
 }

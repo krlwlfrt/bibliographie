@@ -52,9 +52,11 @@ ORDER BY authors.`surname`, authors.`firstname`");
 			$parsedPublication = str_replace('[pages]', $publication->pages, $parsedPublication);
 			$parsedPublication = str_replace('[publisher]', $publication->publisher, $parsedPublication);
 
-			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication->pub_id.'_'.$style.'.txt', 'w+');
-			fwrite($cacheFile, $parsedPublication);
-			fclose($cacheFile);
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication->pub_id.'_'.$style.'.txt', 'w+');
+				fwrite($cacheFile, $parsedPublication);
+				fclose($cacheFile);
+			}
 
 			return '<strong>'.$publication->pub_type.'</strong> '.$parsedPublication;
 		}

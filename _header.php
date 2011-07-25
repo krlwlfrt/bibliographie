@@ -21,6 +21,8 @@
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=showList"><?php echo bibliographie_icon_get('group')?> Show authors</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=createAuthor"><?php echo bibliographie_icon_get('user-add')?> Create author</a>
 
+				<h3>Publications</h3>
+
 				<h3>Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
 			</div>
