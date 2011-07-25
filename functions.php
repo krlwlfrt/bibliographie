@@ -1,20 +1,33 @@
 <?php
 ob_start();
+
+/**
+ * Check authentication.
+ */
 if(!isset($_SERVER['PHP_AUTH_USER'])){
-	header('WWW-Authenticate: Basic realm="My Realm"');
+	header('WWW-Authenticate: Basic realm="bibliographie"');
 	header('HTTP/1.0 401 Unauthorized');
 	exit('You are not logged in!');
 }
 
+/**
+ * Check for config file.
+ */
 if(!file_exists(dirname(__FILE__).'/config.php'))
 	exit('Sorry, but we have no config file!');
 require dirname(__FILE__).'/config.php';
 
+/**
+ * Check for necessary directories.
+ */
 if(!is_dir(dirname(__FILE__).'/cache'))
 	mkdir(dirname(__FILE__).'/cache', 0755);
 if(!is_dir(dirname(__FILE__).'/logs'))
 	mkdir(dirname(__FILE__).'/logs', 0755);
 
+/**
+ * Check mysql connection.
+ */
 if(mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD))
 	if(mysql_select_db(BIBLIOGRAPHIE_MYSQL_DATABASE))
 		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
@@ -23,12 +36,29 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
 
+/**
+ * Initialize UTF-8.
+ */
 mysql_query("SET NAMES 'utf8'");
 mysql_query("SET CHARACTER SET 'utf8'");
 
 header('Content-Type: text/html; charset=UTF-8');
 
+/**
+ * Set standard title for header.
+ */
 $title = 'bibliographie';
+
+/**
+ * Make sure contents of cache are renewed every second day.
+ */
+foreach(scandir(dirname(__FILE__).'/cache') as $object){
+	if($object == '.' or $object == '..')
+		continue;
+
+	if(filemtime(dirname(__FILE__).'/cache/'.$object) + (60 * 60 * 24 * 2) < time())
+		unlink(dirname(__FILE__).'/cache/'.$object);
+}
 
 /**
  * Check if a string is an url.
@@ -60,6 +90,12 @@ function bibliographie_icon_get ($name) {
 	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'"> </span>';
 }
 
+/**
+ * Write an action into the log.
+ * @param string $category The category the action was done in.
+ * @param string $action The action itself.
+ * @param mixed $data Some kind of JSON representation from json_encode()
+ */
 function bibliographie_log ($category, $action, $data) {
 	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
 	$time = date('r');
