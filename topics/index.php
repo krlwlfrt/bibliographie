@@ -115,19 +115,7 @@ switch($_GET['task']){
 		echo '<h3>'.$title.'</h3>';
 
 		echo '<div class="bibliographie_topics_topic_graph">';
-		if(!file_exists($cacheFile) or $_GET['ditchCache'] == 1){
-			$cache = bibliographie_topics_traverse($top);
-
-			if(BIBLIOGRAPHIE_CACHING){
-				$file = fopen($cacheFile, 'w+');
-				fwrite($file, json_encode($cache));
-				fclose($file);
-			}
-		}else{
-			$cache = json_decode(file_get_contents($cacheFile));
-			echo '<p>This is the cached version with timestamp '.date('r', filemtime($cacheFile)).'. <a href="?task=showGraph&ditchCache=1&top='.((int) $top).'">Reload from database.</a></p>';
-			bibliographie_topics_traverse_cache($cache);
-		}
+		bibliographie_topics_traverse($top);
 		echo '</div>';
 
 		echo '<p>depth: '.$bibliographie_topics_graph_depth.'</p>';
