@@ -2,7 +2,6 @@
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
-require dirname(__FILE__).'/authors.php';
 
 ?>
 
@@ -80,6 +79,31 @@ switch($_GET['task']){
 		}
 	break;
 
+	case 'showAuthor':
+		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
+		if(mysql_num_rows($author) == 1){
+			$author = mysql_fetch_object($author);
+
+			$publications = mysql_query("SELECT * FROM
+	`a2publicationauthorlink` relations,
+	`a2publication` publications
+WHERE
+	publications.`pub_id` = relations.`pub_id` AND
+	relations.`author_id` = ".((int) $_GET['author_id'])."
+ORDER BY
+	publications.`year` DESC");
+
+			if(mysql_num_rows($publications) > 0){
+?>
+
+<h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
+<?php
+				while($publication = mysql_fetch_object($publications))
+					echo '<p>'.bibliographie_publications_parse_data($publication).'</p>';
+			}
+		}
+	break;
+
 	case 'showList':
 ?>
 
@@ -96,18 +120,12 @@ switch($_GET['task']){
 	</tr>
 <?php
 			while($author = mysql_fetch_object($authors)){
-				$author->surname = '<strong>'.$author->surname.'</strong>';
-
-				if(!empty($author->von))
-					$author->surname = $author->von.' '.$author->surname;
-
-				if(!empty($author->jr))
-					$author->surname = $author->surname.' '.$author->jr;
+				$name = bibliographie_authors_parse_data($author, array('splitNames'=>true));
 ?>
 
 	<tr>
-		<td><?php echo $author->surname?></td>
-		<td><?php echo $author->firstname?></td>
+		<td><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showAuthor&author_id=<?php echo $author->author_id?>"><?php echo $name['surname']?></a></td>
+		<td><?php echo $name['firstname']?></td>
 	</tr>
 <?php
 			}

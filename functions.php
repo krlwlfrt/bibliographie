@@ -122,3 +122,7 @@ function bibliographie_log ($category, $action, $data) {
 
 	fclose($logFile);
 }
+
+require dirname(__FILE__).'/authors/authors.php';
+require dirname(__FILE__).'/publications/publications.php';
+require dirname(__FILE__).'/topics/topics.php';

@@ -2,8 +2,6 @@
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
-require dirname(__FILE__).'/publications.php';
-
 ?>
 
 <h2>Publications</h2>
