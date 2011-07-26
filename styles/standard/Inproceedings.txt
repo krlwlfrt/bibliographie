@@ -1,1 +1,1 @@
-[authors], [title], in: [booktitle], [publisher], [year]
+[authors] ([year]). [title]. in: [booktitle], [pages].

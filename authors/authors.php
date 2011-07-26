@@ -60,3 +60,7 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 
 	return false;
 }
+
+function bibliographie_authors_get_list () {
+	
+}

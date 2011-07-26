@@ -93,7 +93,7 @@ switch($_GET['task']){
 
 	case 'showGraph':
 	default:
-		$bibliographie_topics_graph_depth = (int) 0;
+		$bibliographie_topics_graph_depth = (int) 1;
 
 		$top = (int) 1;
 		$cacheFile = BIBLIOGRAPHIE_ROOT_PATH.'/cache/bibliographie_topics_graph.json';

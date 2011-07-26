@@ -98,8 +98,9 @@ ORDER BY
 
 <h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
 <?php
+				
 				while($publication = mysql_fetch_object($publications))
-					echo '<p>'.bibliographie_publications_parse_data($publication).'</p>';
+					echo '<p>'.bibliographie_publications_parse_data($publication->pub_id).'</p>';
 			}
 		}
 	break;

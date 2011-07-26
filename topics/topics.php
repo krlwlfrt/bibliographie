@@ -6,7 +6,7 @@
  * @param int $depth Used internally.
  * @param int $walkedBy Used internally to mark yet traversed topics.
  */
-function bibliographie_topics_traverse ($topic, $depth = 0, &$walkedBy = array()) {
+function bibliographie_topics_traverse ($topic, $depth = 1, &$walkedBy = array()) {
 	global $bibliographie_topics_graph_depth;
 
 	if($depth > $bibliographie_topics_graph_depth)

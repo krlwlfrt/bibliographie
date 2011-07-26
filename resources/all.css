@@ -22,12 +22,12 @@ h2, h3, h4, h5, h6 {
 }
 
 p {
-	margin: 10px 0;
+	margin: 20px 0;
 }
 
 a {
 	background: transparent;
-	color: #0a0;
+	color: #777;
 	font-weight: bold;
 	text-decoration: none;
 }
@@ -38,15 +38,6 @@ a:hover {
 
 strong {
 	font-weight: bold;
-}
-
-em {
-	font-style: italic;
-	font-size: 0.8em;
-}
-
-h2 em, h3 em, h4 em, h5 em, h6 em {
-	font-size: 1em;
 }
 
 #wrapper {
@@ -80,6 +71,7 @@ h2 em, h3 em, h4 em, h5 em, h6 em {
 
 #content {
 	float: right;
+	line-height: 1.5em;
 	padding-right: 10px;
 	width: 800px;
 }
@@ -128,12 +120,30 @@ p.success {
 	padding: 5px;
 }
 
+span.success {
+	background: #afa;
+	border: 1px solid #0a0;
+	color: #000;
+	font-size: 0.9em;
+	font-weight: bold;
+	padding: 1px;
+}
+
 p.error {
 	background: #faa;
 	border: 1px solid #f00;
 	color: #000;
 	font-weight: bold;
 	padding: 5px;
+}
+
+span.error {
+	background: #faa;
+	border: 1px solid #f00;
+	color: #000;
+	font-size: 0.9em;
+	font-weight: bold;
+	padding: 1px;
 }
 
 .dataContainer {

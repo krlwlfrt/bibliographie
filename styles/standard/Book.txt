@@ -1,1 +1,1 @@
-[authors], [title], [publisher], [year]
+[authors] ([year]). [title]. [location]: [publisher].
