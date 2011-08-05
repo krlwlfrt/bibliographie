@@ -7,6 +7,94 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Topics</h2>
 <?php
 switch($_GET['task']){
+	case 'createRelation':
+		$title = 'Create relation';
+		$created = false;
+?>
+
+<h3>Create relation</h3>
+<?php
+		if($_SERVER['REQUEST_METHOD'] == 'POST'){
+			$errors = array();
+
+			if(empty($_POST['select_searchTopicOne']) or !is_numeric($_POST['select_searchTopicOne']) or empty($_POST['select_searchTopicTwo']) or !is_numeric($_POST['select_searchTopicTwo']))
+				$errors[] = 'You have to select two topics!';
+
+			if($_POST['select_searchTopicOne'] == $_POST['select_searchTopicTwo'])
+				$errors[] = 'You can\'t select the same topic twice!';
+
+			if(count($errors) == 0){
+				if(bibliographie_topics_create_relation($_POST['select_searchTopicOne'], $_POST['select_searchTopicTwo'])){
+					echo '<p class="success">Relation was created!</p>';
+					$created = true;
+				}else
+					echo '<p class="error">Relation was not created!</p>';
+			}else
+				bibliographie_print_errors($errors);
+		}
+
+		if(!$created){
+?>
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=createRelation'?>" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
+	<div class="unit">
+		<div style="float: right; width: 50%">
+			<label for="searchTopicTwo" class="block">Subordinated topic</label>
+			<input type="text" id="searchTopicTwo" name="searchTopicTwo" value="" style="width: 100%;" />
+			<div id="result_searchTopicTwo"></div>
+		</div>
+		<label for="searchTopicOne" class="block">Parent topic</label>
+		<input type="text" id="searchTopicOne" name="searchTopicOne" value="" style="width: 45%;" />
+		<div id="result_searchTopicOne" style="width: 45%"></div>
+
+		<br style="clear: both;"/>
+	</div>
+	<div class="submit">
+		<input type="submit" value="save" />
+	</div>
+</form>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+function bibliographie_topics_check_submit_status () {
+	if($('#select_searchTopicOne').length == 1 && $('#select_searchTopicTwo').length == 1){
+		if($('#select_searchTopicOne').val() > 0 && $('#select_searchTopicTwo').val() > 0 && $('#select_searchTopicOne').val() != $('#select_searchTopicTwo').val())
+			return true;
+
+		alert('You have to select two distinct topics!');
+		return false;
+	}
+
+	alert('You have to search for the two topics that you want to relate!');
+	return false;
+}
+
+function bibliographie_topics_search_topic_for_relation (event) {
+	if(event.target.id == 'searchTopicOne' || event.target.id == 'searchTopicTwo'){
+		$.ajax({
+			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/ajax.php'?>',
+			data: {
+				'task': 'searchTopic',
+				'id': event.target.id,
+				'value': event.target.value
+			},
+			success: function (html) {
+				$('#result_'+event.target.id).html(html);
+			}
+		});
+	}
+}
+
+$('#searchTopicTwo, #searchTopicOne').change(function(event) {
+	bibliographie_topics_search_topic_for_relation(event);
+}).keyup(function(event) {
+	bibliographie_topics_search_topic_for_relation(event);
+});
+	/* ]]> */
+</script>
+<?php
+		}
+	break;
+
 	case 'createTopic':
 		$title = 'Create topic';
 ?>
@@ -30,8 +118,7 @@ switch($_GET['task']){
 				}else
 					echo '<p class="error">Topic could not have been created. '.mysql_error().'</p>';
 			}else
-				foreach($errors as $error)
-					echo '<p class="error">'.$error.'</p>';
+				bibliographie_print_errors($errors);
 		}
 
 		if(!$created){

@@ -123,6 +123,22 @@ function bibliographie_log ($category, $action, $data) {
 	fclose($logFile);
 }
 
+function bibliographie_print_errors ($errors) {
+	foreach($errors as $error)
+		echo '<p class="error">'.htmlspecialchars($error).'</p>';
+}
+
+function bibliographie_purge_cache ($pattern) {
+	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
+		$files = glob(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$pattern.'*');
+		foreach($files as $file)
+			unlink($file);
+	}
+}
+
 require dirname(__FILE__).'/authors/authors.php';
 require dirname(__FILE__).'/publications/publications.php';
 require dirname(__FILE__).'/topics/topics.php';
+
+if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
+	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
