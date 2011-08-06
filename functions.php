@@ -161,7 +161,7 @@ function bibliographie_print_pages ($baseLink, $amountOfItems) {
 	 * Set standard values.
 	 */
 	$page = 1;
-	$perPage = 10;
+	$perPage = 100;
 	$pages = ceil($amountOfItems / $perPage);
 
 	/**
@@ -184,7 +184,7 @@ function bibliographie_print_pages ($baseLink, $amountOfItems) {
 	 * Print page navigation.
 	 */
 	if($pages > 1){
-		echo '<strong>Pages</strong> ';
+		echo '<p class="bibliographie_pages"><strong>Pages</strong>: ';
 		for($i = 1; $i <= $pages; $i++){
 			$virtualOffset = ($i - 1) * $perPage;
 
@@ -192,8 +192,12 @@ function bibliographie_print_pages ($baseLink, $amountOfItems) {
 			if($virtualEnd > $amountOfItems)
 				$virtualEnd = $amountOfItems;
 
-			echo '<a href="'.$baseLink.'page='.$i.'">['.($virtualOffset + 1).'-'.$virtualEnd.']</a> ';
+			if($i != $page)
+				echo '<a href="'.$baseLink.'page='.$i.'">['.($virtualOffset + 1).'-'.$virtualEnd.']</a> ';
+			else
+				echo '<strong>['.($virtualOffset + 1).'-'.$virtualEnd.']</strong> ';
 		}
+		echo '</p>';
 	}
 
 	return array (

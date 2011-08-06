@@ -152,6 +152,12 @@ ORDER BY
 	return false;
 }
 
+/**
+ * Create a relation between two topics. The topics have to be distinct.
+ * @param int $parent ID of parent topic.
+ * @param int $child ID of child topic.
+ * @return bool True on success or false otherwise.
+ */
 function bibliographie_topics_create_relation ($parent, $child) {
 	if(!empty($parent) and is_numeric($parent) and !empty($child) and is_numeric($child) and $parent != $child){
 		$return = mysql_query("INSERT INTO `a2topictopiclink` (`target_topic_id`, `source_topic_id`) VALUES (".((int) $parent).", ".((int) $child).")");
@@ -161,5 +167,32 @@ function bibliographie_topics_create_relation ($parent, $child) {
 		}
 		return $return;
 	}
+	return false;
+}
+
+/**
+ * Get the data of a topic.
+ * @param int $topic_id The id of a topic.
+ * @return mixed Object on success or false otherwise.
+ */
+function bibliographie_topics_get_topic_data ($topic_id) {
+	if(is_numeric($topic_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'));
+
+		$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
+		if(mysql_num_rows($topic) == 1){
+			$topic = mysql_fetch_object($topic);
+
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json', 'w+');
+				fwrite($cacheFile, json_encode($topic));
+				fclose($cacheFile);
+			}
+
+			return $topic;
+		}
+	}
+
 	return false;
 }

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Parse the data of a publication.
+ * @param int $publication_id
+ * @param string $style
+ * @param bool $textOnly
+ * @return string
+ */
 function bibliographie_publications_parse_data ($publication_id, $style = 'standard', $textOnly = false) {
 	if(is_numeric($publication_id) and strpos($style, '..') === false and strpos($style, '/') === false){
 		/**
@@ -74,7 +81,7 @@ ORDER BY authors.`surname`, authors.`firstname`");
 
 			foreach($publication as $key => $value){
 				if(empty($value))
-					$value = '<span class="error">The required field <em>'.$key.'</em> is missing!</span>';
+					$value = '<span style="font-size: 0.8em;" class="error"><em>'.$key.'</em> missing!</span>';
 
 				$parsedPublication = str_replace('['.$key.']', $value, $parsedPublication);
 			}

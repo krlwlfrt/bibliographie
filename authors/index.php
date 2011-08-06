@@ -92,20 +92,20 @@ WHERE
 	relations.`author_id` = ".((int) $_GET['author_id'])."
 "));
 
-			$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']), $allPublications);
+			if($allPublications > 0){
+				$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']), $allPublications);
 
-			$publications = mysql_query("SELECT * FROM
-	`a2publicationauthorlink` relations,
-	`a2publication` publications
-WHERE
-	publications.`pub_id` = relations.`pub_id` AND
-	relations.`author_id` = ".((int) $_GET['author_id'])."
-ORDER BY
-	relations.`is_editor` DESC,
-	publications.`year` DESC
-LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
+				$publications = mysql_query("SELECT * FROM
+		`a2publicationauthorlink` relations,
+		`a2publication` publications
+	WHERE
+		publications.`pub_id` = relations.`pub_id` AND
+		relations.`author_id` = ".((int) $_GET['author_id'])."
+	ORDER BY
+		relations.`is_editor` DESC,
+		publications.`year` DESC
+	LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
 
-			if(mysql_num_rows($publications) > 0){
 ?>
 
 <h3 id="publications_as_author">Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
@@ -126,7 +126,8 @@ LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
 					$lastIsEditor = $publication->is_editor;
 					$lastYear = $publication->year;
 				}
-			}
+			}else
+				echo '<p class="error">This author has no publications!</p>';
 		}
 	break;
 

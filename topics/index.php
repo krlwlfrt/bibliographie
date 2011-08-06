@@ -173,11 +173,54 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 
 <h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3>
 <ul>
-	<li><a href="">Show publications (<?php echo $directPublications?>)</a></li>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo $directPublications?>)</a></li>
 	<li><a href="">Show publications in subtopics (<?php echo $indirectPublications?>)</a></li>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph&topic_id=<?php echo $topic->topic_id?>">Show subgraph</a></li>
 </ul>
 <?php
+		}
+	break;
+
+	case 'showPublications':
+		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		if($topic){
+?>
+
+<h3>Publications assigned to <?php echo htmlspecialchars($topic->name)?></h3>
+<?php
+			$allPublications = mysql_num_rows(mysql_query("SELECT * FROM
+	`a2topicpublicationlink` relations,
+	`a2publication` publications
+WHERE
+	publications.`pub_id` = relations.`pub_id` AND
+	relations.`topic_id` = ".((int) $_GET['topic_id'])));
+
+			if($allPublications > 0){
+				$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']), $allPublications);
+
+				$publications = mysql_query("SELECT * FROM
+		`a2topicpublicationlink` relations,
+		`a2publication` publications
+	WHERE
+		publications.`pub_id` = relations.`pub_id` AND
+		relations.`topic_id` = ".((int) $_GET['topic_id'])."
+	ORDER BY
+		publications.`year` DESC
+	LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
+
+				$lastYear = null;
+				while($publication = mysql_fetch_object($publications)){
+					if($publication->year != $lastYear)
+						echo '<h4>Publications in '.((int) $publication->year).'</h4>';
+
+					echo '<p class="bibliographie_publication">'.bibliographie_publications_parse_data($publication->pub_id).'</p>';
+
+					$lastYear = $publication->year;
+				}
+
+				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']), $allPublications);
+			}else
+				echo '<p class="error">No publications are assigned to this topic!</p>';
 		}
 	break;
 
