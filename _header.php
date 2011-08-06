@@ -2,8 +2,8 @@
 <html lang="de">
 	<head>
 		<title><?php echo strip_tags($title)?> | bibliographie</title>
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/all.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/silk-icons.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/all.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/silk-icons.css" />
 		<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 	</head>
 

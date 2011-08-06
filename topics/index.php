@@ -13,6 +13,7 @@ switch($_GET['task']){
 ?>
 
 <h3>Create relation</h3>
+<p class="notice">On this page you can create relations between topics. You just have to search for two topics, select them and hit save!</p>
 <?php
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
@@ -35,6 +36,7 @@ switch($_GET['task']){
 
 		if(!$created){
 ?>
+
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=createRelation'?>" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
 	<div class="unit">
 		<div style="float: right; width: 50%">
@@ -100,6 +102,7 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 ?>
 
 <h3>Create topic</h3>
+<p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
 <?php
 		$created = false;
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){

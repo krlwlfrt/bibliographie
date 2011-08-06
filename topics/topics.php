@@ -79,7 +79,7 @@ function bibliographie_topics_create_topic ($name, $description, $url) {
  */
 function bibliographie_topics_get_subtopics ($topic) {
 	if(is_numeric($topic)){
-		if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json'))
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json'));
 
 		$subtopics = mysql_query("SELECT * FROM `a2topictopiclink` relations
@@ -110,7 +110,7 @@ WHERE relations.`target_topic_id` = ".((int) $topic));
  */
 function bibliographie_topics_parse_subtopics ($topic_id) {
 	if(is_numeric($topic_id)){
-		if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'))
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'));
 
 		$topics = mysql_query("SELECT * FROM

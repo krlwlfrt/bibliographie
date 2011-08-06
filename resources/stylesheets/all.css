@@ -18,7 +18,16 @@ li {
 }
 
 h2, h3, h4, h5, h6 {
-	margin: 10px 0 5px 0;
+	margin: 20px 0 10px 0;
+}
+
+h2 {
+	padding-left: 20px;
+}
+
+h3 {
+	border-bottom: 1px solid #000;
+	padding-bottom: 2px;
 }
 
 p {
@@ -137,6 +146,14 @@ p.error {
 	padding: 5px;
 }
 
+p.notice {
+	background: #ffa;
+	border: 1px solid #aa0;
+	color: #000;
+	font-weight: bold;
+	padding: 5px;
+}
+
 span.error {
 	background: #faa;
 	border: 1px solid #f00;
@@ -194,4 +211,9 @@ span.error {
 	height: 16px;
 	margin: 0 1px;
 	width: 16px;
+}
+
+.bibliographie_publication {
+	border: 1px solid #ccc;
+	padding: 5px;
 }

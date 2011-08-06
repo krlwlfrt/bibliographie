@@ -11,6 +11,12 @@ if(!isset($_SERVER['PHP_AUTH_USER'])){
 }
 
 /**
+ * If requested set the caching to false.
+ */
+if($_GET['ignoreCache'] == 1)
+	define('BIBLIOGRAPHIE_CACHING', false);
+
+/**
  * Check for config file.
  */
 if(!file_exists(dirname(__FILE__).'/config.php'))
@@ -123,17 +129,79 @@ function bibliographie_log ($category, $action, $data) {
 	fclose($logFile);
 }
 
+/**
+ * Takes an array of strings and prints them as errors, e.g. for form validation.
+ * @param array $errors Array of errors.
+ */
 function bibliographie_print_errors ($errors) {
 	foreach($errors as $error)
 		echo '<p class="error">'.htmlspecialchars($error).'</p>';
 }
 
+/**
+ * Purge the cache for a specific pattern.
+ * @param string $pattern Pattern for files that shall be deleted.
+ */
 function bibliographie_purge_cache ($pattern) {
 	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
 		$files = glob(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$pattern.'*');
 		foreach($files as $file)
 			unlink($file);
 	}
+}
+
+/**
+ * Print the page navigation and calculate parameters that are needed for page navigation.
+ * @param string $baseLink Baselink before appending the page variable.
+ * @param int $amountOfItems Amount of items that shall be orderd on pages.
+ * @return array Array of parameters that are needed for page navigation.
+ */
+function bibliographie_print_pages ($baseLink, $amountOfItems) {
+	/**
+	 * Set standard values.
+	 */
+	$page = 1;
+	$perPage = 10;
+	$pages = ceil($amountOfItems / $perPage);
+
+	/**
+	 * Adjust to user request.
+	 */
+	if(is_numeric($_GET['page']) and $_GET['page'] >= 1 and $_GET['page'] <= $pages)
+		$page = ((int) $_GET['page']);
+
+	/**
+	 * Calulate offset for mysql queries.
+	 */
+	$offset = ($page - 1) * $perPage;
+
+	if(mb_strpos($baseLink, '?') !== false)
+		$baseLink .= '&';
+	else
+		$baseLink .= '?';
+
+	/**
+	 * Print page navigation.
+	 */
+	if($pages > 1){
+		echo '<strong>Pages</strong> ';
+		for($i = 1; $i <= $pages; $i++){
+			$virtualOffset = ($i - 1) * $perPage;
+
+			$virtualEnd = $virtualOffset + $perPage;
+			if($virtualEnd > $amountOfItems)
+				$virtualEnd = $amountOfItems;
+
+			echo '<a href="'.$baseLink.'page='.$i.'">['.($virtualOffset + 1).'-'.$virtualEnd.']</a> ';
+		}
+	}
+
+	return array (
+		'page' => $page,
+		'perPage' => $perPage,
+		'pages' => $pages,
+		'offset' => $offset
+	);
 }
 
 require dirname(__FILE__).'/authors/authors.php';

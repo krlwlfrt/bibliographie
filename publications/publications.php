@@ -1,21 +1,27 @@
 <?php
 function bibliographie_publications_parse_data ($publication_id, $style = 'standard', $textOnly = false) {
 	if(is_numeric($publication_id) and strpos($style, '..') === false and strpos($style, '/') === false){
-		if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_'.$style.'.txt'))
+		/**
+		 * Return cached result if possible.
+		 */
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_'.$style.'.txt'))
 			return file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_'.$style.'.txt');
 
+		/**
+		 * Get data of publication.
+		 */
 		$publication = mysql_query("SELECT * FROM `a2publication` WHERE `pub_id` = ".((int) $publication_id));
 		if(mysql_num_rows($publication) == 1){
 			$publication = mysql_fetch_assoc($publication);
 
 			$settings = array();
 			$parsedPublication = (string) '';
-			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/styles/'.$style.'/'.$publication['pub_type'].'.txt')){
-				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/styles/'.$style.'/'.$publication['pub_type'].'.txt'));
-				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/styles/'.$style.'/settings.ini', true);
+			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/'.$publication['pub_type'].'.txt')){
+				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/'.$publication['pub_type'].'.txt'));
+				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/settings.ini', true);
 			}else{
-				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/styles/standard/'.$publication['pub_type'].'.txt'));
-				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/styles/standard/settings.ini', true);
+				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/'.$publication['pub_type'].'.txt'));
+				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/settings.ini', true);
 			}
 
 			$authors = mysql_query("SELECT * FROM
@@ -62,6 +68,9 @@ ORDER BY authors.`surname`, authors.`firstname`");
 
 			if(!$textOnly)
 				$publication['title'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&pub_id='.$publication['pub_id'].'">'.$publication['title'].'</a>';
+
+			if(empty($publication['pages']) and !empty($publication['firstpage']) and !empty($publication['lastPage']))
+				$publication['pages'] = ((int) $publication['firstpage']).'-'.((int) $publication['lastpage']);
 
 			foreach($publication as $key => $value){
 				if(empty($value))
