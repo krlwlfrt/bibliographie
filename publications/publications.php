@@ -1,4 +1,35 @@
 <?php
+$bibliographie_publication_types = array (
+	'Article',
+	'Book',
+	'Booklet',
+	'Inbook',
+	'Incollection',
+	'Inproceedings',
+	'Manual',
+	'Masterthesis',
+	'Misc',
+	'Phdthesis',
+	'Proceedings',
+	'Techreport',
+	'Unpublished'
+);
+
+$bibliographie_publication_months = array (
+	'January',
+	'February',
+	'March',
+	'April',
+	'May',
+	'June',
+	'July',
+	'August',
+	'September',
+	'October',
+	'November',
+	'December'
+);
+
 /**
  * Parse the data of a publication.
  * @param int $publication_id

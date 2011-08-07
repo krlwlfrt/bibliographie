@@ -159,22 +159,17 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 
 			$subtopicsArray = bibliographie_topics_get_subtopics($topic->topic_id);
 			if(count($subtopicsArray) > 0){
-				$mysqlString = '';
-				foreach($subtopicsArray as $subtopic){
-					if(!empty($mysqlString))
-						$mysqlString .= " OR ";
-
-					$mysqlString .= "`topic_id` = ".((int) $subtopic);
-				}
+				$mysqlString = '`topic_id` = '.((int) $topic->topic_id);
+				foreach($subtopicsArray as $subtopic)
+					$mysqlString .= " OR  `topic_id` = ".((int) $subtopic);
 				$indirectPublications = mysql_num_rows(mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE ".$mysqlString));
 			}
-
 ?>
 
 <h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo $directPublications?>)</a></li>
-	<li><a href="">Show publications in subtopics (<?php echo $indirectPublications?>)</a></li>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>&includeSubtopics=1">Show publications including all subtopics (<?php echo $indirectPublications?>)</a></li>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph&topic_id=<?php echo $topic->topic_id?>">Show subgraph</a></li>
 </ul>
 <?php
@@ -184,6 +179,18 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 	case 'showPublications':
 		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
 		if($topic){
+
+			$includeSubtopics = '';
+			$mysqlString = '';
+			if($_GET['includeSubtopics'] == 1){
+				$subtopicsArray = bibliographie_topics_get_subtopics($topic->topic_id);
+				if(count($subtopicsArray) > 0){
+					foreach($subtopicsArray as $subtopic)
+						$mysqlString .= " OR relations.`topic_id` = ".((int) $subtopic);
+
+					$includeSubtopics = '&includeSubtopics=1';
+				}
+			}
 ?>
 
 <h3>Publications assigned to <?php echo htmlspecialchars($topic->name)?></h3>
@@ -193,17 +200,17 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 	`a2publication` publications
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
-	relations.`topic_id` = ".((int) $_GET['topic_id'])));
+	(relations.`topic_id` = ".((int) $_GET['topic_id']).$mysqlString.")"));
 
 			if($allPublications > 0){
-				$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']), $allPublications);
+				$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $allPublications);
 
 				$publications = mysql_query("SELECT * FROM
 		`a2topicpublicationlink` relations,
 		`a2publication` publications
 	WHERE
 		publications.`pub_id` = relations.`pub_id` AND
-		relations.`topic_id` = ".((int) $_GET['topic_id'])."
+		(relations.`topic_id` = ".((int) $_GET['topic_id']).$mysqlString.")
 	ORDER BY
 		publications.`year` DESC
 	LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
@@ -218,7 +225,7 @@ WHERE
 					$lastYear = $publication->year;
 				}
 
-				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']), $allPublications);
+				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $allPublications);
 			}else
 				echo '<p class="error">No publications are assigned to this topic!</p>';
 		}

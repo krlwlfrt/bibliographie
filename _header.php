@@ -23,6 +23,7 @@
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=createAuthor"><?php echo bibliographie_icon_get('user-add')?> Create author</a>
 
 				<h3>Publications</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=createPublication"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
 
 				<h3>Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
