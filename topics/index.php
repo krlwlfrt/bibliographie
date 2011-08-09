@@ -41,11 +41,11 @@ switch($_GET['task']){
 	<div class="unit">
 		<div style="float: right; width: 50%">
 			<label for="searchTopicTwo" class="block">Subordinated topic</label>
-			<input type="text" id="searchTopicTwo" name="searchTopicTwo" value="" style="width: 100%;" />
+			<input type="text" id="searchTopicTwo" name="searchTopicTwo" style="width: 100%;" />
 			<div id="result_searchTopicTwo"></div>
 		</div>
 		<label for="searchTopicOne" class="block">Parent topic</label>
-		<input type="text" id="searchTopicOne" name="searchTopicOne" value="" style="width: 45%;" />
+		<input type="text" id="searchTopicOne" name="searchTopicOne" style="width: 45%;" />
 		<div id="result_searchTopicOne" style="width: 45%"></div>
 
 		<br style="clear: both;"/>
@@ -164,6 +164,9 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 					$mysqlString .= " OR  `topic_id` = ".((int) $subtopic);
 				$indirectPublications = mysql_num_rows(mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE ".$mysqlString));
 			}
+
+			if(in_array($topic->topic_id, bibliographie_topics_get_locked_topics()))
+				echo '<p class="error">This topic is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
 ?>
 
 <h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3>
@@ -179,9 +182,9 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 	case 'showPublications':
 		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
 		if($topic){
-
 			$includeSubtopics = '';
 			$mysqlString = '';
+			
 			if($_GET['includeSubtopics'] == 1){
 				$subtopicsArray = bibliographie_topics_get_subtopics($topic->topic_id);
 				if(count($subtopicsArray) > 0){

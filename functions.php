@@ -209,9 +209,10 @@ function bibliographie_print_pages ($baseLink, $amountOfItems) {
 	);
 }
 
-require dirname(__FILE__).'/authors/authors.php';
-require dirname(__FILE__).'/publications/publications.php';
-require dirname(__FILE__).'/topics/topics.php';
+require dirname(__FILE__).'/resources/functions/authors.php';
+require dirname(__FILE__).'/resources/functions/maintenance.php';
+require dirname(__FILE__).'/resources/functions/publications.php';
+require dirname(__FILE__).'/resources/functions/topics.php';
 
 if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
 	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);

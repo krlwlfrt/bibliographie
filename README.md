@@ -3,7 +3,7 @@ Intents to be a bibliography management tool that derives from the database sche
 # Get it running #
 ## Config file ##
 
-All you need is a yet existant aigaion2 database and a config file named 'config.php' that you put in the root of this app.
+All you need is a yet existent aigaion2 database and a config file named 'config.php' that you put in the root of this app.
 The file should look something like that:
 
 ```php
@@ -36,8 +36,8 @@ Since we do not implement such neat user priviliges we don't need all of that st
 DROP TABLE a2aigaiongeneral, a2availablerights, a2changehistory, a2config, a2grouprightsprofilelink, a2logintegration, a2rightsprofilerightlink, a2rightsprofiles, a2usergrouplink, a2userrights
 ```
 
-## Add new table ##
-This is a new table we need to cross reference with the file log.
+## Add new tables ##
+This is a new table that we need to cross reference with the file log.
 
 ```sql
 CREATE TABLE `log` (
@@ -46,4 +46,14 @@ CREATE TABLE `log` (
 	`log_time` TEXT NOT NULL,
 	PRIMARY KEY (`log_id`)
 ) COLLATE='utf8_general_ci' ENGINE=MyISAM;
+```
+
+This is a new table that we need to lock tables against editing.
+
+```sql
+CREATE TABLE `lockedtables` (
+	`topic_id` INT(10) UNSIGNED NOT NULL
+)
+COLLATE='utf8_general_ci'
+ENGINE=MyISAM
 ```

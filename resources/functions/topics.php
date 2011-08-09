@@ -180,7 +180,7 @@ function bibliographie_topics_get_topic_data ($topic_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'));
 
-		$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
+		$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $topic_id));
 		if(mysql_num_rows($topic) == 1){
 			$topic = mysql_fetch_object($topic);
 
@@ -195,4 +195,27 @@ function bibliographie_topics_get_topic_data ($topic_id) {
 	}
 
 	return false;
+}
+
+/**
+ * Get a list of locked topics.
+ */
+function bibliographie_topics_get_locked_topics () {
+	if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'))
+		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'));
+
+	$topicsArray = array();
+	$topics = mysql_query("SELECT * FROM `lockedtopics` ORDER BY `topic_id`");
+	if(mysql_num_rows($topics)){
+		while($topic = mysql_fetch_object($topics))
+			$topicsArray[] = $topic->topic_id;
+	}
+
+	if(BIBLIOGRAPHIE_CACHING){
+		$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json', 'w+');
+		fwrite($cacheFile, json_encode($topicsArray));
+		fclose($cacheFile);
+	}
+
+	return $topicsArray;
 }
