@@ -1,4 +1,6 @@
 <?php
+define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
+
 ob_start();
 session_start();
 
@@ -17,11 +19,14 @@ if(!isset($_SERVER['PHP_AUTH_USER'])){
 if($_GET['ignoreCache'] == 1)
 	define('BIBLIOGRAPHIE_CACHING', false);
 
+if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
+	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
+
 /**
  * Check for config file.
  */
 if(!file_exists(dirname(__FILE__).'/config.php'))
-	exit('Sorry, but we have no config file!');
+	exit('<!DOCTYPE html><html lang="de"><title>Config file missing!</title></head><body><h1>Config file missing!</h1><p>Sorry, but we have no config file!</p></body></html>');
 require dirname(__FILE__).'/config.php';
 
 /**
@@ -41,7 +46,8 @@ if(mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPH
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	exit('Sorry, but we have no access to the database.');
 
-define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
+if(!bibliographie_user_get_id())
+	exit('<!DOCTYPE html><html lang="de"><title>Account missing!</title></head><body><h1>Account missing!</h1><p>Sorry, but you do not have an account for bibliographie!</p></body></html>');
 
 /**
  * Initialize UTF-8.
@@ -209,10 +215,29 @@ function bibliographie_print_pages ($baseLink, $amountOfItems) {
 	);
 }
 
+/**
+ * Check if a name of a user is in the database.
+ * @param string $name
+ * @return bool True on success, false otherwise.
+ */
+function bibliographie_user_get_id ($name = null) {
+	if(empty($name))
+		$name = $_SERVER['PHP_AUTH_USER'];
+
+	$user = mysql_query("SELECT * FROM `a2users` WHERE `login` = '".mysql_real_escape_string(stripslashes($name))."'");
+	if(mysql_num_rows($user)){
+		$user = mysql_fetch_object($user);
+		if($user->login == $name)
+			return $user->user_id;
+	}
+	return false;
+}
+
+/**
+ * Include all needed functions...
+ */
 require dirname(__FILE__).'/resources/functions/authors.php';
+require dirname(__FILE__).'/resources/functions/bookmarks.php';
 require dirname(__FILE__).'/resources/functions/maintenance.php';
 require dirname(__FILE__).'/resources/functions/publications.php';
 require dirname(__FILE__).'/resources/functions/topics.php';
-
-if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
-	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);

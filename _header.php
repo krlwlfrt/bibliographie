@@ -25,6 +25,9 @@
 				<h3>Publications</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=createPublication"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
 
+				<h3>Bookmarks</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('tag-blue')?> Show bookmarks</a>
+
 				<h3>Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Locked topics</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>

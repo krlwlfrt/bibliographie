@@ -121,11 +121,17 @@ WHERE
 					if($publication->year != $lastYear)
 						echo '<h4>Publications in '.((int) $publication->year).'</h4>';
 
-					echo '<p class="bibliographie_publication">'.bibliographie_publications_parse_data($publication->pub_id).'</p>';
+					echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
+					if(bibliographie_bookmarks_check_publication($publication->pub_id))
+						echo ' bibliographie_publication_bookmarked';
+					echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
 
 					$lastIsEditor = $publication->is_editor;
 					$lastYear = $publication->year;
 				}
+
+				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']), $allPublications);
+				bibliographie_bookmarks_print_javascript();
 			}else
 				echo '<p class="error">This author has no publications!</p>';
 		}

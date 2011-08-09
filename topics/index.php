@@ -184,7 +184,7 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 		if($topic){
 			$includeSubtopics = '';
 			$mysqlString = '';
-			
+
 			if($_GET['includeSubtopics'] == 1){
 				$subtopicsArray = bibliographie_topics_get_subtopics($topic->topic_id);
 				if(count($subtopicsArray) > 0){
@@ -223,12 +223,16 @@ WHERE
 					if($publication->year != $lastYear)
 						echo '<h4>Publications in '.((int) $publication->year).'</h4>';
 
-					echo '<p class="bibliographie_publication">'.bibliographie_publications_parse_data($publication->pub_id).'</p>';
+					echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
+					if(bibliographie_bookmarks_check_publication($publication->pub_id))
+						echo ' bibliographie_publication_bookmarked';
+					echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
 
 					$lastYear = $publication->year;
 				}
 
 				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $allPublications);
+				bibliographie_bookmarks_print_javascript();
 			}else
 				echo '<p class="error">No publications are assigned to this topic!</p>';
 		}
