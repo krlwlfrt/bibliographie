@@ -7,7 +7,7 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 <h2>Authors</h2>
 <?php
-
+$title = 'Authors';
 switch($_GET['task']){
 	case 'createAuthor':
 		$created = false;
@@ -82,31 +82,17 @@ switch($_GET['task']){
 	case 'showAuthor':
 		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
 		if(mysql_num_rows($author) == 1){
-			$author = mysql_fetch_object($author);
-
-			$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
-	`a2publicationauthorlink` relations,
-	`a2publication` publications
-WHERE
-	publications.`pub_id` = relations.`pub_id` AND
-	relations.`author_id` = ".((int) $_GET['author_id'])." AND
-	relations.`is_editor` = 'N'
-ORDER BY
-	publications.`year` DESC");
-
-			$publicationsArray = array();
-			while($publication = mysql_fetch_object($publicationsResult))
-				$publicationsArray[] = $publication->pub_id;
-
-			if(mysql_num_rows($publicationsResult) > 0){
 ?>
 
-<h3 id="publications_as_author">Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
+<h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
 <?php
-	
-			bibliographie_publications_print_list($publicationsArray, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']));
+			$author = mysql_fetch_object($author);
 
-			}else
+			$publications = bibliographie_authors_get_publications($_GET['author_id']);
+
+			if(count($publications) > 0)
+				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']));
+			else
 				echo '<p class="error">This author has no publications!</p>';
 		}
 	break;

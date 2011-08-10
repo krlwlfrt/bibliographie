@@ -30,6 +30,12 @@ $bibliographie_publication_months = array (
 	'December'
 );
 
+/**
+ * Get the data of a publication.
+ * @param int $publication_id
+ * @param string $type
+ * @return mixed
+ */
 function bibliographie_publications_get_data ($publication_id, $type = 'object') {
 	if(is_numeric($publication_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json')){
@@ -159,11 +165,11 @@ ORDER BY authors.`surname`, authors.`firstname`");
 }
 
 /**
- *
- * @param type $publications
- * @param type $baseLink
+ * Print a list of publications.
+ * @param array $publications
+ * @param string $baseLink
  */
-function bibliographie_publications_print_list ($publications, $baseLink){
+function bibliographie_publications_print_list (array $publications, $baseLink){
 	$pageData = bibliographie_print_pages(count($publications), $baseLink);
 
 	$lastYear = null;

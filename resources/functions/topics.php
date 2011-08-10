@@ -74,16 +74,16 @@ function bibliographie_topics_create_topic ($name, $description, $url) {
 
 /**
  * Get a list of subtopics recursively with their own subtopics and so on.
- * @param int $topic The id of a topic.
+ * @param int $topic_id The id of a topic.
  * @return mixed An array on success or error otherwise.
  */
-function bibliographie_topics_get_subtopics ($topic) {
-	if(is_numeric($topic)){
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json'));
+function bibliographie_topics_get_subtopics ($topic_id) {
+	if(is_numeric($topic_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'));
 
 		$subtopics = mysql_query("SELECT * FROM `a2topictopiclink` relations
-WHERE relations.`target_topic_id` = ".((int) $topic));
+WHERE relations.`target_topic_id` = ".((int) $topic_id));
 
 		$subtopicsArray = array();
 		while($subtopic = mysql_fetch_object($subtopics)){
@@ -92,7 +92,7 @@ WHERE relations.`target_topic_id` = ".((int) $topic));
 		};
 
 		if(BIBLIOGRAPHIE_CACHING){
-			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic).'_subtopics.json', 'w+');
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json', 'w+');
 			fwrite($cacheFile, json_encode($subtopicsArray));
 			fclose($cacheFile);
 		}
@@ -218,4 +218,48 @@ function bibliographie_topics_get_locked_topics () {
 	}
 
 	return $topicsArray;
+}
+
+/**
+ * Get a list of publications for a specific topic and/or its subtopics.
+ * @param int $topic_id
+ * @param mixed $includeSubtopics
+ * @return mixed
+ */
+function bibliographie_topics_get_publications ($topic_id, $includeSubtopics) {
+	if(is_numeric($topic_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json'));
+
+		$mysqlString = '';
+		if($includeSubtopics){
+			$subtopicsArray = bibliographie_topics_get_subtopics($topic_id);
+
+			if(count($subtopicsArray) > 0)
+				foreach($subtopicsArray as $subtopic)
+					$mysqlString .= " OR relations.`topic_id` = ".((int) $subtopic);
+		}
+
+		$publicationsResult = mysql_query("SELECT * FROM
+	`a2topicpublicationlink` relations,
+	`a2publication` publications
+WHERE
+	publications.`pub_id` = relations.`pub_id` AND
+	(relations.`topic_id` = ".((int) $topic_id).$mysqlString.")
+ORDER BY
+	publications.`year` DESC");
+		$publicationsArray = array();
+		while($publication = mysql_fetch_object($publicationsResult))
+			$publicationsArray[] = $publication->pub_id;
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json', 'w+');
+			fwrite($cacheFile, json_encode($publicationsArray));
+			fclose($cacheFile);
+		}
+
+		return $publicationsArray;
+	}
+
+	return false;
 }

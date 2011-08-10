@@ -45,6 +45,7 @@ switch($_GET['task']){
 <h4>Topics</h4>
 <ul>
 	<li>Detect circles</li>
+	<li>Detect loosened graphs: <code>SELECT * FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` FROM `a2topictopiclink`)</code></li>
 </ul>
 
 <h4>Notes</h4>

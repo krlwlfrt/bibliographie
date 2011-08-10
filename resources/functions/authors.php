@@ -62,5 +62,36 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 }
 
 function bibliographie_authors_get_list () {
-	
+
+}
+
+function bibliographie_authors_get_publications ($author_id) {
+	if(is_numeric($author_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json'));
+
+		$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
+		`a2publicationauthorlink` relations,
+		`a2publication` publications
+	WHERE
+		publications.`pub_id` = relations.`pub_id` AND
+		relations.`author_id` = ".((int) $author_id)." AND
+		relations.`is_editor` = 'N'
+	ORDER BY
+		publications.`year` DESC");
+
+		$publicationsArray = array();
+		while($publication = mysql_fetch_object($publicationsResult))
+			$publicationsArray[] = $publication->pub_id;
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json', 'w+');
+			fwrite($cacheFile, json_encode($publicationsArray));
+			fclose($cacheFile);
+		}
+
+		return $publicationsArray;
+	}
+
+	return false;
 }
