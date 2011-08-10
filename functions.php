@@ -163,7 +163,7 @@ function bibliographie_purge_cache ($pattern) {
  * @param int $amountOfItems Amount of items that shall be orderd on pages.
  * @return array Array of parameters that are needed for page navigation.
  */
-function bibliographie_print_pages ($baseLink, $amountOfItems) {
+function bibliographie_print_pages ($amountOfItems, $baseLink) {
 	/**
 	 * Set standard values.
 	 */

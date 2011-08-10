@@ -8,7 +8,54 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <?php
 
 switch($_GET['task']){
+	case 'ToDo':
+		$title = 'ToDo list';
+?>
+
+<h3>ToDo list</h3>
+<h4>Search</h4>
+<ul>
+	<li>Error tolerant search (Soundex via index field in mysql-rows)</li>
+	<li>Google-Search for "public" stuff</li>
+	<li>Two searches
+		<ul>
+			<li>Simple search</li>
+			<li>Complex search</li>
+		</ul>
+	</li>
+</ul>
+
+<h4>Create publications</h4>
+<ul>
+	<li>Mass-Import of BibTex?</li>
+	<li>Notice on similarity of titles</li>
+	<li>Order
+		<ul>
+			<li>Authors, exact matching</li>
+			<li>Title</li>
+			<li>Data</li>
+			<li>Topics</li>
+			<li>Tags</li>
+		</ul>
+	</li>
+	<li>Nur zutreffende Felder anzeigen.</li>
+	<li>Templating, just a wish!</li>
+</ul>
+
+<h4>Topics</h4>
+<ul>
+	<li>Detect circles</li>
+</ul>
+
+<h4>Notes</h4>
+<ul>
+	<li>private Notizen</li>
+	<li>allgemeine Notizen</li>
+</ul>
+<?php
+	break;
 	case 'lockedTopics':
+		$title = 'Locked topics';
 ?>
 
 <h3>Locked topics</h3>
@@ -125,6 +172,7 @@ $('#searchTopicOne').change(function(event) {
 
 	case 'parseLog':
 	default:
+		$title = 'Parse log';
 ?>
 
 <h3>Parse logs</h3>

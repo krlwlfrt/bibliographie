@@ -12,6 +12,7 @@ switch($_GET['task']){
 		bibliographie_bookmarks_clear_bookmarks();
 
 	case 'showBookmarks':
+		$title = 'List of my bookmarks';
 ?>
 
 <span style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear all bookmarks</a></span>

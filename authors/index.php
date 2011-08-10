@@ -84,54 +84,28 @@ switch($_GET['task']){
 		if(mysql_num_rows($author) == 1){
 			$author = mysql_fetch_object($author);
 
-			$allPublications = mysql_num_rows(mysql_query("SELECT * FROM
+			$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
 	`a2publicationauthorlink` relations,
 	`a2publication` publications
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
-	relations.`author_id` = ".((int) $_GET['author_id'])."
-"));
+	relations.`author_id` = ".((int) $_GET['author_id'])." AND
+	relations.`is_editor` = 'N'
+ORDER BY
+	publications.`year` DESC");
 
-			if($allPublications > 0){
-				$pageData = bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']), $allPublications);
+			$publicationsArray = array();
+			while($publication = mysql_fetch_object($publicationsResult))
+				$publicationsArray[] = $publication->pub_id;
 
-				$publications = mysql_query("SELECT * FROM
-		`a2publicationauthorlink` relations,
-		`a2publication` publications
-	WHERE
-		publications.`pub_id` = relations.`pub_id` AND
-		relations.`author_id` = ".((int) $_GET['author_id'])."
-	ORDER BY
-		relations.`is_editor` DESC,
-		publications.`year` DESC
-	LIMIT ".$pageData['offset'].", ".$pageData['perPage']);
-
+			if(mysql_num_rows($publicationsResult) > 0){
 ?>
 
 <h3 id="publications_as_author">Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
 <?php
-				$lastIsEditor = null;
-				$lastYear = null;
-				while($publication = mysql_fetch_object($publications)){
-					if($lastIsEditor != null and $publication->is_editor != $lastIsEditor){
-						echo '<h3 id="publications_as_editor">Publications as editor</h3>';
-						$lastYear = null;
-					}
+	
+			bibliographie_publications_print_list($publicationsArray, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']));
 
-					if($publication->year != $lastYear)
-						echo '<h4>Publications in '.((int) $publication->year).'</h4>';
-
-					echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
-					if(bibliographie_bookmarks_check_publication($publication->pub_id))
-						echo ' bibliographie_publication_bookmarked';
-					echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
-
-					$lastIsEditor = $publication->is_editor;
-					$lastYear = $publication->year;
-				}
-
-				bibliographie_print_pages(BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']), $allPublications);
-				bibliographie_bookmarks_print_javascript();
 			}else
 				echo '<p class="error">This author has no publications!</p>';
 		}

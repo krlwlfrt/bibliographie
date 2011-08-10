@@ -167,9 +167,12 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 
 			if(in_array($topic->topic_id, bibliographie_topics_get_locked_topics()))
 				echo '<p class="error">This topic is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
+
+			if(!empty($topic->description))
+				$topic->description = '<p>'.htmlspecialchars($topic->description).'</p>';
 ?>
 
-<h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3>
+<h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo $directPublications?>)</a></li>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>&includeSubtopics=1">Show publications including all subtopics (<?php echo $indirectPublications?>)</a></li>

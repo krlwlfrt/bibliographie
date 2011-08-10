@@ -30,6 +30,36 @@ $bibliographie_publication_months = array (
 	'December'
 );
 
+function bibliographie_publications_get_data ($publication_id, $type = 'object') {
+	if(is_numeric($publication_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json')){
+			$assoc = false;
+			if($type == 'assoc')
+				$assoc = true;
+
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json'), $assoc);
+		}
+
+		$publication = mysql_query("SELECT * FROM `a2publication` WHERE `pub_id` = ".((int) $publication_id));
+		if(mysql_num_rows($publication) == 1){
+			if($type == 'object')
+				$publication = mysql_fetch_object($publication);
+			else
+				$publication = mysql_fetch_assoc($publication);
+
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json', 'w+');
+				fwrite($cacheFile, json_encode($publication));
+				fclose($cacheFile);
+			}
+
+			return $publication;
+		}
+	}
+
+	return false;
+}
+
 /**
  * Parse the data of a publication.
  * @param int $publication_id
@@ -39,27 +69,26 @@ $bibliographie_publication_months = array (
  */
 function bibliographie_publications_parse_data ($publication_id, $style = 'standard', $textOnly = false) {
 	if(is_numeric($publication_id) and strpos($style, '..') === false and strpos($style, '/') === false){
+		$fileExtension = 'html';
+		if($textOnly)
+			$fileExtension = 'txt';
+
 		/**
 		 * Return cached result if possible.
 		 */
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_'.$style.'.txt'))
-			return file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_'.$style.'.txt');
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'.'.$fileExtension))
+			return file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'.'.$fileExtension);
 
 		/**
 		 * Get data of publication.
 		 */
-		$publication = mysql_query("SELECT * FROM `a2publication` WHERE `pub_id` = ".((int) $publication_id));
-		if(mysql_num_rows($publication) == 1){
-			$publication = mysql_fetch_assoc($publication);
-
-			$settings = array();
-			$parsedPublication = (string) '';
+		$publication = bibliographie_publications_get_data($publication_id, 'assoc');
+		if($publication){
+			$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/'.$publication['pub_type'].'.txt'));
+			$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/settings.ini', true);
 			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/'.$publication['pub_type'].'.txt')){
 				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/'.$publication['pub_type'].'.txt'));
 				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/settings.ini', true);
-			}else{
-				$parsedPublication = strip_tags(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/'.$publication['pub_type'].'.txt'));
-				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/settings.ini', true);
 			}
 
 			$authors = mysql_query("SELECT * FROM
@@ -91,10 +120,7 @@ ORDER BY authors.`surname`, authors.`firstname`");
 				else
 					$parsedAuthor = $author->firstname.' '.$author->surname;
 
-				if(!$textOnly)
-					$parsedAuthor = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
-
-				$parsedAuthors .= $parsedAuthor;
+				$parsedAuthors .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
 
 				$i++;
 			}
@@ -104,23 +130,23 @@ ORDER BY authors.`surname`, authors.`firstname`");
 			if($settings['title']['titleStyle'] == 'italic')
 				$publication['title'] = '<em>'.$publication['title'].'</em>';
 
-			if(!$textOnly)
-				$publication['title'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&pub_id='.$publication['pub_id'].'">'.$publication['title'].'</a>';
+			$publication['title'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&pub_id='.$publication['pub_id'].'">'.$publication['title'].'</a>';
 
 			if(empty($publication['pages']) and !empty($publication['firstpage']) and !empty($publication['lastPage']))
 				$publication['pages'] = ((int) $publication['firstpage']).'-'.((int) $publication['lastpage']);
 
 			foreach($publication as $key => $value){
 				if(empty($value))
-					$value = '<span style="font-size: 0.8em;" class="error"><em>'.$key.'</em> missing!</span>';
+					$value = '<span style="font-size: 0.8em;" class="error">!'.$key.' missing!</span>';
 
 				$parsedPublication = str_replace('['.$key.']', $value, $parsedPublication);
 			}
 
-			$parsedPublication = '<strong>'.$publication['pub_type'].'</strong> '.$parsedPublication;
+			if($textOnly)
+				$parsedPublication = strip_tags($parsedPublication);
 
 			if(BIBLIOGRAPHIE_CACHING){
-				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication['pub_id'].'_'.$style.'.txt', 'w+');
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication['pub_id'].'_parsed_'.$style.'.'.$fileExtension, 'w+');
 				fwrite($cacheFile, $parsedPublication);
 				fclose($cacheFile);
 			}
@@ -130,4 +156,37 @@ ORDER BY authors.`surname`, authors.`firstname`");
 	}
 
 	return false;
+}
+
+/**
+ *
+ * @param type $publications
+ * @param type $baseLink
+ */
+function bibliographie_publications_print_list ($publications, $baseLink){
+	$pageData = bibliographie_print_pages(count($publications), $baseLink);
+
+	$lastYear = null;
+	$ceiling = $pageData['offset'] + $pageData['perPage'];
+	if($ceiling > count($publications))
+		$ceiling = count($publications);
+
+	for($i = $pageData['offset']; $i < $ceiling; $i++){
+		$publication = bibliographie_publications_get_data($publications[$i]);
+
+		if($publication->year != $lastYear)
+			echo '<h4>Publications in '.((int) $publication->year).'</h4>';
+
+		echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
+		if(bibliographie_bookmarks_check_publication($publication->pub_id))
+			echo ' bibliographie_publication_bookmarked';
+		echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
+
+		$lastYear = $publication->year;
+	}
+
+	if($pageData['pages'] > 1)
+		bibliographie_print_pages(count($publications), $baseLink);
+
+	bibliographie_bookmarks_print_javascript();
 }
