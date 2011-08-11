@@ -178,11 +178,16 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 				$includeSubtopics = '&includeSubtopics=1';
 ?>
 
+<span style="float: right">
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo ((int) $_GET['topic_id']).$includeSubtopics?>&bookmarkBatch=add">Bookmark</a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo ((int) $_GET['topic_id']).$includeSubtopics?>&bookmarkBatch=remove">Unbookmark</a>
+	all
+</span>
 <h3>Publications assigned to <?php echo htmlspecialchars($topic->name)?></h3>
 <?php
 			$publications = bibliographie_topics_get_publications($topic->topic_id, ((bool) $_GET['includeSubtopics']));
 			if(count($publications) > 0)
-				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics);
+				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $_GET['bookmarkBatch']);
 			else
 				echo '<p class="error">No publications are assigned to this topic!</p>';
 		}

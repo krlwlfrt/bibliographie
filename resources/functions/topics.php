@@ -250,7 +250,8 @@ ORDER BY
 	publications.`year` DESC");
 		$publicationsArray = array();
 		while($publication = mysql_fetch_object($publicationsResult))
-			$publicationsArray[] = $publication->pub_id;
+			if(!in_array($publication->pub_id, $publicationsArray))
+				$publicationsArray[] = $publication->pub_id;
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json', 'w+');

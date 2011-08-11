@@ -132,7 +132,7 @@ function bibliographie_maintenance_unlock_topic (topic_id) {
 		},
 		dataType: 'json',
 		success: function (json) {
-			alert(json.text);
+			$.jGrowl(json.text);
 		}
 	})
 }
@@ -162,8 +162,6 @@ function bibliographie_maintenance_search_topic_for_locking (event) {
 }
 
 $('#searchTopicOne').change(function(event) {
-	bibliographie_maintenance_search_topic_for_locking(event);
-}).keyup(function(event) {
 	bibliographie_maintenance_search_topic_for_locking(event);
 });
 	/* ]]> */

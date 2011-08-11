@@ -169,7 +169,15 @@ ORDER BY authors.`surname`, authors.`firstname`");
  * @param array $publications
  * @param string $baseLink
  */
-function bibliographie_publications_print_list (array $publications, $baseLink){
+function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null){
+	if($bookmarkBatch == 'add'){
+		$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
+		echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications were bookmarked already.</p>';
+	}elseif($bookmarkBatch == 'remove'){
+		$bookmarks = bibliographie_bookmarks_unset_bookmarks_for_list($publications);
+		echo '<p class="notice">The bookmarks of '.$bookmarks.' publications were deleted! '.(count($publications) - $bookmarks).' publications weren\'t bookmarked.</p>';
+	}
+
 	$pageData = bibliographie_print_pages(count($publications), $baseLink);
 
 	$lastYear = null;
