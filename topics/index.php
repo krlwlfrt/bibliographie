@@ -198,15 +198,13 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 		$bibliographie_topics_graph_depth = (int) 1;
 
 		$top = (int) 1;
-		$cacheFile = BIBLIOGRAPHIE_ROOT_PATH.'/cache/bibliographie_topics_graph.json';
 		$title = 'Topic graph';
 		if(!empty($_GET['topic_id']) and is_numeric($_GET['topic_id']) and $_GET['topic_id'] != '1'){
 			$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
 			if(mysql_num_rows($topic) == 1){
 				$topic = mysql_fetch_object($topic);
 
-				$top = (int) $_GET['topic_id'];
-				$cacheFile = BIBLIOGRAPHIE_ROOT_PATH.'/cache/bibliographie_topics_graph_'.$top.'.json';
+				$top = (int) $topic->topic_id;
 				$title = 'Topic subgraph for <em>'.$topic->name.'</em>';
 			}
 		}

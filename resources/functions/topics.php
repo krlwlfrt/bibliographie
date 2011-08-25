@@ -6,13 +6,13 @@
  * @param int $depth Used internally.
  * @param int $walkedBy Used internally to mark yet traversed topics.
  */
-function bibliographie_topics_traverse ($topic, $depth = 1, &$walkedBy = array()) {
+function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = array()) {
 	global $bibliographie_topics_graph_depth;
 
 	if($depth > $bibliographie_topics_graph_depth)
 		$bibliographie_topics_graph_depth = $depth;
 
-	$subtopics = bibliographie_topics_parse_subtopics($topic);
+	$subtopics = bibliographie_topics_parse_subtopics($topic_id);
 
 	if(count($subtopics) > 0){
 		echo '<ul>'.PHP_EOL;
@@ -28,7 +28,6 @@ function bibliographie_topics_traverse ($topic, $depth = 1, &$walkedBy = array()
 			if($topic->amount_of_subtopics > 0){
 				echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'" class="topic" onclick="bibliographie_topics_toggle_visibility_of_subtopics('.((int) $topic->topic_id).', '.$walkedBy[$topic->topic_id].')">';
 				echo '<span class="silk-icon silk-icon-bullet-toggle-plus"> </span></a> '.$topic->name;
-
 				echo '<div id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics" class="topic_subtopics" style="display: none">';
 				bibliographie_topics_traverse($topic->topic_id, ($depth + 1), $walkedBy);
 				echo '</div>';
@@ -82,8 +81,7 @@ function bibliographie_topics_get_subtopics ($topic_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'));
 
-		$subtopics = mysql_query("SELECT * FROM `a2topictopiclink` relations
-WHERE relations.`target_topic_id` = ".((int) $topic_id));
+		$subtopics = mysql_query("SELECT * FROM `a2topictopiclink` WHERE `target_topic_id` = ".((int) $topic_id));
 
 		$subtopicsArray = array();
 		while($subtopic = mysql_fetch_object($subtopics)){

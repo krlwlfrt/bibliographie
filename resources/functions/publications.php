@@ -30,6 +30,54 @@ $bibliographie_publication_months = array (
 	'December'
 );
 
+$bibliographie_publication_fields = array (
+	'article' => array (
+		array (
+			'author',
+			'title',
+			'journal',
+			'year'
+		),
+		array (
+			'volume',
+			'number',
+			'pages',
+			'month',
+			'note'
+		)
+	),
+	'book' => array (
+		array (
+			'author,editor',
+			'title',
+			'publisher',
+			'year'
+		),
+		array (
+			'volume',
+			'number',
+			'series',
+			'address',
+			'edition',
+			'month',
+			'note'
+		)
+	),
+	'booklet' => array (
+		array (
+			'title'
+		),
+		array (
+			'author',
+			'howpublished',
+			'address',
+			'month',
+			'year',
+			'note'
+		)
+	)
+);
+
 /**
  * Get the data of a publication.
  * @param int $publication_id
