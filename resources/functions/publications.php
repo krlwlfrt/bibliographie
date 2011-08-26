@@ -410,3 +410,45 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 
 	bibliographie_bookmarks_print_javascript();
 }
+
+function bibliographie_publications_get_authors ($publication_id) {
+	$authors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'N'");
+
+	if(mysql_num_rows($authors)){
+		$return = array();
+		while($author = mysql_fetch_object($authors))
+			$return[] = $author->author_id;
+
+		return $return;
+	}
+
+	return false;
+}
+
+function bibliographie_publications_get_editors ($publication_id) {
+	$editors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'Y'");
+
+	if(mysql_num_rows($editors)){
+		$return = array();
+		while($editor = mysql_fetch_object($editors))
+			$return[] = $editor->author_id;
+
+		return $return;
+	}
+
+	return false;
+}
+
+function bibliographie_publications_get_tags ($publication_id) {
+	$tags = mysql_query("SELECT * FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $publication_id));
+
+	if(mysql_num_rows($tags)){
+		$return = array();
+		while($tag = mysql_fetch_object($tags))
+			$return[] = $tag->tag_id;
+
+		return $return;
+	}
+
+	return false;
+}

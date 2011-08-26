@@ -24,6 +24,11 @@ function bibliographie_tags_create_tag ($tag) {
 	return $return;
 }
 
+/**
+ * Get the name of a tag by its id.
+ * @param type $tag_id
+ * @return type
+ */
 function bibliographie_tags_tag_by_id ($tag_id) {
 	$tag_result = mysql_query("SELECT * FROM `a2tags` WHERE `tag_id` = ".((int) $tag_id));
 	if(mysql_num_rows($tag_result)){

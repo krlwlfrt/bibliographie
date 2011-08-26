@@ -41,6 +41,7 @@ To make the code consistent and more straight forward we want to rename the a2ke
 
 ```sql
 ALTER TABLE `a2keywords`  RENAME TO `a2tags`,  CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST,  CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
+ALTER TABLE `a2publicationkeywordlink`  RENAME TO `a2publicationtaglink`,  CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;
 ```
 
 ## Add new tables ##

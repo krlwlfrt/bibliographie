@@ -7,10 +7,31 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
-	case 'createPublication':
+	case 'publicationEditor':
+		$title = 'Publication editor';
+
 		$prePopulateAuthor = array();
 		$prePopulateEditor = array();
 		$prePopulateTags = array();
+
+		if($_SERVER['REQUEST_METHOD'] == 'GET' and !empty($_GET['pub_id'])){
+			$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
+			if(is_array($publication)){
+				$_POST = $publication;
+
+				$authors = bibliographie_publications_get_authors($_GET['pub_id']);
+				if(is_array($authors) and count($authors) > 0)
+					$_POST['author'] = implode(',', $authors);
+
+				$editors = bibliographie_publications_get_editors($_GET['pub_id']);
+				if(is_array($editors) and count($editors) > 0)
+					$_POST['editor'] = implode(',', $editors);
+
+				$tags = bibliographie_publications_get_tags($_GET['pub_id']);
+				if(is_array($tags) and count($tags) > 0)
+					$_POST['tags'] = implode(',', $tags);
+			}
+		}
 
 		if(!empty($_POST['author'])){
 			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
@@ -46,9 +67,8 @@ switch($_GET['task']){
 		}
 ?>
 
-<h3>Create publication</h3>
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=createPublication" method="post">
-
+<h3>Publication editor</h3>
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor" method="post">
 	<div class="unit"><h4>General data</h4>
 		<label for="pub_type" class="block">Publication type</label>
 		<select id="pub_type" name="pub_type" style="width: 100%">
@@ -340,12 +360,11 @@ $(function() {
 <?php
 	break;
 	case 'showPublication':
-		$publication = mysql_query("SELECT * FROM `a2publication` WHERE `pub_id` = ".((int) $_GET['pub_id']));
-
-		if(mysql_num_rows($publication) == 1){
-			$publication = mysql_fetch_object($publication);
+		$publication = bibliographie_publications_get_data($_GET['pub_id']);
+		if(is_object($publication)){
 ?>
 
+<em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&pub_id=<?php echo $publication->pub_id?>">Edit publication</a></em>
 <h3><?php echo htmlspecialchars($publication->title)?></h3>
 <?php
 			echo bibliographie_publications_parse_data($publication->pub_id);
