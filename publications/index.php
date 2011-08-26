@@ -10,10 +10,16 @@ switch($_GET['task']){
 	case 'publicationEditor':
 		$title = 'Publication editor';
 
+		/**
+		 * Initialize arrays for pre populating specific fields in the form.
+		 */
 		$prePopulateAuthor = array();
 		$prePopulateEditor = array();
 		$prePopulateTags = array();
 
+		/**
+		 * If requested parse existing publication and prefill the form with that.
+		 */
 		if($_SERVER['REQUEST_METHOD'] == 'GET' and !empty($_GET['pub_id'])){
 			$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
 			if(is_array($publication)){
@@ -33,6 +39,9 @@ switch($_GET['task']){
 			}
 		}
 
+		/**
+		 * Fill the prePropulateAuthor array.
+		 */
 		if(!empty($_POST['author'])){
 			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
 				$authors = explode(',', $_POST['author']);
@@ -44,6 +53,9 @@ switch($_GET['task']){
 			}
 		}
 
+		/**
+		 * Fill the prePropulateEditor array.
+		 */
 		if(!empty($_POST['editor'])){
 			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['editor'])){
 				$editors = explode(',', $_POST['editor']);
@@ -55,6 +67,9 @@ switch($_GET['task']){
 			}
 		}
 
+		/**
+		 * Fill the prePropulateTags array.
+		 */
 		if(!empty($_POST['tags'])){
 			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['tags'])){
 				$tags = explode(',', $_POST['tags']);
@@ -75,7 +90,7 @@ switch($_GET['task']){
 <?php
 		foreach($bibliographie_publication_types as $type){
 			echo '<option value="'.$type.'"';
-			if($type == $_POST['type'])
+			if($type == $_POST['pub_type'])
 				echo ' selected="selected"';
 			echo '>'.$type.'</option>';
 		}
@@ -242,7 +257,7 @@ function bibliographie_publications_show_fields (select) {
 						$('label[for="'+value.field+'"]').show();
 						if(value.flag == 0){
 							$('.collapsible #'+value.field).addClass('obligatory');
-							$('label[for="'+value.field+'"]').append(' <span class="silk-icon silk-icon-asterisk-yellow"></span>');
+							$('label[for="'+value.field+'"]').prepend('<span class="silk-icon silk-icon-asterisk-yellow"></span> ');
 						}
 					}
 				});

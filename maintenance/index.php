@@ -53,6 +53,12 @@ switch($_GET['task']){
 	<li>private Notizen</li>
 	<li>allgemeine Notizen</li>
 </ul>
+
+<h4>Parsing</h4>
+<ul>
+	<li>Handle number and volume as equivalents.</li>
+	<li>Handle booktile and journal as equivalents.</li>
+</ul>
 <?php
 	break;
 	case 'lockedTopics':

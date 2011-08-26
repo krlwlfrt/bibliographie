@@ -412,7 +412,7 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 }
 
 function bibliographie_publications_get_authors ($publication_id) {
-	$authors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'N'");
+	$authors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'N' ORDER BY `rank`");
 
 	if(mysql_num_rows($authors)){
 		$return = array();
@@ -426,7 +426,7 @@ function bibliographie_publications_get_authors ($publication_id) {
 }
 
 function bibliographie_publications_get_editors ($publication_id) {
-	$editors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'Y'");
+	$editors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'Y' ORDER BY `rank`");
 
 	if(mysql_num_rows($editors)){
 		$return = array();
