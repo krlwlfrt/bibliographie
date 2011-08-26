@@ -75,6 +75,164 @@ $bibliographie_publication_fields = array (
 			'year',
 			'note'
 		)
+	),
+	'inbook' => array (
+		array (
+			'author,editor',
+			'title',
+			'chapter',
+			'pages',
+			'publisher',
+			'type',
+			'year'
+		),
+		array (
+			'volume',
+			'number',
+			'series',
+			'address',
+			'edition',
+			'month',
+			'note'
+		)
+	),
+	'incollection' => array (
+		array (
+			'author',
+			'title',
+			'booktitle',
+			'publisher',
+			'year'
+		),
+		array (
+			'editor',
+			'volume',
+			'number',
+			'type',
+			'series',
+			'edition',
+			'chapter',
+			'pages',
+			'address',
+			'month',
+			'note'
+		)
+	),
+	'inproceedings' => array (
+		array (
+			'author',
+			'title',
+			'booktitle',
+			'year'
+		),
+		array (
+			'editor',
+			'volume',
+			'number',
+			'organization',
+			'series',
+			'pages',
+			'publisher',
+			'address',
+			'month',
+			'note'
+		)
+	),
+	'manual' => array (
+		array (
+			'title'
+		),
+		array (
+			'author',
+			'organization',
+			'address',
+			'edition',
+			'month',
+			'year',
+			'note'
+		)
+	),
+	'masterthesis' => array (
+		array (
+			'author',
+			'title',
+			'school',
+			'year'
+		),
+		array (
+			'address',
+			'month',
+			'note',
+			'type'
+		)
+	),
+	'misc' => array (
+		array (),
+		array (
+			'author',
+			'title',
+			'howpublished',
+			'month',
+			'year',
+			'note'
+		)
+	),
+	'phdthesis' => array (
+		array (
+			'author',
+			'title',
+			'school',
+			'year'
+		),
+		array (
+			'address',
+			'month',
+			'note',
+			'type'
+		)
+	),
+	'proceedings' => array (
+		array (
+			'title',
+			'year'
+		),
+		array (
+			'editor',
+			'publisher',
+			'volume',
+			'number',
+			'organization',
+			'series',
+			'address',
+			'month',
+			'note'
+		)
+	),
+	'techreport' => array (
+		array (
+			'author',
+			'title',
+			'institution',
+			'year'
+		),
+		array (
+			'type',
+			'number',
+			'address',
+			'month',
+			'note'
+		)
+	),
+	'unpublished' => array (
+		array (
+			'author',
+			'title',
+			'note'
+		),
+		array (
+			'month',
+			'year'
+		)
 	)
 );
 

@@ -1,4 +1,15 @@
 <?php
+/**
+ * Creates an author and returns false or the data of the created author.
+ * @param string $firstname
+ * @param string $von
+ * @param string $surname
+ * @param string $jr
+ * @param string $email
+ * @param string $url
+ * @param string $institute
+ * @return mixed False or array of data on success.
+ */
 function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute) {
 	$return = mysql_query("INSERT INTO `a2author` (
 	`firstname`,
@@ -18,7 +29,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	'".mysql_real_escape_string(stripslashes($institute))."'
 )");
 
-	$data = json_encode(array(
+	$data = array(
 		'author_id' => mysql_insert_id(),
 		'firstname' => $firstname,
 		'von' => $von,
@@ -27,16 +38,18 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		'email' => $email,
 		'url' => $url,
 		'institute' => $institute
-	));
+	);
 
-	if($return)
-		bibliographie_log('authors', 'create', $data);
+	if($return){
+		bibliographie_log('authors', 'create', json_encode($data));
+		return $data;
+	}
 
 	return $return;
 }
 
 function bibliographie_authors_parse_data ($author, $options = array()) {
-	if(is_int($author))
+	if(is_numeric($author))
 		$author = mysql_fetch_object(mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $author)));
 
 	if(is_object($author)){

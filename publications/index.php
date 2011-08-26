@@ -8,6 +8,42 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <?php
 switch($_GET['task']){
 	case 'createPublication':
+		$prePopulateAuthor = array();
+		$prePopulateEditor = array();
+		$prePopulateTags = array();
+
+		if(!empty($_POST['author'])){
+			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
+				$authors = explode(',', $_POST['author']);
+				foreach($authors as $author)
+					$prePopulateAuthor[] = array (
+						'id' => $author,
+						'name' => bibliographie_authors_parse_data($author)
+					);
+			}
+		}
+
+		if(!empty($_POST['editor'])){
+			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['editor'])){
+				$editors = explode(',', $_POST['editor']);
+				foreach($editors as $editor)
+					$prePopulateEditor[] = array (
+						'id' => $editor,
+						'name' => bibliographie_authors_parse_data($editor)
+					);
+			}
+		}
+
+		if(!empty($_POST['tags'])){
+			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['tags'])){
+				$tags = explode(',', $_POST['tags']);
+				foreach($tags as $tag)
+					$prePopulateTags[] = array (
+						'id' => $tag,
+						'name' => bibliographie_tags_tag_by_id($tag)
+					);
+			}
+		}
 ?>
 
 <h3>Create publication</h3>
@@ -27,14 +63,18 @@ switch($_GET['task']){
 
 		</select>
 
+		<p id="authorOrEditorNotice" class="notice" style="display: none;"><span class="silk-icon silk-icon-asterisk-yellow"></span> Either you have to fill an author or an editor!</p>
+
+		<label for="author" class="block">Author(s)</label>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('author')">Add new author</a></em>
+		<input type="text" id="author" name="author" style="width: 100%" value="<?php echo htmlspecialchars($_POST['author'])?>" />
+
+		<label for="editor" class="block">Editor(s)</label>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('editor')">Add new editor</a></em>
+		<input type="text" id="editor" name="editor" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editor'])?>" />
+
 		<label for="title" class="block">Title</label>
 		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" />
-
-		<label for="authors" class="block">Authors</label>
-		<input type="text" id="authors" name="authors" style="width: 100%" value="<?php echo htmlspecialchars($_POST['authors'])?>" />
-
-		<label for="editors" class="block">Editors</label>
-		<input type="text" id="editors" name="editors" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editors'])?>" />
 	</div>
 
 
@@ -60,7 +100,7 @@ switch($_GET['task']){
 
 	<div class="unit collapsible"><h4>Association</h4>
 		<label for="booktitle" class="block">Booktitle</label>
-		<input type="text" id="journal" name="journal" style="width: 100%" value="<?php echo htmlspecialchars($_POST['journal'])?>" />
+		<input type="text" id="booktitle" name="booktitle" style="width: 100%" value="<?php echo htmlspecialchars($_POST['booktitle'])?>" />
 
 		<label for="chapter" class="block">Chapter</label>
 		<input type="text" id="chapter" name="chapter" style="width: 100%" value="<?php echo htmlspecialchars($_POST['chapter'])?>" />
@@ -151,6 +191,7 @@ switch($_GET['task']){
 		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
 
 		<label for="tags" class="block">Tags</label>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()">Add new tag</a></em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
 	</div>
 
@@ -171,13 +212,18 @@ function bibliographie_publications_show_fields (select) {
 			if(json != ''){
 				$('.collapsible, .collapsible input, .collapsible textarea, .collapsible select, .collapsible label').hide().removeClass('obligatory');
 				$('label span').remove();
+				$('#authorOrEditorNotice').hide();
 
 				$.each(json, function(key, value){
-					$('#'+value.field).show().parent().show();
-					$('label[for="'+value.field+'"]').show();
-					if(value.flag == 0){
-						$('#'+value.field).addClass('obligatory');
-						$('label[for="'+value.field+'"]').append(' <span class="silk-icon silk-icon-asterisk-yellow"></span>');
+					if(value.field == 'author,editor'){
+						$('#authorOrEditorNotice').show();
+					}else{
+						$('.collapsible #'+value.field).show().parent().show();
+						$('label[for="'+value.field+'"]').show();
+						if(value.flag == 0){
+							$('.collapsible #'+value.field).addClass('obligatory');
+							$('label[for="'+value.field+'"]').append(' <span class="silk-icon silk-icon-asterisk-yellow"></span>');
+						}
 					}
 				});
 			}else
@@ -186,24 +232,101 @@ function bibliographie_publications_show_fields (select) {
 	});
 }
 
+function bibliographie_publications_create_person (firstname, von, surname, jr, role) {
+	if(role != 'author' && role != 'editor')
+		return;
+
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php',
+		data: {
+			'task': 'createPerson',
+			'firstname': firstname,
+			'von': von,
+			'surname': surname,
+			'jr': jr
+		},
+		dataType: 'json',
+		success: function (json) {
+			$.jGrowl(json.text);
+			if(json.status == 'success')
+				$('#'+role).tokenInput('add', {id: json.autor_id, name: json.name});
+		}
+	})
+}
+
+function bibliographie_publications_create_person_form (role) {
+	if(role != 'author' && role != 'editor')
+		return;
+
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php',
+		data: {
+			task: 'createPersonForm'
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#createPersonForm').dialog({
+				width: 400,
+				modal: true,
+				buttons: {
+					'Create & add': function () {
+						bibliographie_publications_create_person($('#firstname').val(), $('#von').val(), $('#surname').val(), $('#jr').val(), role);
+						$(this).dialog('close');
+					},
+					'cancel': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	})
+}
+
+function bibliographie_publications_create_tag () {
+	tagName = window.prompt('Please enter the tag you want to create!');
+
+	if(tagName != null && tagName != ''){
+		$.ajax({
+			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php',
+			data: {
+				'task': 'createTag',
+				'tag': tagName
+			},
+			dataType: 'json',
+			success: function (json) {
+				$.jGrowl(json.text);
+				if(json.status == 'success')
+					$('#tags').tokenInput('add', {id: json.tag_id, name: json.tag});
+			}
+		})
+	}else
+		$.jGrowl('You have to enter something to add a new tag!');
+}
+
 $(function() {
-	$('#authors').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
+	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
 		minChars: 3,
-		preventDuplicates: true
+		preventDuplicates: true,
+		prePopulate: <?php echo json_encode($prePopulateAuthor)."\n"?>
 	});
 
-	$('#editors').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
+	$('#editor').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
 		minChars: 3,
-		preventDuplicates: true
+		preventDuplicates: true,
+		prePopulate: <?php echo json_encode($prePopulateEditor)."\n"?>
 	});
 
 	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
 		searchDelay: 500,
 		minChars: 3,
 		preventDuplicates: true,
-		theme: 'facebook'
+		theme: 'facebook',
+		prePopulate: <?php echo json_encode($prePopulateTags)."\n"?>
 	});
 
 	$('#pub_type').change(function(event) {

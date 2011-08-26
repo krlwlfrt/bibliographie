@@ -239,10 +239,21 @@ function bibliographie_user_get_id ($name = null) {
 }
 
 /**
+ * Create an HTML-snippet that represents a dialog.
+ * @param string $id ID of the div.
+ * @param string $title Title of the dialog.
+ * @param string $text Text of the dialog.
+ */
+function bibliographie_dialog_create ($id, $title, $text) {
+	echo '<div id="'.$id.'" title="'.$title.'" class="ui-dialog">'.$text.'</div>';
+}
+
+/**
  * Include all needed functions...
  */
 require dirname(__FILE__).'/resources/functions/authors.php';
 require dirname(__FILE__).'/resources/functions/bookmarks.php';
 require dirname(__FILE__).'/resources/functions/maintenance.php';
 require dirname(__FILE__).'/resources/functions/publications.php';
+require dirname(__FILE__).'/resources/functions/tags.php';
 require dirname(__FILE__).'/resources/functions/topics.php';

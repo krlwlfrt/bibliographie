@@ -36,6 +36,13 @@ Since we do not implement such neat user priviliges we don't need all of that st
 DROP TABLE a2aigaiongeneral, a2availablerights, a2changehistory, a2config, a2grouprightsprofilelink, a2logintegration, a2rightsprofilerightlink, a2rightsprofiles, a2usergrouplink, a2userrights
 ```
 
+## Change existing tables ##
+To make the code consistent and more straight forward we want to rename the a2keywords to a2tags
+
+```sql
+ALTER TABLE `a2keywords`  RENAME TO `a2tags`,  CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST,  CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
+```
+
 ## Add new tables ##
 This is a new table that we need to cross reference with the file log.
 

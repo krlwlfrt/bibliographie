@@ -7,6 +7,7 @@
 			</div>
 		</div>
 		<div id="jQueryLoading"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" width="16" height="11" />&nbsp;Actions pending <span id="jQueryLoadingAmount"></span></div>
+		<div id="dialogContainer"></div>
 		<script type="text/javascript">
 	/* <![CDATA[ */
 var jQueryLoading = 0;
