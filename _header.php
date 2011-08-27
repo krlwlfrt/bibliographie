@@ -33,7 +33,7 @@
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=createAuthor"><?php echo bibliographie_icon_get('user-add')?> Create author</a>
 
 				<h3>Publications</h3>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=createPublication"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
 
 				<h3>Bookmarks</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('tag-blue')?> Show bookmarks</a>

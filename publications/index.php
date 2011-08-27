@@ -9,22 +9,58 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 switch($_GET['task']){
 	case 'publicationEditor':
 		$title = 'Publication editor';
+		$done = false;
 
-		/**
-		 * Initialize arrays for pre populating specific fields in the form.
-		 */
-		$prePopulateAuthor = array();
-		$prePopulateEditor = array();
-		$prePopulateTags = array();
-		$prePopulateTopics = array();
-		$assignedTopics = array();
-
-		/**
-		 * If requested parse existing publication and prefill the form with that.
-		 */
-		if($_SERVER['REQUEST_METHOD'] == 'GET' and !empty($_GET['pub_id'])){
+		$publication = null;
+		if(!empty($_GET['pub_id']))
 			$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
-			if(is_array($publication)){
+
+		if($_SERVER['REQUEST_METHOD'] == 'POST'){
+			$errors = array();
+
+			if(in_array($_POST['pub_type'], $bibliographie_publication_types)){
+				foreach($bibliographie_publication_fields[mb_strtolower($_POST['pub_type'])][0] as $requiredField){
+					if(mb_strpos($requiredField, ',')){
+						$fields = explode(',', $requiredField);
+						if(empty($_POST[$fields[0]]) and empty($_POST[$fields[1]]))
+							$errors[] = 'You have to fill '.$fields[0].' or '.$fields[1].'!';
+					}elseif(empty($_POST[$requiredField]))
+						$errors[] = 'You did not fill required field '.$requiredField.'!';
+				}
+
+				$author = explode(',', $_POST['author']);
+				$editor = explode(',', $_POST['editor']);
+				$topics = explode(',', $_POST['topics']);
+				$tags = explode(',', $_POST['tags']);
+
+				if(count($errors) == 0){
+					if(is_array($publication)){
+						echo '<h3>Updating publication...</h3>';
+					}else{
+						echo '<h3>Creating publication...</h3>';
+						$done = bibliographie_publications_create_publication($_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
+						if($done)
+							echo '<p class="success">Publication was created!</p>';
+					}
+				}else
+					bibliographie_print_errors($errors);
+			}
+		}
+
+		if(!$done){
+
+			/**
+			 * Initialize arrays for pre populating specific fields in the form.
+			 */
+			$prePopulateAuthor = array();
+			$prePopulateEditor = array();
+			$prePopulateTags = array();
+			$prePopulateTopics = array();
+
+			/**
+			 * If requested parse existing publication and prefill the form with that.
+			 */
+			if($_SERVER['REQUEST_METHOD'] == 'GET' and is_array($publication)){
 				$_POST = $publication;
 
 				$authors = bibliographie_publications_get_authors($_GET['pub_id']);
@@ -43,92 +79,90 @@ switch($_GET['task']){
 				if(is_array($topics) and count($topics) > 0)
 					$_POST['topics'] = implode(',', $topics);
 			}
-		}
 
-		/**
-		 * Fill the prePropulateAuthor array.
-		 */
-		if(!empty($_POST['author'])){
-			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
-				$authors = explode(',', $_POST['author']);
-				foreach($authors as $author)
-					$prePopulateAuthor[] = array (
-						'id' => $author,
-						'name' => bibliographie_authors_parse_data($author)
-					);
-			}
-		}
-
-		/**
-		 * Fill the prePropulateEditor array.
-		 */
-		if(!empty($_POST['editor'])){
-			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['editor'])){
-				$editors = explode(',', $_POST['editor']);
-				foreach($editors as $editor)
-					$prePopulateEditor[] = array (
-						'id' => $editor,
-						'name' => bibliographie_authors_parse_data($editor)
-					);
-			}
-		}
-
-		/**
-		 * Fill the prePropulateTags array.
-		 */
-		if(!empty($_POST['tags'])){
-			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['tags'])){
-				$tags = explode(',', $_POST['tags']);
-				foreach($tags as $tag)
-					$prePopulateTags[] = array (
-						'id' => $tag,
-						'name' => bibliographie_tags_tag_by_id($tag)
-					);
-			}
-		}
-
-		/**
-		 * Fill the prePropulateTopics array.
-		 */
-		if(!empty($_POST['topics'])){
-			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
-				$topics = explode(',', $_POST['topics']);
-				foreach($topics as $topic){
-					$prePopulateTopics[] = array (
-						'id' => $topic,
-						'name' => bibliographie_topics_topic_by_id($topic)
-					);
-					$assignedTopics[] = (int) $topic;
+			/**
+			 * Fill the prePropulateAuthor array.
+			 */
+			if(!empty($_POST['author'])){
+				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
+					$authors = explode(',', $_POST['author']);
+					foreach($authors as $author)
+						$prePopulateAuthor[] = array (
+							'id' => $author,
+							'name' => bibliographie_authors_parse_data($author)
+						);
 				}
 			}
-		}
+
+			/**
+			 * Fill the prePropulateEditor array.
+			 */
+			if(!empty($_POST['editor'])){
+				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['editor'])){
+					$editors = explode(',', $_POST['editor']);
+					foreach($editors as $editor)
+						$prePopulateEditor[] = array (
+							'id' => $editor,
+							'name' => bibliographie_authors_parse_data($editor)
+						);
+				}
+			}
+
+			/**
+			 * Fill the prePropulateTags array.
+			 */
+			if(!empty($_POST['tags'])){
+				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['tags'])){
+					$tags = explode(',', $_POST['tags']);
+					foreach($tags as $tag)
+						$prePopulateTags[] = array (
+							'id' => $tag,
+							'name' => bibliographie_tags_tag_by_id($tag)
+						);
+				}
+			}
+
+			/**
+			 * Fill the prePropulateTopics array.
+			 */
+			if(!empty($_POST['topics'])){
+				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
+					$topics = explode(',', $_POST['topics']);
+					foreach($topics as $topic){
+						$prePopulateTopics[] = array (
+							'id' => $topic,
+							'name' => bibliographie_topics_topic_by_id($topic)
+						);
+					}
+				}
+			}
 ?>
 
 <h3>Publication editor</h3>
 <?php
-		if(is_array($publication)){
+			if(is_array($publication)){
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>" method="post">
 <?php
-		}else{
+			}else{
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor" method="post">
 <?php
-		}
+			}
 ?>
 
 	<div class="unit"><h4>General data</h4>
 		<label for="pub_type" class="block">Publication type</label>
 		<select id="pub_type" name="pub_type" style="width: 100%">
 <?php
-		foreach($bibliographie_publication_types as $type){
-			echo '<option value="'.$type.'"';
-			if($type == $_POST['pub_type'])
-				echo ' selected="selected"';
-			echo '>'.$type.'</option>';
-		}
+			foreach($bibliographie_publication_types as $type){
+				echo '<option value="'.$type.'"';
+				if($type == $_POST['pub_type'])
+					echo ' selected="selected"';
+				echo '>'.$type.'</option>';
+			}
 ?>
 
 		</select>
@@ -145,26 +179,25 @@ switch($_GET['task']){
 
 		<label for="title" class="block">Title</label>
 		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" />
-	</div>
 
-
-	<div class="unit collapsible"><h4>Dating</h4>
-		<label for="year" class="block">Year</label>
-		<input type="text" id="year" name="year" style="width: 100%" value="<?php echo htmlspecialchars($_POST['year'])?>" placeholder="<?php echo date('Y')?>" />
-
-		<label for="month" class="block">Month</label>
-		<select id="month" name="month" style="width: 100%">
-			<option value=""></option>
+		<div style="float: right; width: 50%">
+			<label for="month" class="block">Month</label>
+			<select id="month" name="month" style="width: 100%">
+				<option value=""></option>
 <?php
-		foreach($bibliographie_publication_months as $month){
-			echo '<option value="'.$month.'"';
-			if($month == $_POST['month'])
-				echo ' selected="selected"';
-			echo '>'.$month.'</option>';
-		}
+			foreach($bibliographie_publication_months as $month){
+				echo '<option value="'.$month.'"';
+				if($month == $_POST['month'])
+					echo ' selected="selected"';
+				echo '>'.$month.'</option>';
+			}
 ?>
 
-		</select>
+			</select>
+		</div>
+
+		<label for="year" class="block">Year</label>
+		<input type="text" id="year" name="year" style="width: 45%" value="<?php echo htmlspecialchars($_POST['year'])?>" />
 	</div>
 
 
@@ -192,7 +225,7 @@ switch($_GET['task']){
 	</div>
 
 
-	<div class="unit collapsible"><h4>Publishing</h4>
+	<div class="unit collapsible"><h4>Publishing & organization</h4>
 		<label for="publisher" class="block">Publisher</label>
 		<input type="text" id="publisher" name="publisher" style="width: 100%" value="<?php echo htmlspecialchars($_POST['publisher'])?>" />
 
@@ -201,41 +234,7 @@ switch($_GET['task']){
 
 		<label for="howpublished" class="block">How published</label>
 		<input type="text" id="howpublished" name="howpublished" style="width: 100%" value="<?php echo htmlspecialchars($_POST['howpublished'])?>" />
-	</div>
 
-
-	<div class="unit collapsible"><h4>Identification</h4>
-		<label for="isbn" class="block">ISBN <em>for books</em></label>
-		<input type="text" id="isbn" name="isbn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['isbn'])?>" />
-
-		<label for="issn" class="block">ISSN <em>for journals</em></label>
-		<input type="text" id="issn" name="issn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['issn'])?>" />
-
-		<label for="doi" class="block">DOI <em>of publication</em></label>
-		<input type="text" id="doi" name="doi" style="width: 100%" value="<?php echo htmlspecialchars($_POST['doi'])?>" />
-
-		<label for="url" class="block">URL <em>of publication</em></label>
-		<input type="text" id="url" name="url" style="width: 100%" value="<?php echo htmlspecialchars($_POST['url'])?>" />
-	</div>
-
-
-	<div class="unit collapsible"><h4>Pagination</h4>
-		<div style="float: right; padding-left: 10px; width: 20%;">
-			<label for="lastpage" class="block">Last page</label>
-			<input type="number" id="lastpage" name="lastpage" style="width: 100%" value="<?php echo htmlspecialchars($_POST['lastpage'])?>" />
-		</div>
-
-		<div style="float: right; width: 20%;">
-			<label for="firstpage" class="block">First page</label>
-			<input type="number" id="firstpage" name="firstpage" style="width: 100%" value="<?php echo htmlspecialchars($_POST['firstpage'])?>" />
-		</div>
-
-		<label for="pages" class="block">Pages</label>
-		<input type="text" id="pages" name="pages" style="width: 55%" value="<?php echo htmlspecialchars($_POST['pages'])?>" />
-	</div>
-
-
-	<div class="unit collapsible"><h4>Organization</h4>
 		<label for="organization" class="block">Organization</label>
 		<input type="text" id="organization" name="organization" style="width: 100%" value="<?php echo htmlspecialchars($_POST['organization'])?>" />
 
@@ -250,6 +249,12 @@ switch($_GET['task']){
 	</div>
 
 
+	<div class="unit collapsible"><h4>Pagination</h4>
+		<label for="pages" class="block">Pages</label>
+		<input type="text" id="pages" name="pages" style="width: 50%" value="<?php echo htmlspecialchars($_POST['pages'])?>" />
+	</div>
+
+
 	<div class="unit"><h4>Descriptional stuff</h4>
 		<label for="note" class="block">Note</label>
 		<textarea id="note" name="note" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['note'])?></textarea>
@@ -259,18 +264,33 @@ switch($_GET['task']){
 
 		<label for="userfields" class="block">User fields</label>
 		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
+	</div>
+
+
+	<div class="unit"><h4>Identification</h4>
+		<label for="isbn" class="block">ISBN <em>for books</em></label>
+		<input type="text" id="isbn" name="isbn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['isbn'])?>" />
+
+		<label for="issn" class="block">ISSN <em>for journals</em></label>
+		<input type="text" id="issn" name="issn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['issn'])?>" />
+
+		<label for="doi" class="block">DOI <em>of publication</em></label>
+		<input type="text" id="doi" name="doi" style="width: 100%" value="<?php echo htmlspecialchars($_POST['doi'])?>" />
+
+		<label for="url" class="block">URL <em>of publication</em></label>
+		<input type="text" id="url" name="url" style="width: 100%" value="<?php echo htmlspecialchars($_POST['url'])?>" />
+	</div>
+
+
+	<div class="unit"><h4>Topics & tags</h4>
+		<label for="topics" class="block">Topics</label>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
+		<br style="clear: both" />
 
 		<label for="tags" class="block">Tags</label>
 		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a></em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
-	</div>
-
-	<div class="unit"><h4>Topics</h4>
-		<label for="topics" class="block">Topics</label>
-		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
-		<!--<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_topic()"><span class="silk-icon silk-icon-folder-add"></span> Add new topic</a></em>-->
-		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
-		<br style="clear: both" />
 	</div>
 
 	<div class="submit"><input type="submit" value="save" /></div>
@@ -278,8 +298,6 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-var assignedTopics = <?php echo json_encode($assignedTopics)?>;
-
 function bibliographie_publications_show_fields (select) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
@@ -290,7 +308,8 @@ function bibliographie_publications_show_fields (select) {
 		dataType: 'json',
 		success: function (json) {
 			if(json != ''){
-				$('.collapsible, .collapsible input, .collapsible textarea, .collapsible select, .collapsible label').hide().removeClass('obligatory');
+				$('.collapsible, .collapsible input, .collapsible textarea, .collapsible select, .collapsible label').hide();
+				$('input, textarea, select').removeClass('obligatory');
 				$('label span').remove();
 				$('#authorOrEditorNotice').hide();
 
@@ -301,7 +320,7 @@ function bibliographie_publications_show_fields (select) {
 						$('.collapsible #'+value.field).show().parent().show();
 						$('label[for="'+value.field+'"]').show();
 						if(value.flag == 0){
-							$('.collapsible #'+value.field).addClass('obligatory');
+							$('#'+value.field).addClass('obligatory');
 							$('label[for="'+value.field+'"]').prepend('<span class="silk-icon silk-icon-asterisk-yellow"></span> ');
 						}
 					}
@@ -483,7 +502,9 @@ $(function() {
 	/* ]]> */
 </script>
 <?php
+		}
 	break;
+
 	case 'showPublication':
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
 		if(is_object($publication)){

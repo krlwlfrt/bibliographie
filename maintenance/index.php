@@ -59,6 +59,12 @@ switch($_GET['task']){
 	<li>Handle number and volume as equivalents.</li>
 	<li>Handle booktile and journal as equivalents.</li>
 </ul>
+
+<h4>Maintenance</h4>
+<ul>
+	<li>Detect wrong coded authors by searching for entries which do not REGEXP against [:alpha:].</li>
+	<li>Drop a2publication.location... It's not part of bibtex.</li>
+</ul>
 <?php
 	break;
 	case 'lockedTopics':

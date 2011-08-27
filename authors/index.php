@@ -80,14 +80,14 @@ switch($_GET['task']){
 	break;
 
 	case 'showAuthor':
+		bibliographie_authors_parse_data($author);
 		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
 		if(mysql_num_rows($author) == 1){
+			$author = mysql_fetch_object($author);
 ?>
 
 <h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
 <?php
-			$author = mysql_fetch_object($author);
-
 			$publications = bibliographie_authors_get_publications($_GET['author_id']);
 
 			if(count($publications) > 0)

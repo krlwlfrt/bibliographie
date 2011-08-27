@@ -470,3 +470,162 @@ function bibliographie_publications_get_topics ($publication_id) {
 
 	return false;
 }
+
+/**
+ *
+ * @param type $pub_type
+ * @param array $author
+ * @param array $editor
+ * @param type $title
+ * @param type $month
+ * @param type $year
+ * @param type $booktitle
+ * @param type $chapter
+ * @param type $series
+ * @param type $journal
+ * @param type $volume
+ * @param type $number
+ * @param type $edition
+ * @param type $publisher
+ * @param type $location
+ * @param type $howpublished
+ * @param type $organization
+ * @param type $institution
+ * @param type $school
+ * @param type $address
+ * @param type $pages
+ * @param type $note
+ * @param type $abstract
+ * @param type $userfields
+ * @param type $isbn
+ * @param type $issn
+ * @param type $doi
+ * @param type $url
+ * @param array $topics
+ * @param array $tags
+ */
+function bibliographie_publications_create_publication ($pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $isbn, $issn, $doi, $url, array $topics, array $tags, $user_id = null) {
+	if($user_id == null)
+		$user_id = bibliographie_user_get_id ();
+
+	$return = mysql_query("INSERT INTO `a2publication` (
+	`pub_type`,
+	`user_id`,
+	`title`,
+	`month`,
+	`year`,
+	`booktitle`,
+	`chapter`,
+	`series`,
+	`journal`,
+	`volume`,
+	`number`,
+	`edition`,
+	`publisher`,
+	`location`,
+	`howpublished`,
+	`organization`,
+	`institution`,
+	`school`,
+	`address`,
+	`pages`,
+	`note`,
+	`abstract`,
+	`userfields`,
+	`isbn`,
+	`issn`,
+	`doi`,
+	`url`
+) VALUES (
+	'".mysql_real_escape_string(stripslashes($pub_type))."',
+	'".((int) $user_id)."',
+	'".mysql_real_escape_string(stripslashes($title))."',
+	'".mysql_real_escape_string(stripslashes($month))."',
+	".((int) $year).",
+	'".mysql_real_escape_string(stripslashes($booktitle))."',
+	'".mysql_real_escape_string(stripslashes($chapter))."',
+	'".mysql_real_escape_string(stripslashes($series))."',
+	'".mysql_real_escape_string(stripslashes($journal))."',
+	'".mysql_real_escape_string(stripslashes($volume))."',
+	'".mysql_real_escape_string(stripslashes($number))."',
+	'".mysql_real_escape_string(stripslashes($edition))."',
+	'".mysql_real_escape_string(stripslashes($publisher))."',
+	'".mysql_real_escape_string(stripslashes($location))."',
+	'".mysql_real_escape_string(stripslashes($howpublished))."',
+	'".mysql_real_escape_string(stripslashes($organization))."',
+	'".mysql_real_escape_string(stripslashes($institution))."',
+	'".mysql_real_escape_string(stripslashes($school))."',
+	'".mysql_real_escape_string(stripslashes($address))."',
+	'".mysql_real_escape_string(stripslashes($pages))."',
+	'".mysql_real_escape_string(stripslashes($note))."',
+	'".mysql_real_escape_string(stripslashes($abstract))."',
+	'".mysql_real_escape_string(stripslashes($userfields))."',
+	'".mysql_real_escape_string(stripslashes($isbn))."',
+	'".mysql_real_escape_string(stripslashes($issn))."',
+	'".mysql_real_escape_string(stripslashes($doi))."',
+	'".mysql_real_escape_string(stripslashes($url))."'
+)");
+
+	$pub_id = mysql_insert_id();
+
+	if(count($author) > 0){
+		$rank = (int) 1;
+		foreach($author as $author_id)
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+	}
+
+	if(count($editor) > 0){
+		$rank = (int) 1;
+		foreach($editor as $editor_id)
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
+	}
+
+	if(count($topics) > 0)
+		foreach($topics as $topic_id)
+			mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
+
+	if(count($tags) > 0)
+		foreach($tags as $tag_id)
+			mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
+
+	$data = json_encode(array(
+		'pub_id' => (int) $pub_id,
+		'pub_type' => $pub_type,
+		'user_id' => (int) $user_id,
+		'title' => $title,
+		'month' => $month,
+		'year' => (int) $year,
+		'booktitle' => $booktitle,
+		'chapter' => $chapter,
+		'series' => $series,
+		'journal' => $journal,
+		'volume' => $volume,
+		'number' => $number,
+		'edition' => $edition,
+		'publisher' => $publisher,
+		'location' => $location,
+		'howpublished' => $howpublished,
+		'organization' => $organization,
+		'institution' => $institution,
+		'school' => $school,
+		'address' => $address,
+		'pages' => $pages,
+		'note' => $note,
+		'abstract' => $abstract,
+		'userfields' => $userfields,
+		'isbn' => $isbn,
+		'issn' => $issn,
+		'doi' => $doi,
+		'url' => $url,
+
+		'author' => $author,
+		'editor' => $editor,
+		'topics' => $topics,
+		'tags' => $tags
+	));
+
+	if($return)
+		bibliographie_log('publications', 'createPublication', $data);
+
+	return $return;
+}
