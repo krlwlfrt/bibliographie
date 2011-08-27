@@ -54,7 +54,6 @@ switch($_GET['task']){
 		}
 
 		if(!$done){
-
 			/**
 			 * Initialize arrays for pre populating specific fields in the form.
 			 */

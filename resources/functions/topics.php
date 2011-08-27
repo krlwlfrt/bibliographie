@@ -45,12 +45,12 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
 
 /**
  * Create a new topic.
- * @param string $name The name of the topic.
+ * @param string $name The name of the topic	.
  * @param string $description The description of the topic.
  * @param string $url The URL of the topic.
  * @return boolean True on success or false otherwise.
  */
-function bibliographie_topics_create_topic ($name, $description, $url) {
+function bibliographie_topics_create_topic ($name, $description, $url, $topics) {
 	$return = mysql_query("INSERT INTO `a2topics` (
 	`name`,
 	`description`,
@@ -61,11 +61,18 @@ function bibliographie_topics_create_topic ($name, $description, $url) {
 	'".mysql_real_escape_string(stripslashes($url))."'
 )");
 
+	$topic_id = mysql_insert_id();
+
+	if(count($topics) > 0)
+		foreach($topics as $parentTopic)
+			mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
+
 	$data = json_encode(array(
-		'topic_id' => mysql_insert_id(),
+		'topic_id' => (int) $topic_id,
 		'name' => $name,
 		'description' => $description,
-		'url' => $url
+		'url' => $url,
+		'topics' => $topics
 	));
 
 	if($return)
@@ -154,21 +161,42 @@ ORDER BY
 }
 
 /**
- * Create a relation between two topics. The topics have to be distinct.
- * @param int $parent ID of parent topic.
- * @param int $child ID of child topic.
- * @return bool True on success or false otherwise.
+ *
+ * @param type $topic_id
+ * @param type $name
+ * @param type $description
+ * @param type $url
+ * @param type $topics
  */
-function bibliographie_topics_create_relation ($parent, $child) {
-	if(!empty($parent) and is_numeric($parent) and !empty($child) and is_numeric($child) and $parent != $child){
-		$return = mysql_query("INSERT INTO `a2topictopiclink` (`target_topic_id`, `source_topic_id`) VALUES (".((int) $parent).", ".((int) $child).")");
-		if($return){
-			bibliographie_purge_cache('topic_'.((int) $parent));
-			bibliographie_log('topics', 'createTopicRelation', json_encode(array('parent' => ((int) $parent), 'child' => ((int) $child))));
-		}
-		return $return;
-	}
-	return false;
+function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, $topics) {
+	mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." LIMIT ".count(bibliographie_topics_get_parent_topics($topic_id)));
+
+	$return = mysql_query("UPDATE `a2topics` SET
+	`name`= '".mysql_real_escape_string(stripslashes($name))."',
+	`description` = '".mysql_real_escape_string(stripslashes($description))."',
+	`url` = '".mysql_real_escape_string(stripslashes($url))."'
+WHERE
+	`topic_id` = ".((int) $topic_id)."
+LIMIT 1");
+
+	if(count($topics) > 0)
+		foreach($topics as $parentTopic)
+			mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
+
+	$data = json_encode(array(
+		'topic_id' => (int) $topic_id,
+		'name' => $name,
+		'description' => $description,
+		'url' => $url,
+		'topics' => $topics
+	));
+
+	if($return)
+		bibliographie_log('topics', 'editTopic', $data);
+
+	bibliographie_purge_cache('topic_'.((int) $topic_id));
+
+	return $return;
 }
 
 /**
@@ -176,14 +204,22 @@ function bibliographie_topics_create_relation ($parent, $child) {
  * @param int $topic_id The id of a topic.
  * @return mixed Object on success or false otherwise.
  */
-function bibliographie_topics_get_topic_data ($topic_id) {
+function bibliographie_topics_get_topic_data ($topic_id, $type = 'object') {
 	if(is_numeric($topic_id)){
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'));
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json')){
+			$assoc = false;
+			if($type == 'assoc')
+				$assoc = true;
+
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'), $assoc);
+		}
 
 		$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $topic_id));
 		if(mysql_num_rows($topic) == 1){
-			$topic = mysql_fetch_object($topic);
+			if($type == 'object')
+				$topic = mysql_fetch_object($topic);
+			else
+				$topic = mysql_fetch_assoc($topic);
 
 			if(BIBLIOGRAPHIE_CACHING){
 				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json', 'w+');
@@ -270,6 +306,22 @@ function bibliographie_topics_topic_by_id ($topic_id) {
 	$data = bibliographie_topics_get_topic_data($topic_id);
 	if($data){
 		return $data->name;
+	}
+
+	return false;
+}
+
+function bibliographie_topics_get_parent_topics ($topic_id) {
+	$topic = bibliographie_topics_get_topic_data($topic_id);
+
+	if(is_object($topic)){
+		$return = array();
+
+		$parentTopics = mysql_query("SELECT * FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic->topic_id));
+		while($parentTopic = mysql_fetch_object($parentTopics))
+			$return[] = $parentTopic->target_topic_id;
+
+		return $return;
 	}
 
 	return false;

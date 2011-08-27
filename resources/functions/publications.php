@@ -630,10 +630,46 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	return $return;
 }
 
+/**
+ *
+ * @param type $pub_id
+ * @param type $pub_type
+ * @param array $author
+ * @param array $editor
+ * @param type $title
+ * @param type $month
+ * @param type $year
+ * @param type $booktitle
+ * @param type $chapter
+ * @param type $series
+ * @param type $journal
+ * @param type $volume
+ * @param type $number
+ * @param type $edition
+ * @param type $publisher
+ * @param type $location
+ * @param type $howpublished
+ * @param type $organization
+ * @param type $institution
+ * @param type $school
+ * @param type $address
+ * @param type $pages
+ * @param type $note
+ * @param type $abstract
+ * @param type $userfields
+ * @param type $isbn
+ * @param type $issn
+ * @param type $doi
+ * @param type $url
+ * @param array $topics
+ * @param array $tags
+ * @return type
+ */
 function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $isbn, $issn, $doi, $url, array $topics, array $tags) {
-	mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id));
-	mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id));
-	mysql_query("DELETE FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $pub_id));
+
+	mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
+	mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
+	mysql_query("DELETE FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
 
 	$return = mysql_query("UPDATE `a2publication` SET
 	`pub_type` = '".mysql_real_escape_string(stripslashes($pub_type))."',

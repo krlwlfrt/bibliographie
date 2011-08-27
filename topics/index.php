@@ -7,104 +7,29 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Topics</h2>
 <?php
 switch($_GET['task']){
-	case 'createRelation':
-		$title = 'Create relation';
-		$created = false;
-?>
-
-<h3>Create relation</h3>
-<p class="notice">On this page you can create relations between topics. You just have to search for two topics, select them and hit save!</p>
-<?php
-		if($_SERVER['REQUEST_METHOD'] == 'POST'){
-			$errors = array();
-
-			if(empty($_POST['select_searchTopicOne']) or !is_numeric($_POST['select_searchTopicOne']) or empty($_POST['select_searchTopicTwo']) or !is_numeric($_POST['select_searchTopicTwo']))
-				$errors[] = 'You have to select two topics!';
-
-			if($_POST['select_searchTopicOne'] == $_POST['select_searchTopicTwo'])
-				$errors[] = 'You can\'t select the same topic twice!';
-
-			if(count($errors) == 0){
-				if(bibliographie_topics_create_relation($_POST['select_searchTopicOne'], $_POST['select_searchTopicTwo'])){
-					echo '<p class="success">Relation was created!</p>';
-					$created = true;
-				}else
-					echo '<p class="error">Relation was not created!</p>';
-			}else
-				bibliographie_print_errors($errors);
-		}
-
-		if(!$created){
-?>
-
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=createRelation'?>" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
-	<div class="unit">
-		<div style="float: right; width: 50%">
-			<label for="searchTopicTwo" class="block">Subordinated topic</label>
-			<input type="text" id="searchTopicTwo" name="searchTopicTwo" style="width: 100%;" />
-			<div id="result_searchTopicTwo"></div>
-		</div>
-		<label for="searchTopicOne" class="block">Parent topic</label>
-		<input type="text" id="searchTopicOne" name="searchTopicOne" style="width: 45%;" />
-		<div id="result_searchTopicOne" style="width: 45%"></div>
-
-		<br style="clear: both;"/>
-	</div>
-	<div class="submit">
-		<input type="submit" value="save" />
-	</div>
-</form>
-
-<script type="text/javascript">
-	/* <![CDATA[ */
-function bibliographie_topics_check_submit_status () {
-	if($('#select_searchTopicOne').length == 1 && $('#select_searchTopicTwo').length == 1){
-		if($('#select_searchTopicOne').val() > 0 && $('#select_searchTopicTwo').val() > 0 && $('#select_searchTopicOne').val() != $('#select_searchTopicTwo').val())
-			return true;
-
-		alert('You have to select two distinct topics!');
-		return false;
-	}
-
-	alert('You have to search for the two topics that you want to relate!');
-	return false;
-}
-
-function bibliographie_topics_search_topic_for_relation (event) {
-	if(event.target.id == 'searchTopicOne' || event.target.id == 'searchTopicTwo'){
-		$.ajax({
-			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/ajax.php'?>',
-			data: {
-				'task': 'searchTopic',
-				'id': event.target.id,
-				'value': event.target.value
-			},
-			success: function (html) {
-				$('#result_'+event.target.id).html(html);
-			}
-		});
-	}
-}
-
-$('#searchTopicTwo, #searchTopicOne').change(function(event) {
-	bibliographie_topics_search_topic_for_relation(event);
-}).keyup(function(event) {
-	bibliographie_topics_search_topic_for_relation(event);
-});
-	/* ]]> */
-</script>
-<?php
-		}
-	break;
-
-	case 'createTopic':
-		$title = 'Create topic';
+	case 'topicEditor':
+		$title = 'Topic editor';
 ?>
 
 <h3>Create topic</h3>
-<p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
 <?php
-		$created = false;
+		$done = false;
+		$topic = null;
+
+		if(!empty($_GET['topic_id']))
+			$topic = bibliographie_topics_get_topic_data($_GET['topic_id'], 'assoc');
+
+		if($_SERVER['REQUEST_METHOD'] == 'GET'){
+			if(is_array($topic)){
+				$_POST = $topic;
+
+				$topics = bibliographie_topics_get_parent_topics($_GET['topic_id']);
+				if(is_array($topics) and count($topics) > 0)
+					$_POST['topics'] = implode(',', $topics);
+			}else
+				$_POST['topics'] = 1;
+		}
+
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
 
@@ -114,36 +39,155 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 			if(!empty($_POST['url']) and !is_url($_POST['url']))
 				$errors[] = 'The URL you filled is not valid.';
 
+			$topics = explode(',', $_POST['topics']);
+
 			if(count($errors) == 0){
-				if(bibliographie_topics_create_topic($_POST['name'], $_POST['description'], $_POST['url'])){
-					echo '<p class="success">Topic has been created!</p>';
-					$created = true;
-				}else
-					echo '<p class="error">Topic could not have been created. '.mysql_error().'</p>';
+				if(is_array($topic)){
+					if(bibliographie_topics_edit_topic($topic['topic_id'], $_POST['name'], $_POST['description'], $_POST['url'], $topics)){
+						echo '<p class="success">Topic has been edited.</p>';
+						echo 'You can <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic['topic_id'].'">return to the editor</a> or view the <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$topic['topic_id'].'">topic page</a>.';
+						$done = true;
+					}else
+						echo '<p class="success">Topic could not be edited.</p>';
+				}else{
+					if(bibliographie_topics_create_topic($_POST['name'], $_POST['description'], $_POST['url'], $topics)){
+						echo '<p class="success">Topic has been created.</p>';
+						$done = true;
+					}else
+						echo '<p class="error">Topic could not be created!</p>';
+				}
 			}else
 				bibliographie_print_errors($errors);
 		}
 
-		if(!$created){
+		if(!$done){
+			$prePopulateTopics = array();
+
+			/**
+			 * Fill the prePropulateTopics array.
+			 */
+			if(!empty($_POST['topics'])){
+				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
+					$topics = explode(',', $_POST['topics']);
+					foreach($topics as $parentTopic){
+						$prePopulateTopics[] = array (
+							'id' => $parentTopic,
+							'name' => bibliographie_topics_topic_by_id($parentTopic)
+						);
+					}
+				}
+			}
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=createTopic'?>" method="post">
+<p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
+<?php
+			if(is_array($topic)){
+?>
+
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic['topic_id']?>" method="post">
+<?php
+			}else{
+?>
+
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor'?>" method="post">
+<?php
+			}
+?>
+
 	<div class="unit">
+		<div style="float: right; width: 50%">
+			<label for="url" class="block">URL</label>
+			<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" />
+		</div>
+
 		<label for="name" class="block">Name*</label>
-		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 100%" />
+		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 45%" />
 	</div>
+
 	<div class="unit">
 		<label for="description" class="block">Description</label>
 		<textarea id="description" name="description" rows="6" cols="40" style="width: 100%"><?php echo htmlspecialchars($_POST['description'])?></textarea>
 	</div>
+
 	<div class="unit">
-		<label for="url" class="block">URL</label>
-		<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" />
+		<label for="topics" class="block">Parent topics</label>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
+		<br style="clear: both" />
 	</div>
+
 	<div class="submit">
 		<input type="submit" value="save" />
 	</div>
 </form>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+function bibliographie_publications_show_subgraph (topic) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php',
+		data: {
+			'task': 'getSubgraph',
+			'topic_id': topic
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#selectFromTopicSubgraph').dialog({
+				width: 400,
+				modal: true,
+				buttons: {
+					'Ok': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	});
+}
+
+$(function () {
+	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopicJSON', {
+		searchDelay: 500,
+		minChars: 3,
+		preventDuplicates: true,
+		theme: 'facebook',
+		prePopulate: <?php echo json_encode($prePopulateTopics)?>,
+		noResultsText: 'Results are in the container to the right!',
+		onResult: function (results) {
+			$('#topicsContainer').html('<div style="margin-bottom: 10px;"><strong>Topics search result</strong></div>');
+			if(results.length > 0){
+				$.each(results, function (key, value) {
+					var selected = false;
+					var topicsArray = $('#topics').tokenInput('get')
+
+					$.each(topicsArray, function (selectedKey, selectedValue) {
+						if(selectedValue.name == value.name)
+							selected = true;
+					});
+
+					if(selected){
+						$('#topicsContainer').append('<div><span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>')
+					}else{
+						$('#topicsContainer')
+							.append('<div>')
+							.append('<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''+value.id+'\',name:\''+value.name+'\'})" style="float: right;"><span class="silk-icon silk-icon-add"></span> add</a>')
+							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
+							.append('<em>'+value.name+'</em>')
+							.append('</div>');
+					}
+				});
+			}else
+				$('#topicsContainer').append('No results for search!');
+
+			return Array();
+		}
+	});
+});
+	/* ]]> */
+</script>
 <?php
 		}
 	break;
@@ -160,6 +204,7 @@ $('#searchTopicTwo, #searchTopicOne').change(function(event) {
 				$topic->description = '<p>'.htmlspecialchars($topic->description).'</p>';
 ?>
 
+<em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=topicEditor&amp;topic_id=<?php echo $topic->topic_id?>">Edit topic</a></em>
 <h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], false))?>)</a></li>
