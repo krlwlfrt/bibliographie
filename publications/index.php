@@ -323,22 +323,25 @@ function bibliographie_publications_create_person_form (role) {
 function bibliographie_publications_create_tag () {
 	tagName = window.prompt('Please enter the tag you want to create!');
 
-	if(tagName != null && tagName != ''){
-		$.ajax({
-			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php',
-			data: {
-				'task': 'createTag',
-				'tag': tagName
-			},
-			dataType: 'json',
-			success: function (json) {
-				$.jGrowl(json.text);
-				if(json.status == 'success')
-					$('#tags').tokenInput('add', {id: json.tag_id, name: json.tag});
-			}
-		})
-	}else
-		$.jGrowl('You have to enter something to add a new tag!');
+	if(tagName == null)
+		return;
+
+	if(tagName == '')
+		return $.jGrowl('You have to enter something to add a new tag!');
+
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php',
+		data: {
+			'task': 'createTag',
+			'tag': tagName
+		},
+		dataType: 'json',
+		success: function (json) {
+			$.jGrowl(json.text);
+			if(json.status == 'success')
+				$('#tags').tokenInput('add', {id: json.tag_id, name: json.tag});
+		}
+	})
 }
 
 $(function() {

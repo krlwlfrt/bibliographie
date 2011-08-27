@@ -98,12 +98,50 @@ switch($_GET['task']){
 	break;
 
 	case 'showList':
+		$initialsResult = mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
+		$miscResult = mysql_num_rows(mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
+
+		$whereClause = "";
+		if(empty($_GET['initial'])){
+			$_GET['initial'] = 'A';
+			$whereClause = " WHERE SUBSTRING(`surname`, 1, 1) = 'A'";
+		}
+
+		if(mysql_num_rows($initialsResult) or $miscResult){
+?>
+
+<p class="bibliographie_pages">
+	<strong>Initials: </strong>
+<?php
+			while($initial = mysql_fetch_object($initialsResult)){
+				if($_GET['initial'] != $initial->initial)
+					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&initial='.$initial->initial.'" title="'.$initial->count.' persons">['.$initial->initial.']</a>'.PHP_EOL;
+				else{
+					echo '<strong>['.$initial->initial.']</strong>'.PHP_EOL;
+					$whereClause = " WHERE SUBSTRING(`surname`, 1, 1) = '".mysql_real_escape_string(stripslashes($initial->initial))."'";
+				}
+			}
+
+			if($miscResult){
+				if($_GET['initial'] != 'Misc')
+					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&initial=Misc" title="'.$miscResult.' persons">Misc</a>'.PHP_EOL;
+				else{
+					echo '<strong>Misc</strong>'.PHP_EOL;
+					$whereClause = " WHERE UPPER(SUBSTRING(`surname`, 1, 1)) NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'";
+				}
+			}
+?>
+
+</p>
+<?php
+		}
 ?>
 
 <h3>List of authors</h3>
 <?php
-		$authors = mysql_query("SELECT * FROM `a2author` ORDER BY `surname`, `firstname`");
-		if(mysql_num_rows($authors) > 0){
+		$authorsResult = mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
+
+		if(mysql_num_rows($authorsResult) > 0){
 ?>
 
 <table class="dataContainer">
@@ -112,7 +150,7 @@ switch($_GET['task']){
 		<th>Firstname</th>
 	</tr>
 <?php
-			while($author = mysql_fetch_object($authors)){
+			while($author = mysql_fetch_object($authorsResult)){
 				$name = bibliographie_authors_parse_data($author, array('splitNames'=>true));
 ?>
 
@@ -122,7 +160,15 @@ switch($_GET['task']){
 	</tr>
 <?php
 			}
-			echo '</table>';
+?>
+
+</table>
+<script type="text/javascript">
+	/* <![CDATA[ */
+$('.dataContainer').floatingTableHead();
+	/* ]]> */
+</script>
+<?php
 		}
 	break;
 }
