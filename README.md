@@ -65,3 +65,6 @@ CREATE TABLE `lockedtables` (
 COLLATE='utf8_general_ci'
 ENGINE=MyISAM
 ```
+
+## Adjust 3rd party libraries ##
+From file `resources/javascript/jquery.tokeninput.js` remove all lines where it says `cache.add(SOMETHING)`. This is already done in the file that is distributed with bibliographie.

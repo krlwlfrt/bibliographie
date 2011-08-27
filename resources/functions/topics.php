@@ -6,7 +6,7 @@
  * @param int $depth Used internally.
  * @param int $walkedBy Used internally to mark yet traversed topics.
  */
-function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = array()) {
+function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = array(), $usage = 'print') {
 	global $bibliographie_topics_graph_depth;
 
 	if($depth > $bibliographie_topics_graph_depth)
@@ -22,14 +22,17 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
 			else
 				$walkedBy[$topic->topic_id]++;
 
-			$topic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&topic_id='.$topic->topic_id.'">'.$topic->name.'</a>';
+			if($usage == 'print')
+				$topic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&topic_id='.$topic->topic_id.'">'.$topic->name.'</a>';
+			else
+				$topic->name = '<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''.$topic->topic_id.'\',name:\''.$topic->name.'\'})"><span class="silk-icon silk-icon-add"></span></a> '.$topic->name;
 
 			echo '<li>';
 			if($topic->amount_of_subtopics > 0){
 				echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'" class="topic" onclick="bibliographie_topics_toggle_visibility_of_subtopics('.((int) $topic->topic_id).', '.$walkedBy[$topic->topic_id].')">';
 				echo '<span class="silk-icon silk-icon-bullet-toggle-plus"> </span></a> '.$topic->name;
 				echo '<div id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics" class="topic_subtopics" style="display: none">';
-				bibliographie_topics_traverse($topic->topic_id, ($depth + 1), $walkedBy);
+				bibliographie_topics_traverse($topic->topic_id, ($depth + 1), $walkedBy, $usage);
 				echo '</div>';
 			}else
 				echo '<span class="silk-icon-equivalent"> </span> '.$topic->name;
@@ -258,6 +261,15 @@ ORDER BY
 		}
 
 		return $publicationsArray;
+	}
+
+	return false;
+}
+
+function bibliographie_topics_topic_by_id ($topic_id) {
+	$data = bibliographie_topics_get_topic_data($topic_id);
+	if($data){
+		return $data->name;
 	}
 
 	return false;

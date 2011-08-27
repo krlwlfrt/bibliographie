@@ -31,6 +31,9 @@ $('#jQueryLoading').hide('slow');
 
 $.jGrowl.defaults.position = 'bottom-right';
 $.jGrowl.defaults.life = 10000;
+jQuery.ajaxSetup({
+	cache: false
+});
 	/* ]]> */
 		</script>
 	</body>

@@ -16,6 +16,8 @@ switch($_GET['task']){
 		$prePopulateAuthor = array();
 		$prePopulateEditor = array();
 		$prePopulateTags = array();
+		$prePopulateTopics = array();
+		$assignedTopics = array();
 
 		/**
 		 * If requested parse existing publication and prefill the form with that.
@@ -36,6 +38,10 @@ switch($_GET['task']){
 				$tags = bibliographie_publications_get_tags($_GET['pub_id']);
 				if(is_array($tags) and count($tags) > 0)
 					$_POST['tags'] = implode(',', $tags);
+
+				$topics = bibliographie_publications_get_topics($_GET['pub_id']);
+				if(is_array($topics) and count($topics) > 0)
+					$_POST['topics'] = implode(',', $topics);
 			}
 		}
 
@@ -80,10 +86,39 @@ switch($_GET['task']){
 					);
 			}
 		}
+
+		/**
+		 * Fill the prePropulateTopics array.
+		 */
+		if(!empty($_POST['topics'])){
+			if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
+				$topics = explode(',', $_POST['topics']);
+				foreach($topics as $topic){
+					$prePopulateTopics[] = array (
+						'id' => $topic,
+						'name' => bibliographie_topics_topic_by_id($topic)
+					);
+					$assignedTopics[] = (int) $topic;
+				}
+			}
+		}
 ?>
 
 <h3>Publication editor</h3>
+<?php
+		if(is_array($publication)){
+?>
+
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>" method="post">
+<?php
+		}else{
+?>
+
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor" method="post">
+<?php
+		}
+?>
+
 	<div class="unit"><h4>General data</h4>
 		<label for="pub_type" class="block">Publication type</label>
 		<select id="pub_type" name="pub_type" style="width: 100%">
@@ -101,11 +136,11 @@ switch($_GET['task']){
 		<p id="authorOrEditorNotice" class="notice" style="display: none;"><span class="silk-icon silk-icon-asterisk-yellow"></span> Either you have to fill an author or an editor!</p>
 
 		<label for="author" class="block">Author(s)</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('author')">Add new author</a></em>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('author')"><span class="silk-icon silk-icon-user-add"></span> Add new author</a></em>
 		<input type="text" id="author" name="author" style="width: 100%" value="<?php echo htmlspecialchars($_POST['author'])?>" />
 
 		<label for="editor" class="block">Editor(s)</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('editor')">Add new editor</a></em>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('editor')"><span class="silk-icon silk-icon-user-add"></span> Add new editor</a></em>
 		<input type="text" id="editor" name="editor" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editor'])?>" />
 
 		<label for="title" class="block">Title</label>
@@ -226,8 +261,16 @@ switch($_GET['task']){
 		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
 
 		<label for="tags" class="block">Tags</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()">Add new tag</a></em>
+		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a></em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
+	</div>
+
+	<div class="unit"><h4>Topics</h4>
+		<label for="topics" class="block">Topics</label>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<!--<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_topic()"><span class="silk-icon silk-icon-folder-add"></span> Add new topic</a></em>-->
+		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
+		<br style="clear: both" />
 	</div>
 
 	<div class="submit"><input type="submit" value="save" /></div>
@@ -235,6 +278,8 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
+var assignedTopics = <?php echo json_encode($assignedTopics)?>;
+
 function bibliographie_publications_show_fields (select) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
@@ -344,19 +389,44 @@ function bibliographie_publications_create_tag () {
 	})
 }
 
+function bibliographie_publications_show_subgraph (topic) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php',
+		data: {
+			'task': 'getSubgraph',
+			'topic_id': topic
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#selectFromTopicSubgraph').dialog({
+				width: 400,
+				modal: true,
+				buttons: {
+					'Ok': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	});
+}
+
 $(function() {
 	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
 		minChars: 3,
 		preventDuplicates: true,
-		prePopulate: <?php echo json_encode($prePopulateAuthor)."\n"?>
+		prePopulate: <?php echo json_encode($prePopulateAuthor).PHP_EOL?>
 	});
 
 	$('#editor').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
 		minChars: 3,
 		preventDuplicates: true,
-		prePopulate: <?php echo json_encode($prePopulateEditor)."\n"?>
+		prePopulate: <?php echo json_encode($prePopulateEditor).PHP_EOL?>
 	});
 
 	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
@@ -364,7 +434,44 @@ $(function() {
 		minChars: 3,
 		preventDuplicates: true,
 		theme: 'facebook',
-		prePopulate: <?php echo json_encode($prePopulateTags)."\n"?>
+		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>
+	});
+
+	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopicJSON', {
+		searchDelay: 500,
+		minChars: 3,
+		preventDuplicates: true,
+		theme: 'facebook',
+		prePopulate: <?php echo json_encode($prePopulateTopics)?>,
+		noResultsText: 'Results are in the container to the right!',
+		onResult: function (results) {
+			$('#topicsContainer').html('<div style="margin-bottom: 10px;"><strong>Topics search result</strong></div>');
+			if(results.length > 0){
+				$.each(results, function (key, value) {
+					var selected = false;
+					var topicsArray = $('#topics').tokenInput('get')
+
+					$.each(topicsArray, function (selectedKey, selectedValue) {
+						if(selectedValue.name == value.name)
+							selected = true;
+					});
+
+					if(selected){
+						$('#topicsContainer').append('<div><span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>')
+					}else{
+						$('#topicsContainer')
+							.append('<div>')
+							.append('<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''+value.id+'\',name:\''+value.name+'\'})" style="float: right;"><span class="silk-icon silk-icon-add"></span> add</a>')
+							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
+							.append('<em>'+value.name+'</em>')
+							.append('</div>');
+					}
+				});
+			}else
+				$('#topicsContainer').append('No results for search!');
+
+			return Array();
+		}
 	});
 
 	$('#pub_type').change(function(event) {

@@ -455,3 +455,18 @@ function bibliographie_publications_get_tags ($publication_id) {
 
 	return false;
 }
+
+function bibliographie_publications_get_topics ($publication_id) {
+	$topics = mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $publication_id));
+
+	if(mysql_num_rows($topics)){
+		$return = array();
+
+		while($topic = mysql_fetch_object($topics))
+			$return[] = $topic->topic_id;
+
+		return $return;
+	}
+
+	return false;
+}
