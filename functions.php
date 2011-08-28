@@ -19,7 +19,7 @@ if(!isset($_SERVER['PHP_AUTH_USER'])){
 if($_GET['ignoreCache'] == 1)
 	define('BIBLIOGRAPHIE_CACHING', false);
 
-if($_GET['dropCache'] == 1)
+if($_GET['purgeCache'] == 1)
 	foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache') as $file)
 		if($file != '.' and $file != '..')
 			unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
