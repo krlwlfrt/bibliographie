@@ -8,8 +8,13 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 switch($_GET['task']){
 	case 'simpleSearch':
 		if($_GET['category'] == 'topics'){
+			/**
+			 * Here we try to add plurals and singulars.
+			 */
+			$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 2);
+
 			if(mb_strlen($_GET['q']) >= 3){
-				$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['q']))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+				$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 				if(mysql_num_rows($searchResults) > 0){
 					$i = (int) 0;
@@ -27,17 +32,20 @@ switch($_GET['task']){
 					}
 
 					echo '<div>Showing '.$i.' results of a total of '.mysql_num_rows($searchResults).' found topics for query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>'.$text;
-				}elseif($_GET['quiet'] != 1)
+				}else
 					echo '<div>There were no results for your search with query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>';
-			}elseif($_GET['quiet'] != 1)
+			}else
 				echo '<p class="error">Search query was too short!</p>';
 		}
 
 		if($_GET['category'] == 'authors'){
-			if(mb_strlen($_GET['q']) >= 3){
-				$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `von`, `surname`, `jr`, `firstname`, `url`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['q']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			/**
+			 * For names we just remove and add suffixes.
+			 */
+			$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 1);
 
-				echo mysql_error();
+			if(mb_strlen($_GET['q']) >= 3){
+				$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `von`, `surname`, `jr`, `firstname`, `url`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 				if(mysql_num_rows($searchResults) > 0){
 					$i = (int) 0;
@@ -55,26 +63,11 @@ switch($_GET['task']){
 						$i++;
 					}
 
-					echo 'Showing '.$i.' results of a total of '.mysql_num_rows($searchResults).' found authors for query '.htmlspecialchars($_GET['q']).'.'.$text;
-				}elseif($_GET['quiet'] != 1)
+					echo 'Showing '.$i.' results of a total of '.mysql_num_rows($searchResults).' found authors for query <strong>'.htmlspecialchars($_GET['q']).'</strong>.'.$text;
+				}else
 					echo '<div>There were no results for your search with query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>';
-			}elseif($_GET['quiet'] != 1)
+			}else
 				echo '<p class="error">Search query was too short!</p>';
-		}
-
-		$newQueries = bibliographie_search_generate_alternate_queries($_GET['q']);
-
-		if(count($newQueries) > 0 and $_GET['quiet'] != 1 and in_array($_GET['category'], array('topics', 'authors', 'publications', 'tags'))){
-	?>
-
-<script type="text/javascript">
-	/* <![CDATA[ */
-<?php
-			foreach($newQueries as $newQuery)
-				echo 'bibliographie_search_simple(\''.htmlspecialchars($_GET['category']).'\', \''.$newQuery.'\');'.PHP_EOL;
-	/* ]]> */
-</script>
-<?php
 		}
 	break;
 }

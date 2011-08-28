@@ -83,7 +83,15 @@ CREATE TABLE `lockedtables` (
 	`topic_id` INT(10) UNSIGNED NOT NULL
 )
 COLLATE='utf8_general_ci'
-ENGINE=MyISAM
+ENGINE=MyISAM;
+```
+
+This is a new table used to expand search queries with singulars and plurals of entered words.
+```sql
+CREATE TABLE `singulars_and_plurals` (
+	`singular` TINYTEXT NOT NULL COLLATE 'utf8_general_ci',
+	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
+) COLLATE='utf8_general_ci' ENGINE=MyISAM;
 ```
 
 ## 3rd party libraries ##
