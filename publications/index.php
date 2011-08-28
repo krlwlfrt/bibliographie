@@ -434,7 +434,7 @@ function bibliographie_publications_show_subgraph (topic) {
 		success: function (html) {
 			$('#dialogContainer').append(html);
 			$('#selectFromTopicSubgraph').dialog({
-				width: 400,
+				width: 600,
 				modal: true,
 				buttons: {
 					'Ok': function () {
@@ -519,7 +519,10 @@ $(function() {
 					});
 
 					if(selected){
-						$('#topicsContainer').append('<div><span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>')
+						$('#topicsContainer')
+							.append('<div>')
+							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
+							.append('<span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>');
 					}else{
 						$('#topicsContainer')
 							.append('<div>')

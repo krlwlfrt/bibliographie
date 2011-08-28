@@ -12,35 +12,39 @@ switch($_GET['task']){
 			$expandedeQuery = (string) '';
 
 			$searchTimer = microtime(true);
+			$options = array('suffixes' => true, 'plurals' => true, 'umlauts' => true, 'repeat' => 3);
 			switch($_GET['category']){
 				case 'topics':
-					$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 2);
+					$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
 					$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 				break;
 
 				case 'authors':
-					$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 1);
-					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `von`, `surname`, `jr`, `firstname`, `url`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+					$options['plurals'] = false;
+					$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
+					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 				break;
 
 				case 'publications':
-					$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 2);
+					$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
 					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, (MATCH(`title`, `abstract`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 				break;
 
 				case 'tags':
-					$expandedQuery = $_GET['q'].bibliographie_search_expand_query($_GET['q'], 2);
+					$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
 					$searchResults = mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 				break;
 			}
-			echo '<em style="float: right;">'.round(microtime(true) - $searchTimer, 5).'s</em>';
+			echo '<em style="float: right; font-size: 0.8em;">query took '.round(microtime(true) - $searchTimer, 5).'s, '.count(explode(' ', $expandedQuery)).' words</em>';
 
 			if(mysql_num_rows($searchResults) > 0){
 				$i = (int) 0;
-				$limit = ceil(log(mysql_num_rows($searchResults), 2) + 1) * 2;
+				$limit = -1;
+				if($_GET['limit'] == 1)
+					$limit = ceil(log(mysql_num_rows($searchResults), 2) + 1) * 2;
 				$text = (string) '';
 
-				while($row = mysql_fetch_object($searchResults) and $i < $limit){
+				while($row = mysql_fetch_object($searchResults) and ($i < $limit or $limit == -1)){
 					switch($_GET['category']){
 						case 'topics':
 							$text .= '<div class="searchResult">';
@@ -54,11 +58,7 @@ switch($_GET['task']){
 
 						case 'authors':
 							$text .= '<div class="searchResult">';
-							if(!empty($row->url))
-								$text .= '<em style="float: right">'.htmlspecialchars($row->url).'</em>';
 							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.$row->author_id.'" style="display: block">'.bibliographie_authors_parse_data($row->author_id).'</a>';
-							if(!empty($row->email))
-								$text .= '<em>'.htmlspecialchars($row->email).'</em>';
 							$text .= '</div>';
 						break;
 
@@ -80,8 +80,11 @@ switch($_GET['task']){
 				echo '<div>Showing ';
 				echo '<strong>'.$i.' result</strong>(s) of ';
 				echo '<strong>'.mysql_num_rows($searchResults).' found '.htmlspecialchars($_GET['category']).'</strong> for query ';
-				echo '<strong>'.htmlspecialchars($_GET['q']).'</strong>.';
-				echo '</div>'.PHP_EOL.$text;
+				echo '<strong>'.htmlspecialchars($_GET['q']).'</strong>. ';
+				if($limit != -1 and $i < mysql_num_rows($searchResults))
+					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category='.htmlspecialchars($_GET['category']).'&amp;q='.htmlspecialchars($_GET['q']).'">Show all results!</a>';
+				echo '</div>';
+				echo PHP_EOL.$text;
 
 			}else
 				echo '<div>There were no results for your search with query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>';
