@@ -16,39 +16,29 @@ switch($_GET['task']){
 ?>
 
 <h3>Topics</h3>
-<div id="simpleSearch_topics"></div>
+<div id="simpleSearch_topics"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <h3>Authors</h3>
-<div id="simpleSearch_authors"></div>
+<div id="simpleSearch_authors"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <h3>Publications</h3>
-<div id="simpleSearch_publications"></div>
+<div id="simpleSearch_publications"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <h3>Tags</h3>
-<div id="simpleSearch_tags"></div>
+<div id="simpleSearch_tags"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-function bibliographie_search_simple (category, q) {
-	if(category == null)
-		return;
-
-	var quiet = 1;
-	if(q == null){
-		q = '<?php echo htmlspecialchars($_GET['q'])?>';
-		quiet = 0;
-	}
-
+function bibliographie_search_simple (category) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/ajax.php',
 		data: {
 			'task': 'simpleSearch',
 			'category': category,
-			'q': q,
-			'quiet': quiet
+			'q': '<?php echo htmlspecialchars($_GET['q'])?>'
 		},
 		success: function (html) {
-			$('#simpleSearch_'+category).append(html);
+			$('#simpleSearch_'+category).html(html);
 		}
 	})
 }
@@ -56,10 +46,13 @@ function bibliographie_search_simple (category, q) {
 $(function () {
 	bibliographie_search_simple('topics');
 	bibliographie_search_simple('authors');
+	bibliographie_search_simple('publications');
+	bibliographie_search_simple('tags');
 });
 	/* ]]> */
 </script>
 <?php
+			bibliographie_bookmarks_print_javascript();
 		}else
 			echo '<p class="error">Please enter at least 3 chars.';
 	break;

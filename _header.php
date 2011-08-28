@@ -19,14 +19,14 @@
 
 
 	<body id="top">
-		<div id="jQueryLoading"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" width="16" height="11" />&nbsp;Actions pending <span id="jQueryLoadingAmount"></span></div>
-		
+		<div id="jQueryLoading" style="display: none;"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" width="16" height="11" />&nbsp;Actions pending <span id="jQueryLoadingAmount"></span></div>
+
 		<div id="wrapper">
 			<div id="header">
 				<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/" method="get" id="search">
 					<div>
 						<input type="hidden" id="task" name="task" value="simpleSearch" />
-						<input type="text" id="q" name="q" style="width: 80%" />
+						<input type="text" id="q" name="q" style="width: 80%" value="<?php echo htmlspecialchars($_GET['q'])?>" />
 						<button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button>
 					</div>
 				</form>

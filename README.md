@@ -15,6 +15,8 @@ define('BIBLIOGRAPHIE_MYSQL_DATABASE', 'database');
 
 define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
 
+define('BIBLIOGRAPHIE_SEARCH_MIN_CHARS', 4);
+
 define('BIBLIOGRAPHIE_CACHING', true);
 ```
 
@@ -55,13 +57,23 @@ ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
 ### Alter topic table ###
 
 ```sql
-ALTER TABLE `a2topics`  ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
+ALTER TABLE `a2topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
 ```
 
 ### Alter author table ###
 
 ```sql
-ALTER TABLE `a2author`  ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
+ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
+```
+
+### Alter tag table ###
+```sql
+ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);
+```
+
+### Alter publication table ###
+```sql
+ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`);
 ```
 
 ## Add new tables ##
