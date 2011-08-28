@@ -61,7 +61,7 @@ ALTER TABLE `a2topics`  ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
 ### Alter author table ###
 
 ```sql
-ALTER TABLE `a2author`  ADD FULLTEXT INDEX `fulltext` (`von`, `surname`, `jr`, `firstname`);
+ALTER TABLE `a2author`  ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
 ```
 
 ## Add new tables ##
