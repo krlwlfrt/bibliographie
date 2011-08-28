@@ -35,7 +35,7 @@ switch($_GET['task']){
 
 		if($_GET['category'] == 'authors'){
 			if(mb_strlen($_GET['q']) >= 3){
-				$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `von`, `surname`, `jr`, `firstname`, `url`, (MATCH(`von`, `surname`, `jr`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['q']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+				$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `von`, `surname`, `jr`, `firstname`, `url`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['q']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 				echo mysql_error();
 
