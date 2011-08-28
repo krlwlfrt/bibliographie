@@ -21,7 +21,14 @@
 	<body id="top">
 		<div id="wrapper">
 			<div id="header">
-				<form action="" method="" id="search"><div><input type="text" id="q" name="q" style="width: 80%" /><button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button></div></form>
+				<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/" method="get" id="search">
+					<div>
+						<input type="hidden" id="task" name="task" value="simpleSearch" />
+						<input type="text" id="q" name="q" style="width: 80%" />
+						<button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button>
+					</div>
+				</form>
+
 				<h1>bibliographie</h1>
 			</div>
 

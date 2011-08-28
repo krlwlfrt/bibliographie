@@ -300,6 +300,14 @@
 		vertical-align: middle;
 		width: 200px;
 	}
+
+	.searchResult {
+		background: #eee;
+		border: 1px solid #aaa;
+		color: #000;
+		margin: 5px 0;
+		padding: 5px;
+	}
 }
 
 @media print {

@@ -52,6 +52,18 @@ ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE 
 ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
 ```
 
+### Alter topic table ###
+
+```sql
+ALTER TABLE `a2topics`  ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
+```
+
+### Alter author table ###
+
+```sql
+ALTER TABLE `a2author`  ADD FULLTEXT INDEX `fulltext` (`von`, `surname`, `jr`, `firstname`);
+```
+
 ## Add new tables ##
 This is a new table that we need to cross reference with the file log.
 

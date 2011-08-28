@@ -261,5 +261,6 @@ require dirname(__FILE__).'/resources/functions/authors.php';
 require dirname(__FILE__).'/resources/functions/bookmarks.php';
 require dirname(__FILE__).'/resources/functions/maintenance.php';
 require dirname(__FILE__).'/resources/functions/publications.php';
+require dirname(__FILE__).'/resources/functions/search.php';
 require dirname(__FILE__).'/resources/functions/tags.php';
 require dirname(__FILE__).'/resources/functions/topics.php';
