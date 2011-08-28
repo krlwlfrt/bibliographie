@@ -627,6 +627,8 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	if($return)
 		bibliographie_log('publications', 'createPublication', $data);
 
+	bibliographie_purge_cache('publications');
+
 	return $return;
 }
 
@@ -762,6 +764,7 @@ LIMIT 1");
 		bibliographie_log('publications', 'editPublication', $data);
 
 	bibliographie_purge_cache('publication_'.((int) $pub_id));
+	bibliographie_purge_cache('publications');
 
 	return $return;
 }

@@ -20,7 +20,10 @@
 
 	<body id="top">
 		<div id="wrapper">
-			<div id="header"><h1>bibliographie</h1></div>
+			<div id="header">
+				<form action="" method="" id="search"><div><input type="text" id="q" name="q" style="width: 80%" /><button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button></div></form>
+				<h1>bibliographie</h1>
+			</div>
 
 			<div id="menu">
 				<h3>Topics</h3>
@@ -34,8 +37,9 @@
 				<h3>Publications</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
 
-				<h3>Bookmarks</h3>
+				<h3>Bookmarks & Tags</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('tag-blue')?> Show bookmarks</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/tags/?task=showCloud"><?php echo bibliographie_icon_get('tag-blue')?> Show tags</a>
 
 				<h3>Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=ToDo"><?php echo bibliographie_icon_get('page-white-text')?> ToDo</a>

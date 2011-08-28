@@ -16,7 +16,7 @@ function bibliographie_bookmarks_get_bookmarks () {
 		bookmarks.`user_id` = ".((int) bibliographie_user_get_id()."
 	ORDER BY
 		publications.`year` DESC"));
-	
+
 	if(mysql_num_rows($bookmarksResult) > 0)
 		while($bookmark = mysql_fetch_object($bookmarksResult))
 			$bookmarks[] = $bookmark->pub_id;
@@ -158,8 +158,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $list) {
 			$return = mysql_affected_rows();
 		}
 
-		if($return > 0)
-			bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
+		bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
 
 		return $return;
 	}

@@ -19,6 +19,11 @@ if(!isset($_SERVER['PHP_AUTH_USER'])){
 if($_GET['ignoreCache'] == 1)
 	define('BIBLIOGRAPHIE_CACHING', false);
 
+if($_GET['dropCache'] == 1)
+	foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache') as $file)
+		if($file != '.' and $file != '..')
+			unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
+
 if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
 	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
 
@@ -151,9 +156,10 @@ function bibliographie_print_errors ($errors) {
  */
 function bibliographie_purge_cache ($pattern) {
 	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
-		$files = glob(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$pattern.'*');
+		$files = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache');
 		foreach($files as $file)
-			unlink($file);
+			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file))
+				unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
 	}
 }
 

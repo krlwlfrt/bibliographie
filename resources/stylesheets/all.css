@@ -66,6 +66,26 @@
 		padding: 10px;
 	}
 
+	#search {
+		float: right;
+		width: 30%;
+	}
+
+	#q {
+		background: #efe;
+		border: 1px solid #aaa;
+		color: #000;
+		font-size: 16px;
+		margin-right: 5px;
+		padding: 5px;
+	}
+
+	#searchSubmit {
+		border: 1px solid #aaa;
+		font-size: 16px;
+		padding: 5px;
+	}
+
 	#menu {
 		float: left;
 		padding-left: 10px;
