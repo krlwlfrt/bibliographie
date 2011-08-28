@@ -39,9 +39,17 @@ DROP TABLE a2aigaiongeneral, a2availablerights, a2changehistory, a2config, a2gro
 ## Change existing tables ##
 To make the code consistent and more straight forward we want to rename the a2keywords to a2tags
 
+### Rename keywords to tags ##
+
 ```sql
-ALTER TABLE `a2keywords`  RENAME TO `a2tags`,  CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST,  CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
-ALTER TABLE `a2publicationkeywordlink`  RENAME TO `a2publicationtaglink`,  CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;
+ALTER TABLE `a2keywords` RENAME TO `a2tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
+ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;
+```
+
+### Alter publication table ###
+
+```sql
+ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
 ```
 
 ## Add new tables ##

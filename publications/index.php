@@ -183,7 +183,9 @@ switch($_GET['task']){
 		<input type="text" id="editor" name="editor" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editor'])?>" />
 
 		<label for="title" class="block">Title</label>
-		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" />
+		<input type="text" id="title" name="title" style="width: 80%" value="<?php echo htmlspecialchars($_POST['title'])?>" />
+		<div id="similarTitleContainer" style="background: #fff; border: 1px solid #aaa; color: #000; display: none; float: right; font-size: 0.8em; padding: 5px; width: 80%"></div>
+		<br style="clear: both;" />
 
 		<div style="float: right; width: 50%">
 			<label for="month" class="block">Month</label>
@@ -303,12 +305,21 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-function bibliographie_publications_show_fields (select) {
+<?php
+			echo 'var pub_id = ';
+			if(is_array($publication))
+				echo $publication['pub_id'];
+			else
+				echo 0;
+			echo ';';
+?>
+
+function bibliographie_publications_show_fields (selectedType) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
 		data: {
 			'task': 'getFields',
-			'type': select.value
+			'type': selectedType
 		},
 		dataType: 'json',
 		success: function (json) {
@@ -331,7 +342,7 @@ function bibliographie_publications_show_fields (select) {
 					}
 				});
 			}else
-				alert('Something bad happened!');
+				$.jGrowl('Something bad happened! Could not fetch the field specifications for the publication type.');
 		}
 	});
 }
@@ -438,6 +449,33 @@ function bibliographie_publications_show_subgraph (topic) {
 	});
 }
 
+function bibliographie_publications_check_title (title) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
+		data: {
+			'task': 'checkTitle',
+			'title': title,
+			'pub_id': pub_id
+		},
+		dataType: 'json',
+		success: function (json) {
+			if(json.results.length > 0){
+				$('#similarTitleContainer').html('<div style="margin-bottom: 10px;">Showing <strong>'+json.results.length+' most similar titles</strong> ('+json.count+' search results)</div>');
+				$.each(json.results, function (key, value) {
+					$('#similarTitleContainer')
+						.append('<div style="margin-top: 5px;">')
+						.append('<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showPublication&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-text"></a>')
+						.append(' <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-edit"></a>')
+						.append(' '+value.title+'</div>');
+				});
+				if($('#similarTitleContainer').is(':visible') == false)
+					$('#similarTitleContainer').show('slow');
+			}else
+				$('#similarTitleContainer').hide();
+		}
+	})
+}
+
 $(function() {
 	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
@@ -498,11 +536,18 @@ $(function() {
 		}
 	});
 
-	$('#pub_type').change(function(event) {
-		bibliographie_publications_show_fields(event.target);
+	$('#pub_type').mouseup(function (event) {
+		bibliographie_publications_show_fields(event.target.value);
+	}).keyup(function (event) {
+		bibliographie_publications_show_fields(event.target.value);
 	});
 
-	bibliographie_publications_show_fields(document.getElementById('pub_type'));
+	$('#title').keyup(function (event) {
+		delayRequest('bibliographie_publications_check_title', Array(event.target.value));
+	});
+
+	bibliographie_publications_show_fields($('#pub_type').val());
+	delayRequest('bibliographie_publications_check_title', Array($('#title').val()));
 });
 	/* ]]> */
 </script>
@@ -512,6 +557,7 @@ $(function() {
 
 	case 'showPublication':
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
+
 		if(is_object($publication)){
 ?>
 
