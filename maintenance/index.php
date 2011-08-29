@@ -13,32 +13,8 @@ switch($_GET['task']){
 ?>
 
 <h3>ToDo list</h3>
-<h4>Search</h4>
-<ul>
-	<li>Error tolerant search (Soundex via index field in mysql-rows)</li>
-	<li>Google-Search for "public" stuff</li>
-	<li>Two searches
-		<ul>
-			<li>Simple search</li>
-			<li>Complex search</li>
-		</ul>
-	</li>
-</ul>
-
 <h4>Create publications</h4>
 <ul>
-	<li>Mass-Import of BibTex?</li>
-	<li>Notice on similarity of titles</li>
-	<li>Order
-		<ul>
-			<li>Authors, exact matching</li>
-			<li>Title</li>
-			<li>Data</li>
-			<li>Topics</li>
-			<li>Tags</li>
-		</ul>
-	</li>
-	<li>Nur zutreffende Felder anzeigen.</li>
 	<li>Templating, just a wish!</li>
 </ul>
 
@@ -63,7 +39,7 @@ switch($_GET['task']){
 <h4>Maintenance</h4>
 <ul>
 	<li>Detect wrong coded authors by searching for entries which do not REGEXP against [:alpha:].</li>
-	<li>Drop a2publication.location... It's not part of bibtex.</li>
+	<li>Datenbank aus Log wiederherstellen...</li>
 </ul>
 <?php
 	break;
