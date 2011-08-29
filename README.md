@@ -8,15 +8,23 @@ The file should look something like that:
 
 ```php
 <?php
+// MySQL connection data
 define('BIBLIOGRAPHIE_MYSQL_HOST', 'host');
 define('BIBLIOGRAPHIE_MYSQL_USER', 'user');
 define('BIBLIOGRAPHIE_MYSQL_PASSWORD', 'password');
 define('BIBLIOGRAPHIE_MYSQL_DATABASE', 'database');
 
+// Root path of bibliographie without ending slash.
 define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
 
+// Minimum of chars needed to start a search. Should be the same as the minimum length of MySQL fulltext index length.
 define('BIBLIOGRAPHIE_SEARCH_MIN_CHARS', 4);
 
+// Configuration for the tag cloud.
+define('BIBLIOGRAPHIE_TAG_SIZE_FACTOR', 50);
+define('BIBLIOGRAPHIE_TAG_SIZE_MINIMUM', 10);
+
+// Wether to use caching or not. Highly recommended for large databases.
 define('BIBLIOGRAPHIE_CACHING', true);
 ```
 
