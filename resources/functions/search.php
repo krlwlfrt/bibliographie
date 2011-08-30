@@ -51,11 +51,21 @@ function bibliographie_search_get_plurals () {
 	$return = array();
 }
 
-function bibliographie_search_expand_query ($q, $options = array(), $iteration = 1) {
+function bibliographie_search_expand_query ($q, $_options = array(), $iteration = 1) {
 	global $bibliographie_search_queries_suffixes, $bibliographie_search_queries_umlaut_substitutes;
 
 	$expandedQuery = (string) '';
 	$words = explode(' ', $q);
+
+	$options = array(
+		'suffixes' => true,
+		'plurals' => true,
+		'umlauts' => true,
+		'repeat' => 3
+	);
+	foreach($options as $key => $value)
+		if(!empty($_options[$key]) and $value != $_options[$key])
+			$options[$key] = $_options[$key];
 
 	foreach($words as $word){
 		if($options['suffixes'])

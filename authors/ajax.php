@@ -52,14 +52,18 @@ switch($_GET['task']){
 	case 'searchAuthors':
 		$result = array();
 		if(mb_strlen($_GET['q']) >= 3){
-			$authors = mysql_query("SELECT * FROM `a2author` WHERE `firstname` LIKE '%".mysql_real_escape_string(stripslashes($_GET['q']))."%' OR `surname` LIKE '%".mysql_real_escape_string(stripslashes($_GET['q']))."%' ORDER BY `surname`, `firstname`");
-			if(mysql_num_rows($authors))
+			$options = array('suffixes' => true, 'plurals' => false, 'umlauts' => true, 'repeat' => 3);
+			$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
+			$authors = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+
+			if(mysql_num_rows($authors)){
 				while($author = mysql_fetch_object($authors)){
 					$result[] = array (
 						'id' => $author->author_id,
-						'name' => bibliographie_authors_parse_data($author)
+						'name' => bibliographie_authors_parse_data($author->author_id)
 					);
 				}
+			}
 		}
 
 		echo json_encode($result);

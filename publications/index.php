@@ -7,6 +7,198 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'checkData':
+		unset($_SESSION['publication_prefetchedData_checked']);
+?>
+
+<h3>Check fetched data</h3>
+<?php
+		if(is_array($_SESSION['publication_prefetchedData_unchecked'])){
+			$searchPersons = array();
+			foreach($_SESSION['publication_prefetchedData_unchecked'] as $outerID => $entry){
+?>
+
+<div id="checkData_entry_<?php echo $outerID?>" style="margin-top: 20px;">
+	<em style="float: right;"><?php echo $entry['pub_type']?></em>
+	<strong><?php echo $entry['title']?></strong>
+
+	<div id="checkData_entryResult_<?php echo $outerID?>"></div>
+	<div class="innerData">
+		<span style="float: right; text-align: right;">
+			<a href="javascript:;" onclick="bibliographie_check_data_approve_entry(<?php echo $outerID?>)"><?php echo bibliographie_icon_get('tick')?> Approve entry</a><br />
+			<a href="javascript:;" onclick="$('#checkData_entry_<?php echo $outerID?>').remove()"><?php echo bibliographie_icon_get('cross')?> Remove entry</a>
+		</span>
+<?php
+				$persons = false;
+				foreach(array('author', 'editor') as $role){
+					if(count($entry[$role]) > 0){
+						$persons = true;
+?>
+
+		<div style="margin-top: 10px;"><strong>Persons of role <?php echo $role?></strong></div>
+<?php
+						foreach($entry[$role] as $innerID => $person){
+							$searchPersons[$role][] = array (
+								'id' => $outerID.'_'.$innerID,
+								'outerID' => $outerID,
+								'innerID' => $innerID,
+								'name' => $person['first'].' '.$person['von'].' '.$person['last'].' '.$person['jr'],
+
+								'first' => $person['first'],
+								'von' => $person['von'],
+								'last' => $person['last'],
+								'jr' => $person['jr']
+							);
+?>
+
+		<div id="checkData_<?php echo $role.'_'.$outerID.'_'.$innerID?>" style="margin-top: 10px;">
+			<strong><?php echo $role?> #<?php echo ($innerID + 1)?></strong>: <?php echo $person['first'].' '.$person['von'].' <strong>'.$person['last'].'</strong> '.$person['jr']?>
+			<div id="checkData_<?php echo $role.'Result_'.$outerID.'_'.$innerID?>"><img src="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/resources/images/loading.gif" alt="pending" /></div>
+		</div>
+<?php
+						}
+					}
+				}
+
+				if(!$persons)
+					echo '<p class="error">No persons were found for this entry!</p>';
+?>
+
+	</div>
+</div>
+<?php
+			}
+?>
+
+<p>If you are finished pre checking your fetched data you can move to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1">creating them</a> as publications!</p>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+var persons = <?php echo json_encode($searchPersons)?>;
+/*
+function bibliographie_check_data_approve_entry (outerID) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'approveEntry',
+			'outerID': outerID
+		},
+		dataType: 'json',
+		success: function (json) {
+			$('#checkData_entryResult_'+outerID).html(json.text);
+			if(json.status == 'success')
+				$('#checkData_entry_'+outerID+' .innerData').remove();
+		}
+	});
+}
+
+function bibliographie_check_data_create_author (outerID, innerID, first, von, last, jr) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'createAuthor',
+			'outerID': outerID,
+			'innerID': innerID,
+			'first': first,
+			'von': von,
+			'last': last,
+			'jr': jr
+		},
+		success: function (html) {
+			$('#checkData_authorResult_'+outerID+'_'+innerID).html(html);
+		}
+	});
+}
+
+function bibliographie_check_data_approve_author (outerID, innerID) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'approveAuthor',
+			'outerID': outerID,
+			'innerID': innerID,
+			'authorID': $('#checkData_authorSelect_'+outerID+'_'+innerID).val()
+		},
+		success: function (html) {
+			$('#checkData_authorResult_'+outerID+'_'+innerID).html(html);
+		}
+	});
+}
+	*/
+
+$(function () {
+	$.each(persons, function (role, persons) {
+		$.each(persons, function (role, authors) {
+			$.ajax({
+				url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php',
+				data: {
+					'task': 'searchAuthors',
+					'q': author.name
+				},
+				dataType: 'json',
+				success: function (json) {
+					if(json.length > 0){
+						$('#checkData_authorResult_'+author.id)
+							.html('<select id="checkData_authorSelect_'+author.id+'" style="width: 45%;"></select>')
+							.append(' <a href="javascript:;" onclick="bibliographie_check_data_approve_author('+author.outerID+', '+author.innerID+')"><span class="silk-icon silk-icon-tick"></span> Approve author')
+							.append(' <a href="javascript:;" onclick="bibliographie_check_data_create_author('+author.outerID+', '+author.innerID+', \''+author.first+'\', \''+author.von+'\', \''+author.last+'\', \''+author.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create author');
+						$.each(json, function (key, authorResult) {
+							$('#checkData_authorSelect_'+author.id).append('<option value="'+authorResult.id+'">'+authorResult.name+'</option>');
+						});
+					}
+				}
+			});
+		});
+	});
+});
+	/* ]]> */
+</script>
+<?php
+//bibliographie_check_data_create_author('+author.outerID+', '+author.innerID+', '+author.data+')
+
+			break;
+		}else
+			echo '<p class="error">You did not fetch any data yet! You may want to do so now!</p>';
+
+	case 'fetchData':
+		unset($_SESSION['publication_prefetchedData_checked']);
+		unset($_SESSION['publication_prefetchedData_unchecked']);
+?>
+
+<h3>Fetch data for publication creation</h3>
+<div id="fetchData_container">
+	<strong>1. step</strong> Select source... <span class="silk-icon silk-icon-hourglass"></span><br />
+
+	<label for="source" class="block">Source</label>
+	<select id="source" name="source" style="width: 60%;">
+		<option value="">Please choose!</option>
+		<option value="bibtexInput">BibTex direct input</option>
+		<option value="bibtexRemote">BibTex remote file</option>
+	</select>
+
+	<button onclick="bibliographie_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
+</div>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+function bibliographie_fetch_data_proceed (data) {
+	$.ajax({
+		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=fetchData_proceed',
+		data: data,
+		type: 'POST',
+		success: function (html) {
+			$('#fetchData_container').html(html);
+		}
+	})
+}
+	/* ]]> */
+</script>
+<?php
+	break;
+
 	case 'publicationEditor':
 		$title = 'Publication editor';
 		$done = false;
@@ -44,9 +236,23 @@ switch($_GET['task']){
 					}else{
 						echo '<h3>Creating publication...</h3>';
 
-						$done = bibliographie_publications_create_publication($_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
-						if($done)
+						$data = bibliographie_publications_create_publication($_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
+
+						if(is_array($data)){
 							echo '<p class="success">Publication was created!</p>';
+							echo 'You can <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&amp;pub_id='.((int) $data['pub_id']).'">view the created publication</a> or you can proceed by <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor">creating another</a> publication.';
+
+							if($_GET['useFetchedData'] == '1'){
+								array_shift($_SESSION['publication_prefetchedData_checked']);
+								if(count($_SESSION['publication_prefetchedData_checked']) > 0)
+									echo '<br /><br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor&amp;useFetchedData=1">'.bibliographie_icon_get('page-white-go').' Proceed publication creation with fetched data.</a>';
+								else
+									echo '<br /><br /><em>'.bibliographie_icon_get('page-white-go').' Prefetched data queue is now empty!</em>';
+							}
+
+							$done = true;
+						}else
+							echo '<p class="error">Something went wrong. Publication could not be created!</p>';
 					}
 				}else
 					bibliographie_print_errors($errors);
@@ -65,24 +271,38 @@ switch($_GET['task']){
 			/**
 			 * If requested parse existing publication and prefill the form with that.
 			 */
-			if($_SERVER['REQUEST_METHOD'] == 'GET' and is_array($publication)){
-				$_POST = $publication;
+			$usingFetchedData = false;
+			if($_SERVER['REQUEST_METHOD'] == 'GET'){
+				if($_GET['useFetchedData'] == '1' and count($_SESSION['publication_prefetchedData_checked']) > 0){
+					$_POST = reset($_SESSION['publication_prefetchedData_checked']);
+					if(count($_POST['checkedAuthor']) == count($_POST['author'])){
+						if(is_array($_POST['checkedAuthor']))
+							$_POST['author'] = implode(',', $_POST['checkedAuthor']);
+						$usingFetchedData = true;
+					}else{
+						echo '<p class="error">There was an error with the prefetched authors!</p>';
+						$_POST = array();
+					}
 
-				$authors = bibliographie_publications_get_authors($_GET['pub_id']);
-				if(is_array($authors) and count($authors) > 0)
-					$_POST['author'] = implode(',', $authors);
+				}elseif(is_array($publication)){
+					$_POST = $publication;
 
-				$editors = bibliographie_publications_get_editors($_GET['pub_id']);
-				if(is_array($editors) and count($editors) > 0)
-					$_POST['editor'] = implode(',', $editors);
+					$authors = bibliographie_publications_get_authors($_GET['pub_id']);
+					if(is_array($authors) and count($authors) > 0)
+						$_POST['author'] = implode(',', $authors);
 
-				$tags = bibliographie_publications_get_tags($_GET['pub_id']);
-				if(is_array($tags) and count($tags) > 0)
-					$_POST['tags'] = implode(',', $tags);
+					$editors = bibliographie_publications_get_editors($_GET['pub_id']);
+					if(is_array($editors) and count($editors) > 0)
+						$_POST['editor'] = implode(',', $editors);
 
-				$topics = bibliographie_publications_get_topics($_GET['pub_id']);
-				if(is_array($topics) and count($topics) > 0)
-					$_POST['topics'] = implode(',', $topics);
+					$tags = bibliographie_publications_get_tags($_GET['pub_id']);
+					if(is_array($tags) and count($tags) > 0)
+						$_POST['tags'] = implode(',', $tags);
+
+					$topics = bibliographie_publications_get_topics($_GET['pub_id']);
+					if(is_array($topics) and count($topics) > 0)
+						$_POST['topics'] = implode(',', $topics);
+				}
 			}
 
 			/**
@@ -145,7 +365,20 @@ switch($_GET['task']){
 
 <h3>Publication editor</h3>
 <?php
-			if(is_array($publication)){
+			if(count($_SESSION['publication_prefetchedData_checked']) > 0 and $_GET['useFetchedData'] != '1'){
+?>
+
+<p class="notice"><?php echo bibliographie_icon_get('page-white-go')?> You have <?php echo count($_SESSION['publication_prefetchedData_checked'])?> entries in the fetched data queue. You might want to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1"> use the fetched data</a>.</p>
+<?php
+			}
+
+			if($usingFetchedData){
+?>
+
+<p class="notice"><?php echo bibliographie_icon_get('page-white-go')?> Using the first of <?php echo count($_SESSION['publication_prefetchedData_checked'])?> entries in the fetched data queue.</p>
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1" method="post">
+<?php
+			}elseif(is_array($publication)){
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>" method="post">
@@ -258,7 +491,7 @@ switch($_GET['task']){
 
 	<div class="unit collapsible"><h4>Pagination</h4>
 		<label for="pages" class="block">Pages</label>
-		<input type="text" id="pages" name="pages" style="width: 50%" value="<?php echo htmlspecialchars($_POST['pages'])?>" />
+		<input type="text" id="pages" name="pages" style="width: 50%" value="<?php echo htmlspecialchars(str_replace('--', '-', $_POST['pages']))?>" />
 	</div>
 
 

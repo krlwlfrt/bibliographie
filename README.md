@@ -21,8 +21,9 @@ define('BIBLIOGRAPHIE_WEB_ROOT', '/bibliographie');
 define('BIBLIOGRAPHIE_SEARCH_MIN_CHARS', 4);
 
 // Configuration for the tag cloud.
-define('BIBLIOGRAPHIE_TAG_SIZE_FACTOR', 50);
+define('BIBLIOGRAPHIE_TAG_SIZE_FACTOR', 100);
 define('BIBLIOGRAPHIE_TAG_SIZE_MINIMUM', 10);
+define('BIBLIOGRAPHIE_TAG_SIZE_FLATNESS', 40);
 
 // Wether to use caching or not. Highly recommended for large databases.
 define('BIBLIOGRAPHIE_CACHING', true);

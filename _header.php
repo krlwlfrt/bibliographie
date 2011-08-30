@@ -44,7 +44,7 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 		$(this).show();
 	jQueryLoading++;
 	$('#jQueryLoadingAmount').html('('+jQueryLoading+')');
-	$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
+	//$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
 }).bind('ajaxComplete', function(){
 	$('body').css('cursor', 'auto');
 	jQueryLoading--;
@@ -73,6 +73,7 @@ jQuery.ajaxSetup({
 
 				<h3>Publications</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Create publication</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-go')?> Create from source</a>
 
 				<h3>Bookmarks & Tags</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('tag-blue')?> Show bookmarks</a>

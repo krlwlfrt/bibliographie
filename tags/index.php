@@ -35,9 +35,6 @@ switch($_GET['task']){
 <?php
 		$tagsResult = mysql_query("SELECT occurrences.`tag_id`, `tag`, `count` FROM `a2tags` tags, (SELECT `tag_id`, COUNT(*) AS `count` FROM `a2publicationtaglink` GROUP BY `tag_id`) occurrences WHERE tags.`tag_id` = occurrences.`tag_id` ORDER BY `tag` ASC");
 
-		$average = mysql_num_rows(mysql_query("SELECT `tag_id` FROM `a2publicationtaglink`")) / mysql_num_rows(mysql_query("SELECT `tag_id` FROM `a2tags`"));
-		$tagsArray = array();
-
 		if(mysql_num_rows($tagsResult) > 0){
 ?>
 
@@ -45,14 +42,17 @@ switch($_GET['task']){
 <?php
 			while($tag = mysql_fetch_object($tagsResult)){
 				/**
-				 * Converges against BIBLIOGRAPHIE_TAG_SIZE_FACTOR * 4.
+				 * Converges against BIBLIOGRAPHIE_TAG_SIZE_FACTOR.
 				 */
-				$size = BIBLIOGRAPHIE_TAG_SIZE_FACTOR * $tag->count / ($tag->count / 4 + 20);
+				$size = BIBLIOGRAPHIE_TAG_SIZE_FACTOR * $tag->count / ($tag->count + BIBLIOGRAPHIE_TAG_SIZE_FLATNESS);
 				$size = ($size < BIBLIOGRAPHIE_TAG_SIZE_MINIMUM) ? BIBLIOGRAPHIE_TAG_SIZE_MINIMUM : $size;
+
+				//if($size > BIBLIOGRAPHIE_TAG_SIZE_MINIMUM){
 ?>
 
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&amp;tag_id=<?php echo $tag->tag_id?>" style="font-size: <?php echo $size.'px'?>; line-height: <?php echo $size.'px'?>;padding: 10px; text-transform: lowercase;" title="<?php echo $tag->count?> publications"><?php echo $tag->tag?></a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&amp;tag_id=<?php echo $tag->tag_id?>" style="font-size: <?php echo round($size, 2).'px'?>; line-height: <?php echo $size.'px'?>;padding: 10px; text-transform: lowercase;" title="<?php echo $tag->count?> publications"><?php echo $tag->tag?></a>
 <?php
+				//}
 			}
 ?>
 

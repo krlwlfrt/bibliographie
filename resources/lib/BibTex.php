@@ -42,7 +42,8 @@ class Structures_BibTex {
 			'ö' => '\"o',
 			'ü' => '\"u',
 			'ß' => '\ss',
-			'-' => '--'
+			'„' => '``',
+			'“' => '\'\''
 		);
 
 		$this->_delimiters = array(
@@ -67,7 +68,7 @@ class Structures_BibTex {
 			'wordWrapBreak' => "\n",
 			'wordWrapCut' => 0,
 			'removeCurlyBraces' => false,
-			'extractAuthors' => true,
+			'extractAuthors' => true
 		);
 
 		foreach ($options as $option => $value) {
@@ -126,18 +127,12 @@ class Structures_BibTex {
 	 * @param string $filename Name of the file
 	 * @return mixed true on success PEAR_Error on failure
 	 */
-	function loadFile($filename) {
-		if (file_exists($filename)) {
-			if (($this->content = @file_get_contents($filename)) === false) {
-				return false;
-			} else {
-				$this->_pos = 0;
-				$this->_oldpos = 0;
-				return true;
-			}
-		} else {
-			return false;
-		}
+	function loadContent ($content) {
+		$this->content = $content;
+		$this->_pos = 0;
+		$this->_oldpos = 0;
+
+		return true;
 	}
 
 	/**
@@ -341,6 +336,10 @@ class Structures_BibTex {
 			//Handling the authors
 			if (in_array('author', array_keys($ret)) && $this->_options['extractAuthors']) {
 				$ret['author'] = $this->_extractAuthors($ret['author']);
+			}
+
+			if (in_array('editor', array_keys($ret)) && $this->_options['extractAuthors']) {
+				$ret['editor'] = $this->_extractAuthors($ret['editor']);
 			}
 		}
 		return $ret;
@@ -874,6 +873,9 @@ class Structures_BibTex {
 					$val = $this->_wordWrap($val);
 				}
 				if (!in_array($key, array('cite', 'entryType', 'author'))) {
+					if($key != 'url')
+						$val = str_replace(array_keys($this->escapedChars), array_values($this->escapedChars), $val);
+
 					$bibtex .= "\t" . $key . ' = {' . $val . "},\n";
 				}
 			}

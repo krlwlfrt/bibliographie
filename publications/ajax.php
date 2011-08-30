@@ -6,6 +6,162 @@ define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 switch($_GET['task']){
+	case 'checkData':
+		if($_GET['subTask'] == 'approveAuthor'){
+			if(!is_array($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor']))
+				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'] = array();
+
+			$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'][$_GET['innerID']] = $_GET['authorID'];
+			echo bibliographie_icon_get('tick').' Author has been approved!';
+		}elseif($_GET['subTask'] == 'createAuthor'){
+			$data = bibliographie_authors_create_author($_GET['first'], $_GET['von'], $_GET['last'], $_GET['jr'], '', '', '');
+			if(is_array($data)){
+				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'][$_GET['innerID']] = $data['author_id'];
+				echo bibliographie_icon_get('tick').' Author has been created and approved!';
+			}else
+				echo '<p class="error">Author could not be created!</p>';
+		}elseif($_GET['subTask'] == 'approveEntry'){
+			if(count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['author'])){
+				$_SESSION['publication_prefetchedData_checked'][$_GET['outerID']] = $_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']];
+
+				echo json_encode(array(
+					'text' => bibliographie_icon_get('tick').' Parsed entry has been approved!',
+					'status' => 'success'
+				));
+			}else
+				echo json_encode(array(
+					'text' => bibliographie_icon_get('cross').' Sorry but you can not approve an entry if there are authors left that are not approved!',
+					'status' => 'error'
+				));
+		}
+	break;
+
+	case 'fetchData_proceed':
+		if($_POST['source'] == 'bibtexInput'){
+?>
+
+<strong>1. step</strong> Selected source <em>BibTex input</em>... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+			if($_POST['step'] == '1'){
+?>
+
+<strong>2. step</strong> Input BibTex string... <span class="silk-icon silk-icon-hourglass"></span>
+<label for="bibtexInput" class="block">BibTex input</label>
+<textarea id="bibtexInput" name="bibtexInput" rows="20" cols="20" style="width: 100%;"></textarea>
+<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse & proceed!</button>
+<?php
+			}elseif($_POST['step'] == '2'){
+				if(!empty($_POST['bibtexInput'])){
+?>
+
+<strong>2. step</strong> Input BibTex string... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+					$bibtex = new Structures_BibTex(array(
+						'stripDelimiter' => true,
+						'validate' => true,
+						'unwrap' => true,
+						'removeCurlyBraces' => true,
+						'extractAuthors' => true
+					));
+					$bibtex->loadContent($_POST['bibtexInput']);
+
+					if($bibtex->parse() and count($bibtex->data) > 0){
+?>
+
+<strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+						foreach($bibtex->data as $key => $row)
+							$bibtex->data[$key]['pub_type'] = $row['entryType'];
+
+						$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
+?>
+
+<p>
+	<span class="success">Parsing of your input was successful!</span>
+	Your input contained <strong><?php echo count($bibtex->data)?></strong> entry/entries.</strong><br />
+	You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.
+</p>
+<?php
+					}else{
+?>
+
+<strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-cross"></span>
+<p class="error">There was an error while parsing!</p>
+<?php
+					}
+				}else{
+?>
+
+<strong>2. step</strong> Input BibTex string... <span class="silk-icon silk-icon-cross"></span>
+<p class="error">Your input was empty!</p>
+<?php
+				}
+			}
+		}elseif($_POST['source'] == 'bibtexRemote'){
+			?>
+
+<strong>1. step</strong> Selected source <em>BibTex remote</em>... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+			if($_POST['step'] == '1'){
+?>
+
+<strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-hourglass"></span>
+<label for="bibtexRemote" class="block">BibTex input</label>
+<input id="bibtexRemote" name="bibtexRemote" style="width: 100%" />
+<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Parse & proceed!</button>
+<?php
+			}elseif($_POST['step'] == '2'){
+				if(!empty($_POST['bibtexRemote']) and is_url($_POST['bibtexRemote'])){
+?>
+
+<strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+					$bibtex = new Structures_BibTex(array(
+						'stripDelimiter' => true,
+						'validate' => true,
+						'unwrap' => true,
+						'removeCurlyBraces' => true,
+						'extractAuthors' => true
+					));
+					$bibtex->loadContent(file_get_contents($_POST['bibtexRemote']));
+
+					if($bibtex->parse() and count($bibtex->data) > 0){
+?>
+
+<strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+						foreach($bibtex->data as $key => $row)
+							$bibtex->data[$key]['pub_type'] = $row['entryType'];
+
+						$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
+?>
+
+<p>
+	<span class="success">Parsing of your input was successful!</span>
+	Your input contained <strong><?php echo count($bibtex->data)?></strong> entry/entries.</strong><br />
+	You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.
+</p>
+<?php
+					}else{
+?>
+
+<strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-cross"></span>
+<p class="error">There was an error while parsing!</p>
+<?php
+					}
+				}else{
+?>
+
+<strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-cross"></span>
+<p class="error">Your input was empty!</p>
+<?php
+				}
+			}
+		}
+
+		//echo '<pre>'.print_r($_POST, true).'</pre>';
+	break;
+
 	case 'checkTitle':
 		$result = array(
 			'count' => 0,
