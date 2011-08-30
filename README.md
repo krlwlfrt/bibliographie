@@ -25,6 +25,9 @@ define('BIBLIOGRAPHIE_TAG_SIZE_FACTOR', 100);
 define('BIBLIOGRAPHIE_TAG_SIZE_MINIMUM', 10);
 define('BIBLIOGRAPHIE_TAG_SIZE_FLATNESS', 40);
 
+// If you have a key for ISBNDB.com put it here.
+define('BIBLIOGRAPHIE_ISBNDB_KEY', '');
+
 // Wether to use caching or not. Highly recommended for large databases.
 define('BIBLIOGRAPHIE_CACHING', true);
 ```

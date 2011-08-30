@@ -504,7 +504,7 @@ function bibliographie_publications_get_topics ($publication_id) {
  * @param array $topics
  * @param array $tags
  */
-function bibliographie_publications_create_publication ($pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $isbn, $issn, $doi, $url, array $topics, array $tags, $user_id = null) {
+function bibliographie_publications_create_publication ($pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags, $user_id = null) {
 	if($user_id == null)
 		$user_id = bibliographie_user_get_id ();
 
@@ -532,6 +532,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	`note`,
 	`abstract`,
 	`userfields`,
+	`bibtex_id`,
 	`isbn`,
 	`issn`,
 	`doi`,
@@ -560,6 +561,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	'".mysql_real_escape_string(stripslashes($note))."',
 	'".mysql_real_escape_string(stripslashes($abstract))."',
 	'".mysql_real_escape_string(stripslashes($userfields))."',
+	'".mysql_real_escape_string(stripslashes($bibtex_id))."',
 	'".mysql_real_escape_string(stripslashes($isbn))."',
 	'".mysql_real_escape_string(stripslashes($issn))."',
 	'".mysql_real_escape_string(stripslashes($doi))."',
@@ -613,6 +615,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 		'note' => $note,
 		'abstract' => $abstract,
 		'userfields' => $userfields,
+		'bibtex_id' => $bibtex_id,
 		'isbn' => $isbn,
 		'issn' => $issn,
 		'doi' => $doi,
@@ -670,7 +673,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
  * @param array $tags
  * @return type
  */
-function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $isbn, $issn, $doi, $url, array $topics, array $tags) {
+function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags) {
 
 	mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
 	mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
@@ -699,6 +702,7 @@ function bibliographie_publications_edit_publication ($pub_id, $pub_type, array 
 	`note` = '".mysql_real_escape_string(stripslashes($note))."',
 	`abstract` = '".mysql_real_escape_string(stripslashes($abstract))."',
 	`userfields` = '".mysql_real_escape_string(stripslashes($userfields))."',
+	`bibtex_id` = '".mysql_real_escape_string(stripslashes($bibtex_id))."',
 	`isbn` = '".mysql_real_escape_string(stripslashes($isbn))."',
 	`issn` = '".mysql_real_escape_string(stripslashes($issn))."',
 	`doi` = '".mysql_real_escape_string(stripslashes($doi))."',
@@ -752,6 +756,7 @@ LIMIT 1");
 		'note' => $note,
 		'abstract' => $abstract,
 		'userfields' => $userfields,
+		'bibtex_id' => $bibtex_id,
 		'isbn' => $isbn,
 		'issn' => $issn,
 		'doi' => $doi,

@@ -71,8 +71,10 @@ switch($_GET['task']){
 
 <strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-tick"></span><br />
 <?php
-						foreach($bibtex->data as $key => $row)
+						foreach($bibtex->data as $key => $row){
 							$bibtex->data[$key]['pub_type'] = $row['entryType'];
+							$bibtex->data[$key]['bibtex_id'] = $row['cite'];
+						}
 
 						$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
 ?>
@@ -131,8 +133,10 @@ switch($_GET['task']){
 
 <strong>3. step</strong> Parsing BibTex... <span class="silk-icon silk-icon-tick"></span><br />
 <?php
-						foreach($bibtex->data as $key => $row)
+						foreach($bibtex->data as $key => $row){
 							$bibtex->data[$key]['pub_type'] = $row['entryType'];
+							$bibtex->data[$key]['bibtex_id'] = $row['cite'];
+						}
 
 						$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
 ?>
@@ -156,6 +160,65 @@ switch($_GET['task']){
 <strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-cross"></span>
 <p class="error">Your input was empty!</p>
 <?php
+				}
+			}
+		}elseif($_POST['source'] == 'isbndb'){
+			if($_POST['step'] == '1'){
+
+			}elseif($_POST['step'] == '2'){
+				/*
+				 * /api/books.xml?access_key=BIBLIOGRAPHIE_ISBNDB_KEY&results=authors&index1=isbn&value1=ISBN
+				 * /api/books.xml?access_key=BIBLIOGRAPHIE_ISBNDB_KEY&results=authors&index1=full&value1=TEXT
+				*/
+
+				$response = '';
+
+				$response = json_decode(json_encode(simplexml_load_string($response)), true);
+				if(!is_array($response['BookList']['BookData']))
+					echo 'Result was empty!';
+
+				/**
+				 * Map unique results to the structure of multiple results for convenience...
+				 */
+				if($response['BookList']['@attributes']['shown_results'] == '1'){
+					$dummy = $response['BookList']['BookData'];
+					$response['BookList']['BookData'] = null;
+					$response['BookList']['BookData'][] = $dummy;
+				}
+
+				echo '<pre style="font-size: 0.8em;">'.print_r($response, true).'</pre>';
+				$i = 0;
+				foreach($response['BookList']['BookData'] as $book){
+					$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['Title'];
+					if(is_string($book['TitleLong']))
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['TitleLong'];
+
+					$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn'];
+					if(!empty($book['@attributes']['isbn13']))
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn13'];
+
+					$_SESSION['publication_prefetchedData_unchecked'][$i]['publisher'] = $book['PublisherText'];
+
+					if(is_array($book['Authors']['Person'])){
+						foreach($book['Authors']['Person'] as $author){
+							$author = explode(',', $author);
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
+								'first' => $author[1],
+								'von' => '',
+								'last' => $author[0],
+								'jr' => ''
+							);
+						}
+					}else{
+						$author = explode(',', $book['Authors']['Person']);
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][0] = array (
+							'first' => $author[1],
+							'von' => '',
+							'last' => $author[0],
+							'jr' => ''
+						);
+					}
+					$i++;
 				}
 			}
 		}

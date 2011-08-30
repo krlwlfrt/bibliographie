@@ -176,6 +176,7 @@ $(function () {
 		<option value="">Please choose!</option>
 		<option value="bibtexInput">BibTex direct input</option>
 		<option value="bibtexRemote">BibTex remote file</option>
+		<option value="isbndb">ISBNDB.com</option>
 	</select>
 
 	<button onclick="bibliographie_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
@@ -206,6 +207,9 @@ function bibliographie_fetch_data_proceed (data) {
 		if(!empty($_GET['pub_id']))
 			$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
 
+		if($_GET['skipEntry'] == '1')
+			array_shift($_SESSION['publication_prefetchedData_checked']);
+
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
 
@@ -228,14 +232,14 @@ function bibliographie_fetch_data_proceed (data) {
 					if(is_array($publication)){
 						echo '<h3>Updating publication...</h3>';
 
-						$done = bibliographie_publications_edit_publication($publication['pub_id'], $_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
+						$done = bibliographie_publications_edit_publication($publication['pub_id'], $_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['bibtex_id'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
 
 						if($done)
 							echo '<p class="success">Publication has been edited!</p>';
 					}else{
 						echo '<h3>Creating publication...</h3>';
 
-						$data = bibliographie_publications_create_publication($_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
+						$data = bibliographie_publications_create_publication($_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['bibtex_id'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
 
 						if(is_array($data)){
 							echo '<p class="success">Publication has been created!</p>';
@@ -382,7 +386,7 @@ function bibliographie_fetch_data_proceed (data) {
 			if($usingFetchedData){
 ?>
 
-<p class="notice"><?php echo bibliographie_icon_get('page-white-go')?> Using the first of <?php echo count($_SESSION['publication_prefetchedData_checked'])?> entries in the fetched data queue.</p>
+<p class="notice"><?php echo bibliographie_icon_get('page-white-go')?> Using the first of <?php echo count($_SESSION['publication_prefetchedData_checked'])?> entries in the fetched data queue. <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1&amp;skipEntry=1">Skip this one.</a></a></p>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1" method="post">
 <?php
 			}elseif(is_array($publication)){
@@ -511,6 +515,9 @@ function bibliographie_fetch_data_proceed (data) {
 
 		<label for="userfields" class="block">User fields</label>
 		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
+
+		<label for="bibtex_id" class="block">bibtex_id</label>
+		<input id="bibtex_id" name="bibtex_id" style="width: 100%" value="<?php echo htmlspecialchars($_POST['bibtex_id'])?>" />
 	</div>
 
 
