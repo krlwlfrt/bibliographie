@@ -431,7 +431,7 @@ function bibliographie_publications_get_authors ($publication_id) {
 function bibliographie_publications_get_editors ($publication_id) {
 	$editors = mysql_query("SELECT * FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $publication_id)." AND `is_editor` = 'Y' ORDER BY `rank`");
 
-	if(mysql_num_rows($editors)){
+	if(mysql_num_rows($editors) > 0){
 		$return = array();
 		while($editor = mysql_fetch_object($editors))
 			$return[] = $editor->author_id;

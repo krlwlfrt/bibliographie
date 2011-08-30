@@ -105,7 +105,7 @@ class Structures_BibTex {
 			'unpublished'
 		);
 
-		$this->authorstring = 'VON LAST, JR, FIRST';
+		$this->authorstring = 'VON LAST, FIRST';
 	}
 
 	/**
@@ -878,14 +878,17 @@ class Structures_BibTex {
 				if ($this->_options['wordWrapWidth'] > 0) {
 					$val = $this->_wordWrap($val);
 				}
-				if (!in_array($key, array('cite', 'entryType', 'author'))) {
+				if (!in_array($key, array('cite', 'entryType', 'author', 'editor'))) {
 					if($key != 'url')
 						$val = str_replace(array_keys($this->escapedChars), array_values($this->escapedChars), $val);
+					if($key == 'pages')
+						$val = str_replace('-', '--', $val);
 
 					$bibtex .= "\t" . $key . ' = {' . $val . "},\n";
 				}
 			}
 			//Author
+			$author = '';
 			if (array_key_exists('author', $entry)) {
 				if ($this->_options['extractAuthors']) {
 					$tmparray = array(); //In this array the authors are saved and the joind with an and
@@ -896,11 +899,27 @@ class Structures_BibTex {
 				} else {
 					$author = $entry['author'];
 				}
-			} else {
-				$author = '';
 			}
-			$bibtex .= "\tauthor = {" . $author . "}\n";
-			$bibtex.="}\n\n";
+
+			$editor = '';
+			if (array_key_exists('editor', $entry)) {
+				if ($this->_options['extractAuthors']) {
+					$tmparray = array(); //In this array the authors are saved and the joind with an and
+					foreach ($entry['editor'] as $authorentry) {
+						$tmparray[] = $this->_formatAuthor($authorentry);
+					}
+					$editor = join(' and ', $tmparray);
+				} else {
+					$editor = $entry['editor'];
+				}
+			}
+
+			if(!empty($author))
+				$bibtex .= "\tauthor = {" . str_replace(array_keys($this->escapedChars), array_values($this->escapedChars), $author) . "}";
+
+			if(!empty($editor))
+				$bibtex .= ",\n\teditor = {" . str_replace(array_keys($this->escapedChars), array_values($this->escapedChars), $editor) . "}";
+			$bibtex.="\n}\n\n";
 		}
 		return $bibtex;
 	}

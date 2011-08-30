@@ -53,6 +53,14 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 		$author = mysql_fetch_object(mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $author)));
 
 	if(is_object($author)){
+		if($options['forBibTex'] == true)
+			return array (
+				'first' => $author->firstname,
+				'von' => $author->von,
+				'last' => $author->surname,
+				'jr' => $author->jr
+			);
+
 		$author->surname = '<strong>'.$author->surname.'</strong>';
 
 		if(!empty($author->von))
@@ -60,7 +68,6 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 
 		if(!empty($author->jr))
 			$author->surname = $author->surname.' '.$author->jr;
-
 
 		if($options['firstnameFirst'] == true)
 			return $author->firstname.' '.$author->surname;

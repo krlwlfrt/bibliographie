@@ -8,6 +8,14 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Bookmarks</h2>
 <?php
 switch($_GET['task']){
+	case 'exportBookmarks':
+?>
+
+<h3>Export bookmkars</h3>
+<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportToBibTex">BibTex</a>
+<?php
+	break;
+
 	case 'clearBookmarks':
 		bibliographie_bookmarks_clear_bookmarks();
 
@@ -15,7 +23,10 @@ switch($_GET['task']){
 		$title = 'List of my bookmarks';
 ?>
 
-<span style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear all bookmarks</a></span>
+<span style="float: right">
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=exportBookmarks">Export</a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear</a> all bookmarks
+</span>
 <h3>List of my bookmarks</h3>
 <?php
 		$publications = bibliographie_bookmarks_get_bookmarks();
