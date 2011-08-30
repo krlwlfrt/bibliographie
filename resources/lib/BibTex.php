@@ -43,7 +43,8 @@ class Structures_BibTex {
 			'ü' => '\"u',
 			'ß' => '\ss',
 			'„' => '``',
-			'“' => '\'\''
+			'“' => '\'\'',
+			'č' => '\vc'
 		);
 
 		$this->_delimiters = array(

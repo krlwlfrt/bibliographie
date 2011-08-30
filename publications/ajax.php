@@ -7,25 +7,26 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 switch($_GET['task']){
 	case 'checkData':
-		if($_GET['subTask'] == 'approveAuthor'){
-			if(!is_array($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor']))
-				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'] = array();
+		if($_GET['subTask'] == 'approvePerson'){
+			if(!is_array($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']]))
+				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']] = array();
 
-			$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'][$_GET['innerID']] = $_GET['authorID'];
-			echo bibliographie_icon_get('tick').' Author has been approved!';
-		}elseif($_GET['subTask'] == 'createAuthor'){
+			$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']][$_GET['innerID']] = $_GET['personID'];
+			echo bibliographie_icon_get('tick').' Person has been approved as '.$_GET['role'].'!';
+		}elseif($_GET['subTask'] == 'createPerson'){
 			$data = bibliographie_authors_create_author($_GET['first'], $_GET['von'], $_GET['last'], $_GET['jr'], '', '', '');
 			if(is_array($data)){
-				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor'][$_GET['innerID']] = $data['author_id'];
-				echo bibliographie_icon_get('tick').' Author has been created and approved!';
+				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']][$_GET['innerID']] = $data['author_id'];
+				echo bibliographie_icon_get('tick').' Person has been created and approved as '.$_GET['role'].'!';
 			}else
-				echo '<p class="error">Author could not be created!</p>';
+				echo '<p class="error">Person could not be created!</p>';
 		}elseif($_GET['subTask'] == 'approveEntry'){
-			if(count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checkedAuthor']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['author'])){
+			if(count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_author']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['author'])
+				and count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_editor']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['editor'])){
 				$_SESSION['publication_prefetchedData_checked'][$_GET['outerID']] = $_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']];
 
 				echo json_encode(array(
-					'text' => bibliographie_icon_get('tick').' Parsed entry has been approved!',
+					'text' => bibliographie_icon_get('tick').' Parsed entry has been approved and added to queue!',
 					'status' => 'success'
 				));
 			}else
