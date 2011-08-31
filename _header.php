@@ -55,6 +55,14 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 		$(this).hide('fade');
 });
 
+/**
+ * Enable expected behaviour by sending the placeholder content if no input was provided...
+ */
+$('#search').bind('submit', function (event) {
+	if($('#q').val() == '' && $('#q').attr('placeholder') != '')
+		$('#q').val($('#q').attr('placeholder'));
+});
+
 $.jGrowl.defaults.position = 'bottom-right';
 $.jGrowl.defaults.life = 10000;
 jQuery.ajaxSetup({
