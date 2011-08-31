@@ -1,9 +1,32 @@
 <?php
 $bibliographie_search_queries_suffixes = array (
 	's',
+	'es',
+	'ies',
+	'ed',
 	'en',
+	'ing',
+	'er',
+	'est',
+	'n\'t',
+	'ism',
+	'ist',
+	'ful',
+	'able',
+	'ation',
+	'ness',
+	'ment',
+	'ify',
+	'fy',
+	'ity',
+	'noun',
+	'ly',
+	'ise',
+	'ize',
+	's',
 	'n',
-	'er'
+	'er',
+	'ic'
 );
 
 $bibliographie_search_queries_umlaut_substitutes = array (
@@ -16,19 +39,20 @@ $bibliographie_search_queries_umlaut_substitutes = array (
 	'ß,sz',
 	'ß,ss',
 	'ß,s',
-	'ph,f',
-	'ie,y',
-	'ie,i',
-	'ks,x',
+	'f,ph',
+	'y,ie',
+	'i,ie',
+	'x,ks',
 	'v,w',
 	'v,f',
-	'll,l',
-	'pp,p',
-	'nn,n',
 	'k,c',
 	'ei,ai'
 );
 
+/**
+ *
+ * @return type
+ */
 function bibliographie_search_get_plurals () {
 	if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'))
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'), true);
@@ -51,6 +75,15 @@ function bibliographie_search_get_plurals () {
 	$return = array();
 }
 
+/**
+ * Uses several rules to expand search queries.
+ * @global array $bibliographie_search_queries_suffixes
+ * @global array $bibliographie_search_queries_umlaut_substitutes
+ * @param string $q
+ * @param array $_options
+ * @param int $iteration
+ * @return string
+ */
 function bibliographie_search_expand_query ($q, $_options = array(), $iteration = 1) {
 	global $bibliographie_search_queries_suffixes, $bibliographie_search_queries_umlaut_substitutes;
 
@@ -60,53 +93,93 @@ function bibliographie_search_expand_query ($q, $_options = array(), $iteration 
 	$options = array(
 		'suffixes' => true,
 		'plurals' => true,
-		'umlauts' => true,
-		'repeat' => 3
+		'umlauts' => true
 	);
+
 	foreach($options as $key => $value)
 		if(!empty($_options[$key]) and $value != $_options[$key])
 			$options[$key] = $_options[$key];
 
 	foreach($words as $word){
-		if($options['suffixes'])
-			foreach($bibliographie_search_queries_suffixes as $suffix){
-				$removed = preg_replace('~'.$suffix.'$~', '', $word);
+		if($iteration == 1){
+			/**
+			 * Change every char with its successor and add this as new word.
+			 * We do this to iron out minor typos.
+			 */
+			for($i = 0; $i < mb_strlen($word) - 1; $i++)
+				$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{($i + 1)}.$word{$i}.mb_substr($word, $i + 2);
 
-				if($removed != $word)
-					$expandedQuery .= ' '.$removed;
+		}elseif($iteration == 2){
+			/**
+			 * Remove and add doubled chars.
+			 */
+			for($i = 0; $i < mb_strlen($word) - 1; $i++)
+				if($word{$i} == $word{($i + 1)})
+					$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{$i}.mb_substr($word, $i + 2);
 				else
-					$expandedQuery .= ' '.$word.$suffix;
+					$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{$i}.mb_substr($word, $i);
 
+		}elseif($iteration == 3){
+			if($options['suffixes']){
+				/**
+				 * Try to remove known suffixes. If a known suffix is removed attach all other known suffixes.
+				 */
+				foreach(array_unique($bibliographie_search_queries_suffixes) as $suffix){
+					$rootStem = preg_replace('~'.$suffix.'$~', '', $word);
+
+					if($rootStem != $word){
+						$expandedQuery .= ' '.$rootStem;
+						foreach(array_unique($bibliographie_search_queries_suffixes) as $innerSuffix)
+							$expandedQuery .= ' '.$rootStem.$innerSuffix;
+					}else
+						$expandedQuery .= ' '.$word.$suffix;
+
+				}
 			}
 
-		if($options['plurals'])
-			foreach(bibliographie_search_get_plurals() as $singular => $plural){
-				if(mb_strtolower($word) == mb_strtolower($singular))
-					$expandedQuery .= ' '.$plural;
-				if(mb_strtolower($word) == mb_strtolower(plural))
-					$expandedQuery .= ' '.$singular;
+			/**
+			 * If we find an irregular plural of a singular add the singular or if we find the singular add the irregular plural.
+			 * Irregular plural means that its not (only) generated via suffixes.
+			 */
+			if($options['plurals']){
+				foreach(bibliographie_search_get_plurals() as $singular => $plural){
+					if(mb_strtolower($word) == mb_strtolower($singular))
+						$expandedQuery .= ' '.$plural;
+					if(mb_strtolower($word) == mb_strtolower(plural))
+						$expandedQuery .= ' '.$singular;
+				}
 			}
 
-		if($options['umlauts']){
-			foreach($bibliographie_search_queries_umlaut_substitutes as $pair){
-				list($umlaut, $equivalent) = explode(',', $pair);
 
-				$substitute = str_replace($umlaut, $equivalent, $word);
-				if($substitute != $word)
-					$expandedQuery .= ' '.$substitute;
+			/**
+			 * Replace umlauts with their periphrasis and some chars with likely sounding chars.
+			 */
+			if($options['umlauts']){
+				$umlaut = (string) '';
+				$equivalent = (string) '';
+				foreach($bibliographie_search_queries_umlaut_substitutes as $pair){
+					list($umlaut, $equivalent) = explode(',', $pair);
 
-				$substitute = str_replace($equivalent, $umlaut, $word);
-				if($substitute != $word)
-					$expandedQuery .= ' '.$substitute;
+					$substitute = str_replace($umlaut, $equivalent, $word);
+					if($substitute != $word)
+						$expandedQuery .= ' '.$substitute;
+
+					$substitute = str_replace($equivalent, $umlaut, $word);
+					if($substitute != $word)
+						$expandedQuery .= ' '.$substitute;
+				}
 			}
 		}
 	}
 
-	if($iteration < $options['repeat'])
-		$expandedQuery = bibliographie_search_expand_query($expandedQuery, $options, ($iteration + 1));
+	/**
+	 * Call the function recursively 2 times after initial call to get all the rules.
+	 */
+	if($iteration < 3)
+		$expandedQuery = bibliographie_search_expand_query($q.$expandedQuery, $options, ($iteration + 1));
 
 	/**
 	 * Remove duplicates and return expanded query string.
 	 */
-	return $q.implode(' ', array_values(array_flip(array_flip(explode(' ', $expandedQuery)))));
+	return $q.' '.implode(' ', array_unique(explode(' ', $q.' '.$expandedQuery)));
 }

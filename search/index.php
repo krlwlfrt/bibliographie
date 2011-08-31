@@ -55,6 +55,15 @@ $(function () {
 <?php
 				bibliographie_bookmarks_print_javascript();
 			}
+
+			$searchTerms = array_unique(explode(' ', bibliographie_search_expand_query($_GET['q'])));
+			usort($searchTerms, function ($a, $b) {
+				if(mb_strlen($a) == mb_strlen($b))
+					return 0;
+
+				return(mb_strlen($a) < mb_strlen($b)) ? 1 : -1;
+			});
+			$searchTerms = json_encode(array_values($searchTerms));
 ?>
 
 <script type="text/javascript">
@@ -70,6 +79,7 @@ function bibliographie_search_simple (category, limit) {
 		},
 		success: function (html) {
 			$('#simpleSearch_'+category).html(html);
+			$('#simpleSearch_'+category).highlight(<?php echo $searchTerms?>);
 		}
 	})
 }

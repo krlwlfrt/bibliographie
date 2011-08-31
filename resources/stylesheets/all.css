@@ -308,6 +308,11 @@
 		margin: 5px 0;
 		padding: 5px;
 	}
+
+	.highlight {
+		background-color: #ffa;
+		color: #000;
+	}
 }
 
 @media print {

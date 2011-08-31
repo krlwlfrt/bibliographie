@@ -113,9 +113,10 @@ ENGINE=MyISAM;
 This is a new table used to expand search queries with singulars and plurals of entered words.
 ```sql
 CREATE TABLE `singulars_and_plurals` (
+	`ln` VARCHAR(2) NOT NULL DEFAULT 'en' COLLATE 'utf8_general_ci',
 	`singular` TINYTEXT NOT NULL COLLATE 'utf8_general_ci',
 	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
-) COLLATE='utf8_general_ci' ENGINE=MyISAM;
+) COLLATE='utf8_general_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT
 ```
 
 ## 3rd party libraries ##
