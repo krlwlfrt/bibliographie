@@ -108,17 +108,17 @@ function bibliographie_search_expand_query ($q, $_options = array(), $iteration 
 			 * We do this to iron out minor typos.
 			 */
 			for($i = 0; $i < mb_strlen($word) - 1; $i++)
-				$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{($i + 1)}.$word{$i}.mb_substr($word, $i + 2);
+				$expandedQuery .= ' '.mb_substr($word, 0, $i).mb_substr($word, $i + 1, 1).mb_substr($word, $i, 1).mb_substr($word, $i + 2);
 
 		}elseif($iteration == 2){
 			/**
 			 * Remove and add doubled chars.
 			 */
 			for($i = 0; $i < mb_strlen($word) - 1; $i++)
-				if($word{$i} == $word{($i + 1)})
-					$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{$i}.mb_substr($word, $i + 2);
+				if(mb_substr($word, $i, 1) == mb_substr($word, $i + 1, 1))
+					$expandedQuery .= ' '.mb_substr($word, 0, $i).mb_substr($word, $i, 1).mb_substr($word, $i + 2);
 				else
-					$expandedQuery .= ' '.mb_substr($word, 0, $i).$word{$i}.mb_substr($word, $i);
+					$expandedQuery .= ' '.mb_substr($word, 0, $i).mb_substr($word, $i, 1).mb_substr($word, $i);
 
 		}elseif($iteration == 3){
 			if($options['suffixes']){

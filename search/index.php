@@ -38,6 +38,7 @@ switch($_GET['task']){
 			}
 
 			$_SESSION['search_query'] = $_GET['q'].' '.implode(' ', $searchTerms);
+			echo '<pre>'.print_r($searchTerms, true).'</pre>';
 			$highlightTerms = json_encode($searchTerms);
 
 			if(in_array($_GET['category'], array('topics', 'authors', 'publications', 'tags'))){
