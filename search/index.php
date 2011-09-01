@@ -30,7 +30,7 @@ switch($_GET['task']){
 <p class="notice">Query expansion produced <?php echo count($searchTerms)?> words to search for. You can have <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>&amp;noQueryExpansion=1">exact term matching</a>, too.</p>
 <?php
 			}else{
-				$searchTerms = explode(' ', $_GET['q']);
+				$searchTerms = explode(' ', bibliographie_search_expand_query($_GET['q']));
 ?>
 
 <p class="notice">This is exact matching search. You can have <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>">query expansion</a>, too.</p>

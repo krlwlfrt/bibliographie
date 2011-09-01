@@ -84,7 +84,7 @@ class Structures_BibTex {
 			}
 		}
 
-		$this->rtfstring = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+		$this->rtfstring = 'AUTHORS (YEAR): {\b TITLE}.';
 
 		$this->htmlstring = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
 
@@ -993,7 +993,7 @@ class Structures_BibTex {
 					foreach ($entry['author'] as $authorentry) {
 						$tmparray[] = $this->_formatAuthor($authorentry);
 					}
-					$authors = join(', ', $tmparray);
+					$authors = join(' & ', $tmparray);
 				} else {
 					$authors = $entry['author'];
 				}
@@ -1003,7 +1003,7 @@ class Structures_BibTex {
 				$line = str_replace("JOURNAL", $journal, $line);
 				$line = str_replace("YEAR", $year, $line);
 				$line = str_replace("AUTHORS", $authors, $line);
-				$line .= "\n\\par\n";
+				$line .= "\n\\par\n\n\\par\n";
 				$ret .= $line;
 			} else {
 				$this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry, 1));

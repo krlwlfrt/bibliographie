@@ -12,7 +12,8 @@ switch($_GET['task']){
 ?>
 
 <h3>Export bookmkars</h3>
-<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportToBibTex">BibTex</a>
+<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportBookmarks&amp;target=bibTex">BibTex</a><br />
+<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportBookmarks&amp;target=rtf">RTF</a>
 <?php
 	break;
 

@@ -89,7 +89,7 @@ function bibliographie_search_expand_query ($q, $_options = array(), $iteration 
 	global $bibliographie_search_queries_suffixes, $bibliographie_search_queries_umlaut_substitutes;
 
 	$expandedQuery = (string) '';
-	$words = explode(' ', $q);
+	$words = preg_split('~[\s\-\,]~', $q);
 
 	$options = array(
 		'suffixes' => true,

@@ -5,7 +5,7 @@ define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 switch($_GET['task']){
-	case 'exportToBibTex':
+	case 'exportBookmarks':
 		$bookmarks = bibliographie_bookmarks_get_bookmarks();
 		if(count($bookmarks) > 0){
 			$mysql_string = "";
@@ -54,8 +54,17 @@ switch($_GET['task']){
 					$bibtex->data[] = $_publication;
 				}
 
-				header('Content-Type: text/plain; charset=UTF-8');
-				echo $bibtex->bibtex();
+				if($_GET['target'] == 'bibTex'){
+					header('Content-Type: text/plain; charset=UTF-8');
+					echo $bibtex->bibtex();
+				}elseif($_GET['target'] == 'rtf'){
+					$rtf = $bibtex->rtf();
+					$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');
+					fwrite($file, $rtf);
+					fclose($file);
+					header('Location: '.BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf');
+				}
+
 			}
 		}
 	break;
