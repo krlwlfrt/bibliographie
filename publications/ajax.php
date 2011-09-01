@@ -49,7 +49,7 @@ switch($_GET['task']){
 <strong>2. step</strong> Input BibTex string... <span class="silk-icon silk-icon-hourglass"></span>
 <label for="bibtexInput" class="block">BibTex input</label>
 <textarea id="bibtexInput" name="bibtexInput" rows="20" cols="20" style="width: 100%;"></textarea>
-<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse & proceed!</button>
+<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Proceed & parse!</button>
 <?php
 			}elseif($_POST['step'] == '2'){
 				if(!empty($_POST['bibtexInput'])){
@@ -111,7 +111,7 @@ switch($_GET['task']){
 <strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-hourglass"></span>
 <label for="bibtexRemote" class="block">BibTex input</label>
 <input id="bibtexRemote" name="bibtexRemote" style="width: 100%" />
-<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Parse & proceed!</button>
+<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Proceed & parse!</button>
 <?php
 			}elseif($_POST['step'] == '2'){
 				if(!empty($_POST['bibtexRemote']) and is_url($_POST['bibtexRemote'])){
@@ -163,67 +163,114 @@ switch($_GET['task']){
 				}
 			}
 		}elseif($_POST['source'] == 'isbndb'){
-			if($_POST['step'] == '1'){
+?>
 
+<strong>1. step</strong> Selected source <em>ISBNDB</em>... <span class="silk-icon silk-icon-tick"></span><br />
+<?php
+			if($_POST['step'] == '1'){
+?>
+
+<strong>2. step</strong> Input query...<span class="silk-icon silk-icon-hourglass"></span>
+
+<br />
+
+<div style="float: right; width: 50%">
+	<label for="value" class="block">Query</label>
+	<input type="text" id="value" name="value" style="width: 100%" />
+</div>
+
+<label for="key" class="block">Range</label>
+<select id="key" name="key" style="width: 45%">
+	<option value="isbn">ISBN #</option>
+	<option value="title">In field title</option>
+	<option value="combined">In fields title, authors and publisher</option>
+	<option value="full">Fulltext</option>
+</select>
+
+<button onclick="bibliographie_fetch_data_proceed({'source': 'isbndb', 'step': '2', 'key': $('#key').val(), 'value': $('#value').val()})">Search</button>
+<?php
 			}elseif($_POST['step'] == '2'){
-				/*
-				 * /api/books.xml?access_key=BIBLIOGRAPHIE_ISBNDB_KEY&results=authors&index1=isbn&value1=ISBN
-				 * /api/books.xml?access_key=BIBLIOGRAPHIE_ISBNDB_KEY&results=authors&index1=full&value1=TEXT
-				*/
+?>
+
+
+<strong>2. step</strong> Input query...<span class="silk-icon silk-icon-tick"></span><br />
+<?php
 
 				$response = '';
+				if(in_array($_POST['key'], array('isbn', 'full', 'title', 'combined'))){
+					if($_POST['key'] == 'isbn')
+						$_POST['value'] = str_replace('-', '', $_POST['value']);
 
-				$response = json_decode(json_encode(simplexml_load_string($response)), true);
-				if(!is_array($response['BookList']['BookData']))
-					echo 'Result was empty!';
-
-				/**
-				 * Map unique results to the structure of multiple results for convenience...
-				 */
-				if($response['BookList']['@attributes']['shown_results'] == '1'){
-					$dummy = $response['BookList']['BookData'];
-					$response['BookList']['BookData'] = null;
-					$response['BookList']['BookData'][] = $dummy;
+					$response = file_get_contents('http://www.isbndb.com/api/books.xml?access_key='.BIBLIOGRAPHIE_ISBNDB_KEY.'&results=authors&index1='.$_POST['key'].'&value1='.strip_tags($_POST['value']));
 				}
 
-				echo '<pre style="font-size: 0.8em;">'.print_r($response, true).'</pre>';
-				$i = 0;
-				foreach($response['BookList']['BookData'] as $book){
-					$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['Title'];
-					if(is_string($book['TitleLong']))
-						$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['TitleLong'];
+				$response = json_decode(json_encode(simplexml_load_string($response)), true);
+				if(is_array($response['BookList']['BookData'])){
+?>
 
-					$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn'];
-					if(!empty($book['@attributes']['isbn13']))
-						$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn13'];
+<strong>3. step</strong> Parsing result...<span class="silk-icon silk-icon-tick"></span>
+<?php
 
-					$_SESSION['publication_prefetchedData_unchecked'][$i]['publisher'] = $book['PublisherText'];
+					/**
+					 * Map unique results to the structure of multiple results for convenience...
+					 */
+					if($response['BookList']['@attributes']['shown_results'] == '1'){
+						$dummy = $response['BookList']['BookData'];
+						$response['BookList']['BookData'] = null;
+						$response['BookList']['BookData'][] = $dummy;
+					}
 
-					if(is_array($book['Authors']['Person'])){
-						foreach($book['Authors']['Person'] as $author){
-							$author = explode(',', $author);
-							$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
+					$i = 0;
+					foreach($response['BookList']['BookData'] as $book){
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['Title'];
+						if(is_string($book['TitleLong']))
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $book['TitleLong'];
+
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn'];
+						if(!empty($book['@attributes']['isbn13']))
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['isbn'] = $book['@attributes']['isbn13'];
+
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['publisher'] = $book['PublisherText'];
+
+						if(is_array($book['Authors']['Person'])){
+							foreach($book['Authors']['Person'] as $author){
+								$author = explode(',', $author);
+								$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
+									'first' => $author[1],
+									'von' => '',
+									'last' => $author[0],
+									'jr' => ''
+								);
+							}
+						}else{
+							$author = explode(',', $book['Authors']['Person']);
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][0] = array (
 								'first' => $author[1],
 								'von' => '',
 								'last' => $author[0],
 								'jr' => ''
 							);
 						}
-					}else{
-						$author = explode(',', $book['Authors']['Person']);
-						$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][0] = array (
-							'first' => $author[1],
-							'von' => '',
-							'last' => $author[0],
-							'jr' => ''
-						);
+						$i++;
 					}
-					$i++;
+?>
+
+<p>
+	<span class="success">Parsing of your search was successful!</span> You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.<br /><br />
+<?php if($response['BookList']['@attributes']['total_results'] > $i){ ?>
+	Your search result contained <?php echo ((int) $response['BookList']['@attributes']['total_results'])?> results. Due to service limitations only the first 10 entries can be shown. If the result didn't contain the book you searched for try to narrow down your search via the query!
+<?php } ?>
+</p>
+<?php
+				}else{
+?>
+
+<strong>3. step</strong> Parsing result...<span class="silk-icon silk-icon-cross"></span>
+<p class="error">Result was empty!</p>
+<?php
 				}
 			}
 		}
-
-		//echo '<pre>'.print_r($_POST, true).'</pre>';
 	break;
 
 	case 'checkTitle':

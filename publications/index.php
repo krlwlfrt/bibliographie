@@ -149,7 +149,8 @@ $(function () {
 						$.each(json, function (key, personResult) {
 							$('#checkData_'+role+'Select_'+person.id).append('<option value="'+personResult.id+'">'+personResult.name+'</option>');
 						});
-					}
+					}else
+						$('#checkData_'+role+'Result_'+person.id).html('<strong>No author was found.</strong> <a href="javascript:;" onclick="bibliographie_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
 				}
 			});
 		});
@@ -176,7 +177,10 @@ $(function () {
 		<option value="">Please choose!</option>
 		<option value="bibtexInput">BibTex direct input</option>
 		<option value="bibtexRemote">BibTex remote file</option>
-		<option value="isbndb">ISBNDB.com</option>
+<?php
+		if(BIBLIOGRAPHIE_ISBNDB_KEY != '')
+			echo '<option value="isbndb">ISBNDB.com</option>';
+?>
 	</select>
 
 	<button onclick="bibliographie_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
