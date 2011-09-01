@@ -16,7 +16,7 @@ switch($_GET['task']){
 		$done = false;
 		$topic = null;
 
-		if(!empty($_GET['topic_id']))
+		if(!empty($_GET['topic_id']) and !in_array($_GET['topic_id'], bibliographie_topics_get_locked_topics()))
 			$topic = bibliographie_topics_get_topic_data($_GET['topic_id'], 'assoc');
 
 		if($_SERVER['REQUEST_METHOD'] == 'GET'){
@@ -149,7 +149,7 @@ function bibliographie_publications_show_subgraph (topic) {
 }
 
 $(function () {
-	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopicJSON', {
+	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopics', {
 		searchDelay: 500,
 		minChars: 3,
 		preventDuplicates: true,
@@ -205,9 +205,15 @@ $(function () {
 
 			if(!empty($topic->description))
 				$topic->description = '<p>'.htmlspecialchars($topic->description).'</p>';
+
+			if(!in_array($topic->topic_id, bibliographie_topics_get_locked_topics())){
 ?>
 
 <em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=topicEditor&amp;topic_id=<?php echo $topic->topic_id?>">Edit topic</a></em>
+<?php
+			}
+?>
+
 <h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], false))?>)</a></li>

@@ -85,9 +85,9 @@ function bibliographie_bookmarks_print_html ($pub_id) {
 	$str = '<div id="bibliographie_bookmark_container_'.((int) $pub_id).'" class="bibliographie_bookmark_container">';
 
 	if(bibliographie_bookmarks_check_publication($pub_id)){
-		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_unset_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('tag-blue-delete').' unbookmark</a>';
+		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_unset_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('cross').'</a>';
 	}else{
-		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_set_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('tag-blue-add').' bookmark</a>';
+		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_set_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('star').'</a>';
 	}
 
 	$str .= '</div>';

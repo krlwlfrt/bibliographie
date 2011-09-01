@@ -730,33 +730,34 @@ function bibliographie_publications_check_title (title) {
 $(function() {
 	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
-		minChars: 3,
+		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		prePopulate: <?php echo json_encode($prePopulateAuthor).PHP_EOL?>
 	});
 
 	$('#editor').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
 		searchDelay: 500,
-		minChars: 3,
+		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		prePopulate: <?php echo json_encode($prePopulateEditor).PHP_EOL?>
 	});
 
 	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
 		searchDelay: 500,
-		minChars: 3,
+		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		theme: 'facebook',
 		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>
 	});
 
-	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopicJSON', {
+	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopics', {
 		searchDelay: 500,
-		minChars: 3,
+		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		theme: 'facebook',
 		prePopulate: <?php echo json_encode($prePopulateTopics)?>,
 		noResultsText: 'Results are in the container to the right!',
+		queryParam: 'query',
 		onResult: function (results) {
 			$('#topicsContainer').html('<div style="margin-bottom: 10px;"><strong>Topics search result</strong></div>');
 			if(results.length > 0){

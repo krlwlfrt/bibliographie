@@ -9,7 +9,7 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <?php
 $title = 'Authors';
 switch($_GET['task']){
-	case 'createAuthor':
+	case 'authorEditor':
 		$created = false;
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
@@ -80,7 +80,23 @@ switch($_GET['task']){
 	break;
 
 	case 'showAuthor':
-		bibliographie_authors_parse_data($author);
+		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
+		if(mysql_num_rows($author) == 1){
+			$author = mysql_fetch_object($author);
+?>
+
+<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author:id=<?php echo ((int) $author->author_id)?>">Edit author</a></em>
+<h3><?php echo bibliographie_authors_parse_data($author)?></h3>
+<ul>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=0">Show publications as author (<?php echo count(bibliographie_authors_get_publications($author->author_id, 0))?>)</a></li>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=1">Show publications as editor (<?php echo count(bibliographie_authors_get_publications($author->author_id, 1))?>)</a></li>
+</ul>
+
+<?php
+		}
+	break;
+
+	case 'showPublications':
 		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
 		if(mysql_num_rows($author) == 1){
 			$author = mysql_fetch_object($author);
@@ -88,10 +104,10 @@ switch($_GET['task']){
 
 <h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
 <?php
-			$publications = bibliographie_authors_get_publications($_GET['author_id']);
+			$publications = bibliographie_authors_get_publications($_GET['author_id'], $_GET['asEditor']);
 
 			if(count($publications) > 0)
-				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.((int) $_GET['author_id']));
+				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&author_id='.((int) $_GET['author_id'].'&asEditor='.((int) $_GET['asEditor'])));
 			else
 				echo '<p class="error">This author has no publications!</p>';
 		}
@@ -99,6 +115,7 @@ switch($_GET['task']){
 
 	case 'showList':
 		$initialsResult = mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
+
 		$miscResult = mysql_num_rows(mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
 
 		$whereClause = "";
@@ -118,7 +135,7 @@ switch($_GET['task']){
 					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&initial='.$initial->initial.'" title="'.$initial->count.' persons">['.$initial->initial.']</a>'.PHP_EOL;
 				else{
 					echo '<strong>['.$initial->initial.']</strong>'.PHP_EOL;
-					$whereClause = " WHERE SUBSTRING(`surname`, 1, 1) = '".mysql_real_escape_string(stripslashes($initial->initial))."'";
+					$whereClause = " WHERE UPPER(SUBSTRING(`surname`, 1, 1)) = '".mysql_real_escape_string(stripslashes($initial->initial))."'";
 				}
 			}
 

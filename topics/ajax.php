@@ -35,48 +35,21 @@ function bibliographie_topics_toggle_visibility_of_subtopics (topic_id, repeat_i
 
 		echo bibliographie_dialog_create('selectFromTopicSubgraph', $title, $text);
 	break;
-	case 'searchTopicJSON':
-		$result = array();
-		if(mb_strlen($_GET['q']) >= 3){
-			$topics = mysql_query("SELECT * FROM `a2topics` WHERE `name` LIKE '%".mysql_real_escape_string(stripslashes($_GET['q']))."%' ORDER BY `name`");
 
-			if(mysql_num_rows($topics) > 0)
+	case 'searchTopics':
+		$result = array();
+
+		if(mb_strlen($_GET['query']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
+			$topics = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['query'])))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+
+			if(mysql_num_rows($topics) > 0){
 				while($topic = mysql_fetch_object($topics))
 					$result[] = array('id' => $topic->topic_id, 'name' => $topic->name);
+			}
 		}
 
 		echo json_encode($result);
 	break;
-
-	case 'searchTopic':
-		if(in_array($_GET['id'], array('searchTopicOne', 'searchTopicTwo'))){
-			$topics = mysql_query("SELECT * FROM `a2topics` WHERE `name` LIKE '%".mysql_real_escape_string(stripslashes($_GET['value']))."%' ORDER BY `name`");
-			if(mysql_num_rows($topics) > 0 and !empty($_GET['value'])){
-?>
-
-<label for="select_<?php echo $_GET['id']?>" class="block"><?php echo mysql_num_rows($topics)?> Result(s)</label>
-<select id="select_<?php echo $_GET['id']?>" name="select_<?php echo $_GET['id']?>" style="width: 100%">
-	<option value="0">Please choose...</option>
-<?php
-			while($topic = mysql_fetch_object($topics)){
-				if($topic->topic_id == 1){
-					$topic->name .= ' (Symbolic head of graph!)';
-				}
-?>
-
-	<option value="<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></option>
-<?php
-			}
-?>
-
-</select>
-<?php
-			}else
-				echo '<p class="error">Sorry, your search did not give any results!</p>';
-		}
-	break;
-	default:
-		echo 'WORKING';
 }
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/close.php';

@@ -85,10 +85,15 @@ function bibliographie_authors_get_list () {
 
 }
 
-function bibliographie_authors_get_publications ($author_id) {
+function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 	if(is_numeric($author_id)){
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json'));
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_'.((int) $editor).'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_'.((int) $editor).'_publications.json'));
+
+		if($editor == 0)
+			$mysql_editor = 'N';
+		else
+			$mysql_editor = 'Y';
 
 		$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
 		`a2publicationauthorlink` relations,
@@ -96,7 +101,7 @@ function bibliographie_authors_get_publications ($author_id) {
 	WHERE
 		publications.`pub_id` = relations.`pub_id` AND
 		relations.`author_id` = ".((int) $author_id)." AND
-		relations.`is_editor` = 'N'
+		relations.`is_editor` = '".mysql_real_escape_string(stripslashes($mysql_editor))."'
 	ORDER BY
 		publications.`year` DESC");
 
@@ -105,7 +110,7 @@ function bibliographie_authors_get_publications ($author_id) {
 			$publicationsArray[] = $publication->pub_id;
 
 		if(BIBLIOGRAPHIE_CACHING){
-			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_publications.json', 'w+');
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_'.((int) $editor).'_publications.json', 'w+');
 			fwrite($cacheFile, json_encode($publicationsArray));
 			fclose($cacheFile);
 		}

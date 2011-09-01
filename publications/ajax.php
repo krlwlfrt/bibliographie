@@ -258,7 +258,7 @@ switch($_GET['task']){
 <p>
 	<span class="success">Parsing of your search was successful!</span> You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.<br /><br />
 <?php if($response['BookList']['@attributes']['total_results'] > $i){ ?>
-	Your search result contained <?php echo ((int) $response['BookList']['@attributes']['total_results'])?> results. Due to service limitations only the first 10 entries can be shown. If the result didn't contain the book you searched for try to narrow down your search via the query!
+	Your search result contained <?php echo ((int) $response['BookList']['@attributes']['total_results'])?> results. Due to service limitations only the first 10 entries can be shown. If the result didn't contain the book you searched for, try to narrow down your search via the query!
 <?php } ?>
 </p>
 <?php

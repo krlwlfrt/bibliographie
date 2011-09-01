@@ -7,16 +7,65 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Maintenance</h2>
 <?php
 
+$bibliographie_consistency_checks = array (
+	'authors' => array (
+		'charsetArtifacts'
+	),
+
+	'topics' => array (
+		'loosenedSubgraphs'
+	)
+);
+
 switch($_GET['task']){
+	case 'consistencyChecks':
+		foreach($bibliographie_consistency_checks as $category => $categoryChecks){
+?>
+
+<h3><?php echo $category?></h3>
+<?php
+			foreach($categoryChecks as $check){
+?>
+
+<h4><?php echo $check?></h4>
+<div id="<?php echo $category.'_'.$check?>"><a href="javascript:;" onclick="bibliographie_maintenance_run_consistency_check('<?php echo $category.'_'.$check?>')">Run this check!</a></div>
+<?php
+			}
+
+		}
+?>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+var consistencyChecks = <?php echo json_encode($bibliographie_consistency_checks)?>;
+var runChecks = Array();
+
+function bibliographie_maintenance_run_consistency_check (id) {
+	if($.inArray(id, runChecks) == -1){
+		runChecks.push(id);
+
+		$.ajax({
+			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/ajax.php',
+			data: {
+				'task': 'consistencyChecks',
+				'consistencyCheckID': id
+			},
+			success: function (html) {
+				$('#'+id).html(html);
+			}
+		})
+	}
+}
+
+
+	/* ]]> */
+</script>
+<?php
+	break;
+
 	case 'ToDo':
 		$title = 'ToDo list';
 ?>
-
-<h3>ToDo list</h3>
-<h4>Create publications</h4>
-<ul>
-	<li>Templating, just a wish!</li>
-</ul>
 
 <h4>Topics</h4>
 <ul>
@@ -27,7 +76,6 @@ switch($_GET['task']){
 <h4>Notes</h4>
 <ul>
 	<li>private Notizen</li>
-	<li>allgemeine Notizen</li>
 </ul>
 
 <h4>Parsing</h4>
@@ -52,25 +100,31 @@ switch($_GET['task']){
 		$lockedTopics = bibliographie_topics_get_locked_topics();
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
-			$topic = bibliographie_topics_get_topic_data($_POST['select_searchTopicOne']);
-			if($topic){
-				if(in_array($topic->topic_id, $lockedTopics)){
-					echo '<p class="success">The topic <em>'.htmlspecialchars($topic->name).'</em> was in the list of locked tables yet.</p>';
-				}else{
-					$result = bibliographie_maintenance_lock_topic($topic->topic_id);
-					if($result){
-						echo '<p class="success">The topic <em>'.htmlspecialchars($topic->name).'</em> was added to the list of locked tables.</p>';
-						$lockedTopics = bibliographie_topics_get_locked_topics();
-					}else
-						echo '<p class="error">The topic <em>'.htmlspecialchars($topic->name).'</em> could not be added to the list of locked tables!</p>';
+			echo '<ul>';
+			foreach(explode(',', $_POST['topics']) as $topic){
+				$topic = bibliographie_topics_get_topic_data($topic);
+				if(is_object($topic)){
+					if(in_array($topic->topic_id, $lockedTopics))
+						echo '<li class="notice">The topic <em>'.htmlspecialchars($topic->name).'</em> was in the list of locked tables yet.</li>';
+
+					else{
+						$result = bibliographie_maintenance_lock_topic($topic->topic_id);
+
+						if($result)
+							echo '<li class="success">The topic <em>'.htmlspecialchars($topic->name).'</em> was added to the list of locked tables.</li>';
+						else
+							echo '<li class="error">The topic <em>'.htmlspecialchars($topic->name).'</em> could not be added to the list of locked tables!</li>';
+					}
 				}
 			}
+
+			echo '</ul>';
+			$lockedTopics = bibliographie_topics_get_locked_topics();
 		}
 
 		if(count($lockedTopics) > 0){
 ?>
 
-<p class="notice">This is a list of locked topics. You can unlock them if you want to!</p>
 <table class="dataContainer">
 	<tr>
 		<th>Name</th>
@@ -82,7 +136,7 @@ switch($_GET['task']){
 				$topic = bibliographie_topics_get_topic_data($topic);
 ?>
 
-	<tr>
+	<tr id="topic_<?php echo $topic->topic_id?>">
 		<td><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&topic_id=<?php echo ((int) $topic->topic_id)?>)?>"><?php echo htmlspecialchars($topic->name)?></td>
 		<td><?php echo htmlspecialchars($topic->description)?></td>
 		<td><a href="javascript:;" onclick="bibliographie_maintenance_unlock_topic(<?php echo ((int) $topic->topic_id)?>)"><?php echo bibliographie_icon_get('lock-open')?></a></td>
@@ -97,16 +151,13 @@ switch($_GET['task']){
 			echo '<p class="notice">There are no locked topics!</p>';
 ?>
 
-<h3>Lock topic</h3>
-<p class="notice">With this form you can add a topic to the list of locked topics.</p>
+<h3>Lock topics</h3>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
 	<div class="unit">
-		<label for="searchTopicOne" class="block">Search topic</label>
-		<input type="text" id="searchTopicOne" name="searchTopicOne" style="width: 100%" />
-
-		<div id="result_searchTopicOne"></div>
+		<label for="topics" class="block">Search for topics to lock.</label>
+		<input type="text" id="topics" name="topics" style="width: 100%" />
 	</div>
-	<div class="submit"><input type="submit" value="save" /></div>
+	<div class="submit"><input type="submit" value="Lock selected topics!" /></div>
 </form>
 
 <script type="text/javascript">
@@ -121,36 +172,20 @@ function bibliographie_maintenance_unlock_topic (topic_id) {
 		dataType: 'json',
 		success: function (json) {
 			$.jGrowl(json.text);
+			if(json.status == 'success')
+				$('#topic_'+topic_id).remove();
 		}
 	})
 }
 
-function bibliographie_maintenance_check_submit_status () {
-	if($('#select_searchTopicOne').length == 1 && $('#select_searchTopicOne').val() > 0)
-		return true;
-
-	alert('You have to select a topic that you want to lock!');
-	return false;
-}
-
-function bibliographie_maintenance_search_topic_for_locking (event) {
-	if(event.target.id == 'searchTopicOne'){
-		$.ajax({
-			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/ajax.php'?>',
-			data: {
-				'task': 'searchTopic',
-				'id': event.target.id,
-				'value': event.target.value
-			},
-			success: function (html) {
-				$('#result_'+event.target.id).html(html);
-			}
-		});
-	}
-}
-
-$('#searchTopicOne').change(function(event) {
-	bibliographie_maintenance_search_topic_for_locking(event);
+$(function () {
+	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopics', {
+		searchDelay: 500,
+		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
+		preventDuplicates: true,
+		theme: 'facebook',
+		queryParam: 'query'
+	});
 });
 	/* ]]> */
 </script>
@@ -184,9 +219,7 @@ $('#searchTopicOne').change(function(event) {
 
 		</select>
 	</div>
-	<div class="submit">
-		<input type="submit" value="show" />
-	</div>
+	<div class="submit"><input type="submit" value="show" /></div>
 </form>
 <?php
 		}else
@@ -231,6 +264,10 @@ $('#searchTopicOne').change(function(event) {
 <?php
 			}
 		}
+	break;
+
+	case 'consistencyChecks':
+
 	break;
 }
 
