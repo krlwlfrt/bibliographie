@@ -7,6 +7,17 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'export':
+?>
+
+<h3>Export publications</h3>
+<ul>
+	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=bibTex">BibTex</a></li>
+	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=rtf">RTF</a></li>
+</ul>
+<?php
+	break;
+
 	case 'checkData':
 		unset($_SESSION['publication_prefetchedData_checked']);
 ?>
@@ -818,8 +829,53 @@ $(function() {
 
 <em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&pub_id=<?php echo $publication->pub_id?>">Edit publication</a></em>
 <h3><?php echo htmlspecialchars($publication->title)?></h3>
+
+
 <?php
-			echo bibliographie_publications_parse_data($publication->pub_id);
+			echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
+			if(bibliographie_bookmarks_check_publication($publication->pub_id))
+				echo ' bibliographie_publication_bookmarked';
+			echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
+
+			bibliographie_bookmarks_print_javascript();
+		}
+	break;
+
+	case 'showJournal':
+		$result = mysql_query("SELECT `year`, `journal`, `volume`, COUNT(*) AS `count` FROM `a2publication` WHERE `journal` = '".mysql_real_escape_string(stripslashes($_GET['journal']))."' GROUP BY `volume` ORDER BY `year`, `volume`");
+
+		if(mysql_num_rows($result) > 0){
+			echo '<h3>Journal '.htmlspecialchars($_GET['journal']).'</h3>';
+			echo '<table class="dataContainer">';
+			echo '<tr><th></th><th>Journal</th><th>Year & Volume</th><th>Articles</th></tr>';
+			while($journal = mysql_fetch_object($result)){
+				if(!empty($journal->volume))
+					$journal->volume = $journal->volume;
+
+				echo '<tr>'
+					.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournalVolume&amp;journal='.htmlspecialchars($journal->journal).'&amp;year='.((int) $journal->year).'&amp;volume='.htmlspecialchars($journal->volume).'">'.bibliographie_icon_get('page-white-stack').'</a></td>'
+					.'<td>'.htmlspecialchars($journal->journal).'</td>'
+					.'<td>'.$journal->year.' '.$journal->volume.'</td>'
+					.'<td>'.$journal->count.' article(s)</td>'
+					.'</tr>';
+			}
+			echo '</table>';
+		}
+	break;
+
+	case 'showJournalVolume':
+		$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `journal` = '".mysql_real_escape_string(stripslashes($_GET['journal']))."' AND `year` = ".((int) $_GET['year'])." AND `volume` = '".mysql_real_escape_string(stripslashes($_GET['volume']))."' ORDER BY `title`");
+
+		if(mysql_num_rows($result) > 0){
+?>
+
+<h3>Publications in <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showJournal&amp;journal=<?php echo htmlspecialchars($_GET['journal'])?>"><?php echo htmlspecialchars($_GET['journal'])?></a>, <?php echo ((int) $_GET['year']).' #'.htmlspecialchars($_GET['volume'])?></h3>
+<?php
+			$publications = array();
+			while($publication = mysql_fetch_object($result))
+				$publications[] = $publication->pub_id;
+
+			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournalVolume&amp;journal='.htmlspecialchars($_GET['journal']).'&amp;year='.((int) $_GET['year']).'&amp;volume='.htmlspecialchars($_GET['volume']), $_GET['bookmarkBatch']);
 		}
 	break;
 }

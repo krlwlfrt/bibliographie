@@ -8,26 +8,23 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Bookmarks</h2>
 <?php
 switch($_GET['task']){
-	case 'exportBookmarks':
+	case 'clearBookmarks':
 ?>
 
-<h3>Export bookmkars</h3>
-<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportBookmarks&amp;target=bibTex">BibTex</a><br />
-<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/ajax.php?task=exportBookmarks&amp;target=rtf">RTF</a>
+<h3>Clearing bookmarks</h3>
 <?php
+		$clearedBookmarks = bibliographie_bookmarks_clear_bookmarks();
+		if($clearedBookmarks > 0)
+			echo '<p class="success">'.$clearedBookmarks.' bookmarks where cleared from the list of bookmarks!</p>';
+		else
+			echo '<p class="notice">List of bookmarks was empty!</p>';
 	break;
-
-	case 'clearBookmarks':
-		bibliographie_bookmarks_clear_bookmarks();
 
 	case 'showBookmarks':
 		$title = 'List of my bookmarks';
 ?>
 
-<span style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=exportBookmarks">Export</a>
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear</a> all bookmarks
-</span>
+<span style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear</a> all bookmarks</span>
 <h3>List of my bookmarks</h3>
 <?php
 		$publications = bibliographie_bookmarks_get_bookmarks();
@@ -36,7 +33,7 @@ switch($_GET['task']){
 
 <p class="notice">In total you have set <?php echo count($publications)?> bookmark(s)!</p>
 <?php
-			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $_GET['bookmarkBatch']);
+			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/?task=showBookmarks', $_GET['bookmarkBatch'], false);
 		}else
 			echo '<p class="error">You have not set any bookmarks!</p>';
 	break;

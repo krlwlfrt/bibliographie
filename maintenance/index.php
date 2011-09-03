@@ -13,7 +13,8 @@ $bibliographie_consistency_checks = array (
 	),
 
 	'topics' => array (
-		'loosenedSubgraphs'
+		'loosenedSubgraphs',
+		'doubledNames'
 	)
 );
 

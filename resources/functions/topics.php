@@ -328,8 +328,9 @@ function bibliographie_topics_get_parent_topics ($topic_id) {
 		$return = array();
 
 		$parentTopics = mysql_query("SELECT `target_topic_id` FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic->topic_id));
-		while($parentTopic = mysql_fetch_object($parentTopics))
-			$return[] = $parentTopic->target_topic_id;
+		if(mysql_num_rows($parentTopics) > 0)
+			while($parentTopic = mysql_fetch_object($parentTopics))
+				$return[] = $parentTopic->target_topic_id;
 
 		return $return;
 	}

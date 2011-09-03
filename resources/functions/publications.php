@@ -350,6 +350,9 @@ ORDER BY authors.`surname`, authors.`firstname`");
 			if(empty($publication['pages']) and !empty($publication['firstpage']) and !empty($publication['lastPage']))
 				$publication['pages'] = ((int) $publication['firstpage']).'-'.((int) $publication['lastpage']);
 
+			if(!empty($publication['journal']))
+				$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournal&amp;journal='.htmlspecialchars($_GET['journal']).'">'.htmlspecialchars($_GET['journal']).'</a>';
+
 			foreach($publication as $key => $value){
 				if(empty($value))
 					$value = '<span style="font-size: 0.8em;" class="error">!'.$key.' missing!</span>';
@@ -378,16 +381,23 @@ ORDER BY authors.`surname`, authors.`firstname`");
  * @param array $publications
  * @param string $baseLink
  */
-function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null){
+function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null, $showBookmarkingLink = true){
 	if($bookmarkBatch == 'add'){
 		$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
-		echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications were bookmarked already.</p>';
+		echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications in the shown list were bookmarked already.</p>';
 	}elseif($bookmarkBatch == 'remove'){
 		$bookmarks = bibliographie_bookmarks_unset_bookmarks_for_list($publications);
-		echo '<p class="notice">The bookmarks of '.$bookmarks.' publications were deleted! '.(count($publications) - $bookmarks).' publications weren\'t bookmarked.</p>';
+		echo '<p class="notice">The bookmarks of '.$bookmarks.' publications were deleted! '.(count($publications) - $bookmarks).' publications in the shown list weren\'t bookmarked.</p>';
 	}
 
 	$pageData = bibliographie_print_pages(count($publications), $baseLink);
+
+	if($showBookmarkingLink)
+		echo '<span style="float: right">
+	<a href="'.$baseLink.'&amp;bookmarkBatch=add">'.bibliographie_icon_get('star').' Bookmark</a>
+	<a href="'.$baseLink.'&amp;bookmarkBatch=remove">'.bibliographie_icon_get('cross').' Unbookmark</a>
+	all
+</span>';
 
 	$lastYear = null;
 	$ceiling = $pageData['offset'] + $pageData['perPage'];

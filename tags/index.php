@@ -12,12 +12,6 @@ switch($_GET['task']){
 		if($tag){
 ?>
 
-<span style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&tag_id=<?php echo ((int) $_GET['tag_id'])?>&bookmarkBatch=add">Bookmark</a>
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&tag_id=<?php echo ((int) $_GET['tag_id'])?>&bookmarkBatch=remove">Unbookmark</a>
-	all
-</span>
-
 <h3>Publications assigned to <?php echo htmlspecialchars($tag->tag)?></h3>
 <?php
 			$publications = bibliographie_tags_get_publications($tag->tag_id);

@@ -200,6 +200,9 @@ $(function () {
 		if($topic){
 			$title = 'Topic: '.htmlspecialchars($topic->name);
 
+			$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
+			$subTopics = bibliographie_topics_get_subtopics($topic->topic_id);
+
 			if(in_array($topic->topic_id, bibliographie_topics_get_locked_topics()))
 				echo '<p class="error">This topic is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
 
@@ -214,13 +217,36 @@ $(function () {
 			}
 ?>
 
-<h3>Topic: <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
+<h3>Data of <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], false))?>)</a></li>
+<?php
+			if(count($subTopics) > 0){
+?>
+
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>&includeSubtopics=1">Show publications including all subtopics (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], true))?>)</a></li>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph&topic_id=<?php echo $topic->topic_id?>">Show subgraph</a></li>
+<?php
+			}
+?>
+
 </ul>
 <?php
+			if(count($parentTopics) > 0){
+?>
+
+<h4>Parent topics</h4>
+<ul>
+<?php
+				foreach($parentTopics as $parentTopic){
+					$parentTopic = bibliographie_topics_get_topic_data($parentTopic);
+					echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$parentTopic->topic_id.'">'.$parentTopic->name.'</a></li>';
+				}
+?>
+
+</ul>
+<?php
+			}
 		}
 	break;
 
@@ -228,16 +254,14 @@ $(function () {
 		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
 		if($topic){
 			$includeSubtopics = '';
-			if($_GET['includeSubtopics'] == 1)
+			$title = '';
+			if($_GET['includeSubtopics'] == 1){
 				$includeSubtopics = '&includeSubtopics=1';
+				$title = ' and subtopics';
+			}
 ?>
 
-<span style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo ((int) $_GET['topic_id']).$includeSubtopics?>&bookmarkBatch=add">Bookmark</a>
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo ((int) $_GET['topic_id']).$includeSubtopics?>&bookmarkBatch=remove">Unbookmark</a>
-	all
-</span>
-<h3>Publications assigned to <?php echo htmlspecialchars($topic->name)?></h3>
+<h3>Publications assigned to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></a><?php echo $title?></h3>
 <?php
 			$publications = bibliographie_topics_get_publications($topic->topic_id, ((bool) $_GET['includeSubtopics']));
 			if(count($publications) > 0)
@@ -253,26 +277,25 @@ $(function () {
 
 		$top = (int) 1;
 		$title = 'Topic graph';
-		if(!empty($_GET['topic_id']) and is_numeric($_GET['topic_id']) and $_GET['topic_id'] != '1'){
-			$topic = mysql_query("SELECT * FROM `a2topics` WHERE `topic_id` = ".((int) $_GET['topic_id']));
-			if(mysql_num_rows($topic) == 1){
-				$topic = mysql_fetch_object($topic);
-
-				$top = (int) $topic->topic_id;
-				$title = 'Topic subgraph for <em>'.$topic->name.'</em>';
-			}
+		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		if(is_object($topic)){
+			$top = (int) $topic->topic_id;
+			$title = 'Topic subgraph for <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$topic->topic_id.'">'.htmlspecialchars($topic->name).'</a></em>';
 		}
 
-		echo '<span style="float: right"><a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a> '.
-			'<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a> '.
-			'all subtopics</span>';
-		echo '<h3>'.$title.'</h3>';
+?>
 
-		echo '<div class="bibliographie_topics_topic_graph">';
-		bibliographie_topics_traverse($top);
-		echo '</div>';
+<span style="float: right">
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a>
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a>
+	all subtopics
+</span>
 
-		echo '<p>depth: '.$bibliographie_topics_graph_depth.'</p>';
+<h3><?php echo $title?></h3>
+
+<div class="bibliographie_topics_topic_graph"><?php echo bibliographie_topics_traverse($top)?></div>
+<p class="notice">Depth of graph: <?php echo $bibliographie_topics_graph_depth?></p>
+<?php
 	break;
 }
 ?>
