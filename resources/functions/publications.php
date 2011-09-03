@@ -392,12 +392,25 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 
 	$pageData = bibliographie_print_pages(count($publications), $baseLink);
 
-	if($showBookmarkingLink)
-		echo '<span style="float: right">
-	<a href="'.$baseLink.'&amp;bookmarkBatch=add">'.bibliographie_icon_get('star').' Bookmark</a>
-	<a href="'.$baseLink.'&amp;bookmarkBatch=remove">'.bibliographie_icon_get('cross').' Unbookmark</a>
-	all
-</span>';
+	$publicationsJSON = json_encode(array_values($publications));
+	$listCached = false;
+	if(BIBLIOGRAPHIE_CACHING){
+		$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.md5($publicationsJSON).'.json', 'w+');
+		fwrite($file, $publicationsJSON);
+		fclose($file);
+		$listCached = true;
+	}
+
+	if(!$listCached)
+		$_SESSION['export_list_'.md5($publicationsJSON)] = $publications;
+
+	echo '<p class="bibliographie_operations">';
+	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.md5($publicationsJSON).'">'.bibliographie_icon_get('page-white-go').' Export</a>';
+	if($showBookmarkingLink){
+		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add">'.bibliographie_icon_get('star').' Bookmark</a>';
+		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove">'.bibliographie_icon_get('cross').' Unbookmark</a>';
+	}
+	echo '</p>';
 
 	$lastYear = null;
 	$ceiling = $pageData['offset'] + $pageData['perPage'];
@@ -785,4 +798,20 @@ LIMIT 1");
 	bibliographie_purge_cache('publications');
 
 	return $return;
+}
+
+function bibliographie_publications_get_cached_list ($listID) {
+	if(strpos($listID, '..') === FALSE and strpos($listID, '/') === FALSE){
+		$publications = array();
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.$listID.'.json') and is_array(json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.$listID.'.json'))))
+			$publications = json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.$listID.'.json'));
+
+		if(is_array($_SESSION['export_list_'.$listID]))
+			$publications = $_SESSION['export_list_'.$listID];
+
+		return $publications;
+	}
+
+	return false;
 }

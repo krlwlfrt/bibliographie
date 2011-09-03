@@ -7,19 +7,20 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 switch($_GET['task']){
 	case 'exportPublications':
-		$bookmarks = bibliographie_bookmarks_get_bookmarks();
-		if(count($bookmarks) > 0){
+		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
+
+		if(is_array($publications) and count($publications) > 0){
 			$mysql_string = "";
 
-			foreach($bookmarks as $bookmark){
+			foreach($publications as $publication){
 				if(!empty($mysql_string))
 					$mysql_string .= " OR ";
 
-				$mysql_string .= "`pub_id` = ".((int) $bookmark);
+				$mysql_string .= "`pub_id` = ".((int) $publication);
 			}
 
-			$bookmarkResult = mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
-			if(mysql_num_rows($bookmarkResult) > 0){
+			$result = mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
+			if(mysql_num_rows($result) > 0){
 				$bibtex = new Structures_BibTex(array(
 					'stripDelimiter' => true,
 					'validate' => true,
@@ -28,7 +29,7 @@ switch($_GET['task']){
 					'extractAuthors' => true
 				));
 
-				while($publication = mysql_fetch_assoc($bookmarkResult)){
+				while($publication = mysql_fetch_assoc($result)){
 					$publication['entryType'] = $publication['pub_type'];
 					if(empty($publication['bibtex_id']))
 						$publication['bibtex_id'] = md5($publication['title']);

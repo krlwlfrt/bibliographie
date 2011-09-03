@@ -7,15 +7,20 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
-	case 'export':
+	case 'exportPublications':
+		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
+
+		if(is_array($publications) and count($publications) > 0){
 ?>
 
 <h3>Export publications</h3>
+<p class="notice">You're about to export <?php echo count($publications)?> publication(s). Please choose the format that you want to export into.</p>
 <ul>
-	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=bibTex">BibTex</a></li>
-	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=rtf">RTF</a></li>
+	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList=<?php echo htmlspecialchars($_GET['exportList'])?>"><?php echo bibliographie_icon_get('page-white-actionscript')?> BibTex</a></li>
+	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList=<?php echo htmlspecialchars($_GET['exportList'])?>"><?php echo bibliographie_icon_get('page-white-word')?> RTF</a></li>
 </ul>
 <?php
+		}
 	break;
 
 	case 'checkData':

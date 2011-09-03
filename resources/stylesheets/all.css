@@ -210,6 +210,13 @@
 		padding: 5px;
 	}
 
+	p.bibliographie_operations {
+		border: 1px solid #ccc;
+		margin: 20px 0;
+		padding: 5px;
+		text-align: right;
+	}
+
 	.dataContainer {
 		clear: both;
 		margin: 10px 0;

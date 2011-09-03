@@ -82,7 +82,7 @@ jQuery.ajaxSetup({
 
 				<h3>Add data</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Publication</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-go')?> Use source</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-get')?> Use source</a>
 				<br />
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=topicEditor"><?php echo bibliographie_icon_get('folder-add')?> Topic</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=authorEditor"><?php echo bibliographie_icon_get('user-add')?> Author</a>
