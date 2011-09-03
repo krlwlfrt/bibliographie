@@ -11,6 +11,8 @@ switch($_GET['task']){
 			$searchResults = null;
 			$expandedeQuery = (string) '';
 
+			$publications = array();
+
 			$searchTimer = microtime(true);
 			switch($_GET['category']){
 				case 'topics':
@@ -24,13 +26,20 @@ switch($_GET['task']){
 
 				case 'publications':
 					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, (MATCH(`title`, `abstract`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+
+					if(mysql_num_rows($searchResults)){
+						$result = mysql_query("SELECT `pub_id` FROM (SELECT `pub_id`, `year`, (MATCH(`title`, `abstract`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `year` DESC");
+
+						while($publication = mysql_fetch_object($result))
+							$publications[] = $publication->pub_id;
+					}
 				break;
 
 				case 'tags':
 					$searchResults = mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 				break;
 			}
-			echo '<em style="float: right; font-size: 0.8em;">query took '.round(microtime(true) - $searchTimer, 5).'s</em>';
+			echo '<em style="float: right; font-size: 0.8em;">query '.round(microtime(true) - $searchTimer, 5).'s';
 
 			if(mysql_num_rows($searchResults) > 0){
 				$i = (int) 0;
@@ -72,17 +81,25 @@ switch($_GET['task']){
 					$i++;
 				}
 
+				echo ', output '.round(microtime(true) - $searchTimer, 5).'s</em>';
+
 				echo '<div>Showing ';
 				echo '<strong>'.$i.' result</strong>(s) of ';
 				echo '<strong>'.mysql_num_rows($searchResults).' found '.htmlspecialchars($_GET['category']).'</strong> for query ';
 				echo '<strong>'.htmlspecialchars($_GET['q']).'</strong>. ';
-				if($limit != -1 and $i < mysql_num_rows($searchResults))
-					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category='.htmlspecialchars($_GET['category']).'&amp;q='.htmlspecialchars($_GET['q']).'&amp;noQueryExpansion='.((int) $_GET['noQueryExpansion']).'">Show all results!</a>';
+				if($limit != -1 and $i < mysql_num_rows($searchResults)){
+					if($_GET['category'] == 'publications'){
+						$publicationsList = bibliographie_publications_cache_list($publications);
+						echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=showPublications&amp;publicationsList='.$publicationsList.'">Show all results!</a>';
+					}else
+						echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category='.htmlspecialchars($_GET['category']).'&amp;q='.htmlspecialchars($_GET['q']).'&amp;noQueryExpansion='.((int) $_GET['noQueryExpansion']).'">Show all results!</a>';
+				}
 				echo '</div>';
 				echo PHP_EOL.$text;
 
+
 			}else
-				echo '<div>There were no '.htmlspecialchars($_GET['category']).' for your search with query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>';
+				echo '</em><div>There were no '.htmlspecialchars($_GET['category']).' for your search with query <strong>'.htmlspecialchars($_GET['q']).'</strong>.</div>';
 
 		}else
 			echo '<p class="error">Your search query <em>'.htmlspecialchars($_GET['q']).'</em> was too short! You have to input at least '.BIBLIOGRAPHIE_SEARCH_MIN_CHARS.' chars. </p>';

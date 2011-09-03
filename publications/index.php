@@ -8,6 +8,7 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <?php
 switch($_GET['task']){
 	case 'exportPublications':
+		$title = 'Export publications';
 		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
 
 		if(is_array($publications) and count($publications) > 0){

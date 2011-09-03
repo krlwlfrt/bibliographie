@@ -391,21 +391,10 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 	}
 
 	$pageData = bibliographie_print_pages(count($publications), $baseLink);
-
-	$publicationsJSON = json_encode(array_values($publications));
-	$listCached = false;
-	if(BIBLIOGRAPHIE_CACHING){
-		$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.md5($publicationsJSON).'.json', 'w+');
-		fwrite($file, $publicationsJSON);
-		fclose($file);
-		$listCached = true;
-	}
-
-	if(!$listCached)
-		$_SESSION['export_list_'.md5($publicationsJSON)] = $publications;
+	$exportList = bibliographie_publications_cache_list($publications);
 
 	echo '<p class="bibliographie_operations">';
-	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.md5($publicationsJSON).'">'.bibliographie_icon_get('page-white-go').' Export</a>';
+	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'">'.bibliographie_icon_get('page-white-go').' Export</a>';
 	if($showBookmarkingLink){
 		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add">'.bibliographie_icon_get('star').' Bookmark</a>';
 		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove">'.bibliographie_icon_get('cross').' Unbookmark</a>';
@@ -814,4 +803,22 @@ function bibliographie_publications_get_cached_list ($listID) {
 	}
 
 	return false;
+}
+
+function bibliographie_publications_cache_list (array $publications) {
+	$publicationsJSON = json_encode(array_values($publications));
+
+	$listCached = false;
+	if(BIBLIOGRAPHIE_CACHING){
+		$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_list_'.md5($publicationsJSON).'.json', 'w+');
+		fwrite($file, $publicationsJSON);
+		fclose($file);
+
+		$listCached = true;
+	}
+
+	if(!$listCached)
+		$_SESSION['export_list_'.md5($publicationsJSON)] = $publications;
+
+	return md5($publicationsJSON);
 }

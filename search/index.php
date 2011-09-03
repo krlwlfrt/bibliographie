@@ -9,6 +9,13 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <?php
 $title = 'Search';
 switch($_GET['task']){
+	case 'showPublications':
+		$publications = bibliographie_publications_get_cached_list($_GET['publicationsList']);
+		if(is_array($publications) and count($publications) > 0){
+			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=showPublications&amp;publicationsList='.htmlspecialchars($_GET['publicationsList']), $_GET['bookmarkBatch']);
+		}
+	break;
+
 	case 'simpleSearch':
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			if($_GET['noQueryExpansion'] != '1'){
