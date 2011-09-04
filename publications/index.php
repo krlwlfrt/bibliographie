@@ -7,6 +7,65 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'showContainer':
+		if(in_array($_GET['type'], array('journal', 'book'))){
+			$fields = array (
+				'journal',
+				'volume'
+			);
+			if($_GET['type'] == 'book')
+				$fields = array (
+					'booktitle',
+					'number'
+				);
+
+			$result = mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
+
+			if(mysql_num_rows($result) > 0){
+				echo '<h3>Chronology of '.htmlspecialchars($_GET['container']).'</h3>';
+				echo '<table class="dataContainer">';
+				echo '<tr><th></th><th>'.htmlspecialchars($fields[0]).'</th><th>Year & '.htmlspecialchars($fields[1]).'</th><th>Articles</th></tr>';
+				while($container = mysql_fetch_assoc($result)){
+					echo '<tr>'
+						.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($container[$fields[0]]).'&amp;year='.((int) $container['year']).'&amp;piece='.htmlspecialchars($container[$fields[1]]).'">'.bibliographie_icon_get('page-white-stack').'</a></td>'
+						.'<td>'.htmlspecialchars($container[$fields[0]]).'</td>'
+						.'<td>'.$container['year'].' '.$container[$fields[1]].'</td>'
+						.'<td>'.$container['count'].' article(s)</td>'
+						.'</tr>';
+				}
+				echo '</table>';
+			}
+		}
+	break;
+
+	case 'showContainerPiece':
+		if(in_array($_GET['type'], array('journal', 'book'))){
+			$fields = array (
+				'journal',
+				'volume'
+			);
+			if($_GET['type'] == 'book')
+				$fields = array (
+					'booktitle',
+					'number'
+				);
+
+			$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
+
+			if(mysql_num_rows($result) > 0){
+	?>
+
+	<h3>Publications in <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showContainer&amp;type=<?php echo htmlspecialchars($_GET['type'])?>&amp;container=<?php echo htmlspecialchars($_GET['container'])?>"><?php echo htmlspecialchars($_GET['container'])?></a>, <?php echo ((int) $_GET['year']).' '.htmlspecialchars($_GET[$field[1]])?></h3>
+	<?php
+				$publications = array();
+				while($publication = mysql_fetch_object($result))
+					$publications[] = $publication->pub_id;
+
+				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($_GET['container']).'&amp;year='.((int) $_GET['year']).'&amp;piece='.htmlspecialchars($_GET['piece']), $_GET['bookmarkBatch']);
+			}
+		}
+	break;
+
 	case 'exportPublications':
 		$title = 'Export publications';
 		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
@@ -844,44 +903,6 @@ $(function() {
 			echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
 
 			bibliographie_bookmarks_print_javascript();
-		}
-	break;
-
-	case 'showJournal':
-		$result = mysql_query("SELECT `year`, `journal`, `volume`, COUNT(*) AS `count` FROM `a2publication` WHERE `journal` = '".mysql_real_escape_string(stripslashes($_GET['journal']))."' GROUP BY `volume` ORDER BY `year`, `volume`");
-
-		if(mysql_num_rows($result) > 0){
-			echo '<h3>Journal '.htmlspecialchars($_GET['journal']).'</h3>';
-			echo '<table class="dataContainer">';
-			echo '<tr><th></th><th>Journal</th><th>Year & Volume</th><th>Articles</th></tr>';
-			while($journal = mysql_fetch_object($result)){
-				if(!empty($journal->volume))
-					$journal->volume = $journal->volume;
-
-				echo '<tr>'
-					.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournalVolume&amp;journal='.htmlspecialchars($journal->journal).'&amp;year='.((int) $journal->year).'&amp;volume='.htmlspecialchars($journal->volume).'">'.bibliographie_icon_get('page-white-stack').'</a></td>'
-					.'<td>'.htmlspecialchars($journal->journal).'</td>'
-					.'<td>'.$journal->year.' '.$journal->volume.'</td>'
-					.'<td>'.$journal->count.' article(s)</td>'
-					.'</tr>';
-			}
-			echo '</table>';
-		}
-	break;
-
-	case 'showJournalVolume':
-		$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `journal` = '".mysql_real_escape_string(stripslashes($_GET['journal']))."' AND `year` = ".((int) $_GET['year'])." AND `volume` = '".mysql_real_escape_string(stripslashes($_GET['volume']))."' ORDER BY `title`");
-
-		if(mysql_num_rows($result) > 0){
-?>
-
-<h3>Publications in <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showJournal&amp;journal=<?php echo htmlspecialchars($_GET['journal'])?>"><?php echo htmlspecialchars($_GET['journal'])?></a>, <?php echo ((int) $_GET['year']).' #'.htmlspecialchars($_GET['volume'])?></h3>
-<?php
-			$publications = array();
-			while($publication = mysql_fetch_object($result))
-				$publications[] = $publication->pub_id;
-
-			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournalVolume&amp;journal='.htmlspecialchars($_GET['journal']).'&amp;year='.((int) $_GET['year']).'&amp;volume='.htmlspecialchars($_GET['volume']), $_GET['bookmarkBatch']);
 		}
 	break;
 }

@@ -20,6 +20,10 @@ $bibliographie_consistency_checks = array (
 
 switch($_GET['task']){
 	case 'consistencyChecks':
+?>
+
+<a href="javascript:;" onclick="bibliographie_maintenance_run_all_checks()">Run all checks...</a>
+<?php
 		foreach($bibliographie_consistency_checks as $category => $categoryChecks){
 ?>
 
@@ -40,6 +44,14 @@ switch($_GET['task']){
 	/* <![CDATA[ */
 var consistencyChecks = <?php echo json_encode($bibliographie_consistency_checks)?>;
 var runChecks = Array();
+
+function bibliographie_maintenance_run_all_checks () {
+	$.each(consistencyChecks, function (category, checks){
+		$.each(checks, function (dummy, checkID) {
+			bibliographie_maintenance_run_consistency_check(category+'_'+checkID);
+		});
+	});
+}
 
 function bibliographie_maintenance_run_consistency_check (id) {
 	if($.inArray(id, runChecks) == -1){

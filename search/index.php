@@ -3,6 +3,14 @@ define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
+$bibliographie_search_categories = array(
+	'topics',
+	'authors',
+	'publications',
+	'tags',
+	'journals',
+	'books'
+);
 ?>
 
 <h2>Search</h2>
@@ -47,7 +55,7 @@ switch($_GET['task']){
 			$_SESSION['search_query'] = $_GET['q'].' '.implode(' ', $searchTerms);
 			$highlightTerms = json_encode(array_values($searchTerms));
 
-			if(in_array($_GET['category'], array('topics', 'authors', 'publications', 'tags'))){
+			if(in_array($_GET['category'], $bibliographie_search_categories)){
 				$title = 'Simple search '.htmlspecialchars($_GET['category']);
 ?>
 
@@ -64,27 +72,24 @@ $(function () {
 <?php
 			}else{
 				$title = 'Simple search';
+
+				foreach($bibliographie_search_categories as $category){
 ?>
 
-<h3>Topics</h3>
-<div id="simpleSearch_topics"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
+<h3 id="bibliographie_search_<?php echo htmlspecialchars($category)?>_title"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($category, 0, 1)).mb_substr($category, 1))?></h3>
+<div id="bibliographie_search_<?php echo htmlspecialchars($category)?>_container"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
-<h3>Authors</h3>
-<div id="simpleSearch_authors"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
-
-<h3>Publications</h3>
-<div id="simpleSearch_publications"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
-
-<h3>Tags</h3>
-<div id="simpleSearch_tags"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
+<?php
+				}
+?>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_search_simple('topics', 1);
-	bibliographie_search_simple('authors', 1);
-	bibliographie_search_simple('publications', 1);
-	bibliographie_search_simple('tags', 1);
+	$.each(<?php echo json_encode($bibliographie_search_categories)?>, function (dummy, category) {
+		bibliographie_search_simple(category, 1);
+	});
+	//bibliographie_search_simple('topics', 1);
 });
 	/* ]]> */
 </script>
@@ -106,8 +111,13 @@ function bibliographie_search_simple (category, limit) {
 			'noQueryExpansion': '<?php echo ((int) $_GET['noQueryExpansion'])?>'
 		},
 		success: function (html) {
-			$('#simpleSearch_'+category).html(html);
-			$('#simpleSearch_'+category).highlight(<?php echo $highlightTerms?>);
+			$('#bibliographie_search_'+category+'_container').html(html);
+			$('#bibliographie_search_'+category+'_container').highlight(<?php echo $highlightTerms?>);
+
+			if($('#bibliographie_search_'+category+'_result').length == 0){
+				$('#bibliographie_search_'+category+'_title').hide();
+				$('#bibliographie_search_'+category+'_container').hide();
+			}
 		}
 	})
 }

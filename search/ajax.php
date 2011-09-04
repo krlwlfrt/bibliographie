@@ -16,19 +16,19 @@ switch($_GET['task']){
 			$searchTimer = microtime(true);
 			switch($_GET['category']){
 				case 'topics':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `name` DESC");
 				break;
 
 				case 'authors':
 					$options['plurals'] = true;
-					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `surname`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `surname`, `author_id` DESC");
 				break;
 
 				case 'publications':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, (MATCH(`title`, `abstract`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `title` DESC");
 
 					if(mysql_num_rows($searchResults)){
-						$result = mysql_query("SELECT `pub_id` FROM (SELECT `pub_id`, `year`, (MATCH(`title`, `abstract`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `year` DESC");
+						$result = mysql_query("SELECT `pub_id` FROM (SELECT `pub_id`, `year`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `year` DESC");
 
 						while($publication = mysql_fetch_object($result))
 							$publications[] = $publication->pub_id;
@@ -37,6 +37,14 @@ switch($_GET['task']){
 
 				case 'tags':
 					$searchResults = mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+				break;
+
+				case 'journals':
+					$searchResults = mysql_query("SELECT * FROM (SELECT `journal`, COUNT(*) AS `count`, (MATCH(`journal`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `journal`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `journal` DESC");
+				break;
+
+				case 'books':
+					$searchResults = mysql_query("SELECT * FROM (SELECT `booktitle`, COUNT(*) AS `count`, (MATCH(`booktitle`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `booktitle`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `booktitle` DESC");
 				break;
 			}
 			echo '<em style="float: right; font-size: 0.8em;">query '.round(microtime(true) - $searchTimer, 5).'s';
@@ -54,7 +62,7 @@ switch($_GET['task']){
 							$text .= '<div class="searchResult">';
 							if(!empty($row->url))
 								$text .= '<em style="float: right">'.htmlspecialchars($row->url).'</em>';
-							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$row->topic_id.'" style="display: block">'.htmlspecialchars($row->name).'</a>';
+							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $row->topic_id).'" style="display: block">'.htmlspecialchars($row->name).'</a>';
 							if(!empty($row->description))
 								$text .= '<em>'.htmlspecialchars($row->description).'</em>';
 							$text .= '</div>';
@@ -62,7 +70,7 @@ switch($_GET['task']){
 
 						case 'authors':
 							$text .= '<div class="searchResult">';
-							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.$row->author_id.'" style="display: block">'.bibliographie_authors_parse_data($row->author_id).'</a>';
+							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $row->author_id).'" style="display: block">'.bibliographie_authors_parse_data($row->author_id).'</a>';
 							$text .= '</div>';
 						break;
 
@@ -73,8 +81,20 @@ switch($_GET['task']){
 							$text .= '">'.bibliographie_bookmarks_print_html($row->pub_id).bibliographie_publications_parse_data($row->pub_id).'</div>';
 						break;
 
+						case 'journals':
+							$text .= '<div class="searchResult">';
+							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&amp;container='.htmlspecialchars($row->journal).'" style="display: block">'.htmlspecialchars($row->journal).'</a>';
+							$text .= '</div>';
+						break;
+
+						case 'books':
+							$text .= '<div class="searchResult">';
+							$text .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&amp;container='.htmlspecialchars($row->booktitle).'" style="display: block">'.htmlspecialchars($row->booktitle).'</a>';
+							$text .= '</div>';
+						break;
+
 						case 'tags':
-							$text .= '<div class="searchResult"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.$row->tag_id.'" style="display: block">'.$row->tag.'</a></div>';
+							$text .= '<div class="searchResult"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $row->tag_id).'" style="display: block">'.htmlspecialchars($row->tag).'</a></div>';
 						break;
 					}
 
@@ -83,7 +103,7 @@ switch($_GET['task']){
 
 				echo ', output '.round(microtime(true) - $searchTimer, 5).'s</em>';
 
-				echo '<div>Showing ';
+				echo '<div id="bibliographie_search_'.htmlspecialchars($_GET['category']).'_result">Showing ';
 				echo '<strong>'.$i.' result</strong>(s) of ';
 				echo '<strong>'.mysql_num_rows($searchResults).' found '.htmlspecialchars($_GET['category']).'</strong> for query ';
 				echo '<strong>'.htmlspecialchars($_GET['q']).'</strong>. ';

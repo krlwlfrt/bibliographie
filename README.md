@@ -63,7 +63,11 @@ ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE 
 ### Alter publication table ###
 
 ```sql
+ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);
+
 ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
+ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);
+ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);
 ```
 
 ### Alter topic table ###
@@ -81,11 +85,6 @@ ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
 ### Alter tag table ###
 ```sql
 ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);
-```
-
-### Alter publication table ###
-```sql
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`);
 ```
 
 ## Add new tables ##

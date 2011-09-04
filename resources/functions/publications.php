@@ -351,7 +351,10 @@ ORDER BY authors.`surname`, authors.`firstname`");
 				$publication['pages'] = ((int) $publication['firstpage']).'-'.((int) $publication['lastpage']);
 
 			if(!empty($publication['journal']))
-				$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showJournal&amp;journal='.htmlspecialchars($_GET['journal']).'">'.htmlspecialchars($_GET['journal']).'</a>';
+				$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&amp;container='.htmlspecialchars($publication['journal']).'">'.htmlspecialchars($publication['journal']).'</a>';
+
+			if(!empty($publication['booktitle']))
+				$publication['booktitle'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&amp;container='.htmlspecialchars($publication['booktitle']).'">'.htmlspecialchars($publication['booktitle']).'</a>';
 
 			foreach($publication as $key => $value){
 				if(empty($value))
@@ -394,10 +397,11 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 	$exportList = bibliographie_publications_cache_list($publications);
 
 	echo '<p class="bibliographie_operations">';
-	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'">'.bibliographie_icon_get('page-white-go').' Export</a>';
+	echo '<span style="float: left">List contains '.count($publications).' publications...</span>';
+	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
 	if($showBookmarkingLink){
-		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add">'.bibliographie_icon_get('star').' Bookmark</a>';
-		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove">'.bibliographie_icon_get('cross').' Unbookmark</a>';
+		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
+		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
 	}
 	echo '</p>';
 
