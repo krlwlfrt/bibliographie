@@ -59,8 +59,8 @@ switch($_GET['task']){
 				$title = 'Simple search '.htmlspecialchars($_GET['category']);
 ?>
 
-<h3><?php echo $title?></h3>
-<div id="simpleSearch_<?php echo htmlspecialchars($_GET['category'])?>"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
+<h3 id="bibliographie_search_<?php echo htmlspecialchars($_GET['category'])?>_title"><?php echo $title?></h3>
+<div id="bibliographie_search_<?php echo htmlspecialchars($_GET['category'])?>_container"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
