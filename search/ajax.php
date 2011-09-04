@@ -16,16 +16,16 @@ switch($_GET['task']){
 			$searchTimer = microtime(true);
 			switch($_GET['category']){
 				case 'topics':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `name` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, `description`, `url`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `name`");
 				break;
 
 				case 'authors':
 					$options['plurals'] = true;
-					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `surname`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `surname`, `author_id` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `author_id`, `surname`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `surname`, `author_id`");
 				break;
 
 				case 'publications':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `title` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `title`");
 
 					if(mysql_num_rows($searchResults)){
 						$result = mysql_query("SELECT `pub_id` FROM (SELECT `pub_id`, `year`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `year` DESC");
@@ -40,11 +40,11 @@ switch($_GET['task']){
 				break;
 
 				case 'journals':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `journal`, COUNT(*) AS `count`, (MATCH(`journal`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `journal`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `journal` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `journal`, COUNT(*) AS `count`, (MATCH(`journal`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `journal`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `journal`");
 				break;
 
 				case 'books':
-					$searchResults = mysql_query("SELECT * FROM (SELECT `booktitle`, COUNT(*) AS `count`, (MATCH(`booktitle`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `booktitle`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy`, `booktitle` DESC");
+					$searchResults = mysql_query("SELECT * FROM (SELECT `booktitle`, COUNT(*) AS `count`, (MATCH(`booktitle`) AGAINST ('".mysql_real_escape_string(stripslashes($_SESSION['search_query']))."')) AS `relevancy` FROM `a2publication` GROUP BY `booktitle`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `booktitle`");
 				break;
 			}
 			echo '<em style="float: right; font-size: 0.8em;">query '.round(microtime(true) - $searchTimer, 5).'s';
