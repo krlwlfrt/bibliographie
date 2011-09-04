@@ -73,14 +73,20 @@ $(function () {
 			}else{
 				$title = 'Simple search';
 
+				$text = (string) '';
+				echo '<strong>Categories</strong><ul>'.PHP_EOL;
 				foreach($bibliographie_search_categories as $category){
-?>
+					$categoryTitle = mb_strtoupper(mb_substr($category, 0, 1)).mb_substr($category, 1);
 
-<h3 id="bibliographie_search_<?php echo htmlspecialchars($category)?>_title"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($category, 0, 1)).mb_substr($category, 1))?></h3>
-<div id="bibliographie_search_<?php echo htmlspecialchars($category)?>_container"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
+					echo '<li id="bibliographie_search_'.htmlspecialchars($category).'_link"><a href="#bibliographie_search_'.htmlspecialchars($category).'_title">'.htmlspecialchars($categoryTitle).'</a></li>'.PHP_EOL;
 
-<?php
+					$text .= '<h3 id="bibliographie_search_'.htmlspecialchars($category).'_title">'.htmlspecialchars($categoryTitle).'</h3>'
+						.'<div id="bibliographie_search_'.htmlspecialchars($category).'_container">'
+						.'<img src="'.BIBLIOGRAPHIE_WEB_ROOT.'/resources/images/loading.gif" alt="loading" /> result pending...'
+						.'</div>'.PHP_EOL;
 				}
+				echo '</ul>'.PHP_EOL;
+				echo $text;
 ?>
 
 <script type="text/javascript">
@@ -115,8 +121,11 @@ function bibliographie_search_simple (category, limit) {
 			$('#bibliographie_search_'+category+'_container').highlight(<?php echo $highlightTerms?>);
 
 			if($('#bibliographie_search_'+category+'_result').length == 0){
-				$('#bibliographie_search_'+category+'_title').hide();
-				$('#bibliographie_search_'+category+'_container').hide();
+				$('#bibliographie_search_'+category+'_title').remove();
+				$('#bibliographie_search_'+category+'_container').remove();
+				$('#bibliographie_search_'+category+'_link').remove();
+			}else{
+				$('#bibliographie_search_'+category+'_link').append(' ('+$('#bibliographie_search_'+category+'_results_count').html()+' results)');
 			}
 		}
 	})

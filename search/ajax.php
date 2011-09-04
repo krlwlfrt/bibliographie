@@ -105,7 +105,7 @@ switch($_GET['task']){
 
 				echo '<div id="bibliographie_search_'.htmlspecialchars($_GET['category']).'_result">Showing ';
 				echo '<strong>'.$i.' result</strong>(s) of ';
-				echo '<strong>'.mysql_num_rows($searchResults).' found '.htmlspecialchars($_GET['category']).'</strong> for query ';
+				echo '<strong><span id="bibliographie_search_'.htmlspecialchars($_GET['category']).'_results_count">'.mysql_num_rows($searchResults).'</span> found '.htmlspecialchars($_GET['category']).'</strong> for query ';
 				echo '<strong>'.htmlspecialchars($_GET['q']).'</strong>. ';
 				if($limit != -1 and $i < mysql_num_rows($searchResults)){
 					if($_GET['category'] == 'publications'){
