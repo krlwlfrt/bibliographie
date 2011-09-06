@@ -236,6 +236,38 @@ $bibliographie_publication_fields = array (
 	)
 );
 
+$bibliographie_publication_data = array (
+	'pub_type' => 'Publication type',
+
+	'year' => 'Year',
+	'month' => 'Month',
+
+	'booktitle' => 'Booktitle',
+	'chapter' => 'Chapter',
+	'series' => 'Series',
+	'journal' => 'Journal',
+	'volume' => 'Volume',
+	'number' => 'Number',
+	'edition' => 'Edition',
+	'publisher' => 'Publisher',
+	'location' => 'Location',
+	'howpublished' => 'How published',
+	'organization' => 'Organization',
+	'institution' => 'Institution',
+	'school' => 'School',
+	'address' => 'Address',
+	'pages' => 'Pages',
+	'note' => 'Note',
+	'abstract' => 'Abstract',
+	'userfields' => 'User fields',
+	'bibtex_id' => 'BibTex ID',
+	'isbn' => 'ISBN',
+	'issn' => 'ISSN',
+	'doi' => 'DOI',
+	'url' => 'URL',
+	'user_id' => 'Added by'
+);
+
 /**
  * Get the data of a publication.
  * @param int $publication_id
@@ -386,7 +418,7 @@ ORDER BY authors.`surname`, authors.`firstname`");
  * @param string $bookmarkBatch
  * @param bool $showBookmarkingLink
  */
-function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null, $showBookmarkingLink = true){
+function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null, $showBookmarkingLink = true, $onlyPublication = false){
 	if(count($publications) > 0){
 		if($bookmarkBatch == 'add'){
 			$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
@@ -399,17 +431,19 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 		$pageData = bibliographie_print_pages(count($publications), $baseLink);
 		$exportList = bibliographie_publications_cache_list($publications);
 
-		echo '<p class="bibliographie_operations">';
-		if(count($publications) > 1)
-			echo '<span style="float: left">List contains '.count($publications).' publication(s)...</span>';
+		if(!$onlyPublication){
+			echo '<p class="bibliographie_operations">';
+			if(count($publications) > 1)
+				echo '<span style="float: left">List contains '.count($publications).' publication(s)...</span><strong>List operations: </strong> ';
 
-		echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
+			echo '<a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.bibliographie_publications_cache_list($publications).'\')"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
 
-		if(count($publications) > 1 and $showBookmarkingLink){
-			echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
-			echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
+			if(count($publications) > 1 and $showBookmarkingLink){
+				echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
+				echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
+			}
+			echo '</p>';
 		}
-		echo '</p>';
 
 		$lastYear = null;
 		$ceiling = $pageData['offset'] + $pageData['perPage'];
@@ -419,7 +453,7 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 		for($i = $pageData['offset']; $i < $ceiling; $i++){
 			$publication = bibliographie_publications_get_data($publications[$i]);
 
-			if($publication->year != $lastYear)
+			if($publication->year != $lastYear and !$onlyPublication)
 				echo '<h4>Publications in '.((int) $publication->year).'</h4>';
 
 			echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
@@ -434,6 +468,37 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 			bibliographie_print_pages(count($publications), $baseLink);
 
 		bibliographie_bookmarks_print_javascript();
+?>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+function bibliographie_publications_export_choose_type (exportList) {
+	$.ajax({
+		'url': '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
+		'data': {
+			'task': 'exportChooseType',
+			'exportList': exportList
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#exportChooseType_'+exportList).dialog({
+				width: 500,
+				modal: true,
+				buttons: {
+					'Close': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	})
+}
+	/* ]]> */
+</script>
+<?php
 	}else
 		echo '<p class="error">List of publications is empty...</p>';
 }

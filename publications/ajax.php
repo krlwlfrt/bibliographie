@@ -5,7 +5,23 @@ define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
+$title = 'An error occured!';
+$text = 'An error occurred...';
 switch($_GET['task']){
+	case 'exportChooseType':
+		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
+
+		if(is_array($publications) and count($publications) > 0){
+			$title = 'Choose export format';
+			$text = '<h3>Export publications</h3>
+<p class="notice">You\'re about to export '.count($publications).' publication(s). Please choose the format that you want to export into.</p>
+<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-actionscript').' BibTex</a><br />
+<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-word').' RTF</a>';
+		}
+
+		bibliographie_dialog_create('exportChooseType_'.htmlspecialchars($_GET['exportList']), $title, $text);
+	break;
+
 	case 'exportPublications':
 		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
 

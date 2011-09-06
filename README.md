@@ -68,6 +68,8 @@ ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, 
 ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
 ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);
 ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);
+
+ALTER TABLE `a2publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;
 ```
 
 ### Alter topic table ###

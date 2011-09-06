@@ -66,23 +66,6 @@ switch($_GET['task']){
 		}
 	break;
 
-	case 'exportPublications':
-		$title = 'Export publications';
-		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
-
-		if(is_array($publications) and count($publications) > 0){
-?>
-
-<h3>Export publications</h3>
-<p class="notice">You're about to export <?php echo count($publications)?> publication(s). Please choose the format that you want to export into.</p>
-<ul>
-	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList=<?php echo htmlspecialchars($_GET['exportList'])?>"><?php echo bibliographie_icon_get('page-white-actionscript')?> BibTex</a></li>
-	<li>to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList=<?php echo htmlspecialchars($_GET['exportList'])?>"><?php echo bibliographie_icon_get('page-white-word')?> RTF</a></li>
-</ul>
-<?php
-		}
-	break;
-
 	case 'checkData':
 		unset($_SESSION['publication_prefetchedData_checked']);
 ?>
@@ -887,17 +870,37 @@ $(function() {
 	break;
 
 	case 'showPublication':
-		$publication = bibliographie_publications_get_data($_GET['pub_id']);
+		$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
 
-		if(is_object($publication)){
+		if(is_array($publication)){
 ?>
 
-<em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication->pub_id)?>">Edit publication</a></em>
-<h3><?php echo htmlspecialchars($publication->title)?></h3>
-
-
+<em style="float: right">
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=exportPublications&amp;exportList=<?php echo bibliographie_publications_cache_list(array($publication['pub_id']))?>"><em><?php echo bibliographie_icon_get('page-white-go')?> Export</em></a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit publication</a>
+</em>
+<h3><?php echo htmlspecialchars($publication['title'])?></h3>
 <?php
-			bibliographie_publications_print_list(array($publication->pub_id), BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor&amp;pub_id='.((int) $publication->pub_id), null, false);
+			bibliographie_publications_print_list(array($publication['pub_id']), BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor&amp;pub_id='.((int) $publication['pub_id']), null, false, true);
+
+			echo '<table class="dataContainer"><tr><th colspan="2">Further data of the publication</th></tr>';
+			foreach($bibliographie_publication_data as $dataKey => $dataLabel){
+				if(!empty($publication[$dataKey])){
+					if($dataKey == 'url')
+						$publication['url'] = '<a href="'.$publication['url'].'">'.$publication['url'].'</a>';
+					elseif($dataKey == 'booktitle')
+						$publication['booktitle'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&amp;container='.htmlspecialchars($publication['booktitle']).'">'.htmlspecialchars($publication['booktitle']).'</a>';
+					elseif($dataKey == 'journal')
+						$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&amp;container='.htmlspecialchars($publication['journal']).'">'.htmlspecialchars($publication['journal']).'</a>';
+					elseif($dataKey == 'user_id')
+						$publication['user_id'] = bibliographie_user_get_name($publication['user_id']);
+					else
+						$publication[$dataKey] = htmlspecialchars($publication[$dataKey]);
+
+					echo '<tr><td><strong>'.$dataLabel.'</strong></td><td>'.$publication[$dataKey].'</td></tr>';
+				}
+			}
+			echo '</table>';
 		}
 	break;
 }

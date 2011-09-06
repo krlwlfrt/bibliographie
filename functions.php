@@ -246,6 +246,19 @@ function bibliographie_user_get_id ($name = null) {
 	return $cache[$name];
 }
 
+function bibliographie_user_get_name ($user_id) {
+	if(is_numeric($user_id)){
+		$user = mysql_query("SELECT * FROM `a2users` WHERE `user_id` = ".((int) $user_id));
+
+		if(mysql_num_rows($user) == 1){
+			$user = mysql_fetch_object($user);
+			return $user->login;
+		}
+	}
+
+	return 'bibliographie';
+}
+
 /**
  * Create an HTML-snippet that represents a dialog.
  * @param string $id ID of the div.
