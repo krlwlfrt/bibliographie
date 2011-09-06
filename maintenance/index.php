@@ -115,7 +115,7 @@ function bibliographie_maintenance_run_consistency_check (id) {
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			echo '<ul>';
 			foreach(explode(',', $_POST['topics']) as $topic){
-				$topic = bibliographie_topics_get_topic_data($topic);
+				$topic = bibliographie_topics_get_data($topic);
 				if(is_object($topic)){
 					if(in_array($topic->topic_id, $lockedTopics))
 						echo '<li class="notice">The topic <em>'.htmlspecialchars($topic->name).'</em> was in the list of locked tables yet.</li>';
@@ -146,7 +146,7 @@ function bibliographie_maintenance_run_consistency_check (id) {
 	</tr>
 <?php
 			foreach($lockedTopics as $topic){
-				$topic = bibliographie_topics_get_topic_data($topic);
+				$topic = bibliographie_topics_get_data($topic);
 ?>
 
 	<tr id="topic_<?php echo $topic->topic_id?>">

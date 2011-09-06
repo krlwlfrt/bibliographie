@@ -96,6 +96,9 @@ function bibliographie_tags_get_publications ($tag_id, $options = array()) {
 		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id'])){
 			$add_table .= ", `a2publicationauthorlink` authors ";
 			$where_clause = " AND publications.`pub_id` = authors.`pub_id` AND authors.`author_id` = ".((int) $options['author_id'])." ";
+		}elseif(is_numeric($options['topic_id']) and bibliographie_topics_get_data($options['topic_id'])){
+			$add_table .= ", `a2topicpublicationlink` topics ";
+			$where_clause = " AND publications.`pub_id` = topics.`pub_id` AND topics.`topic_id` = ".((int) $options['topic_id'])." ";
 		}
 
 		$publicationsResult = mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
@@ -129,6 +132,8 @@ function bibliographie_tags_print_cloud ($tags, $options = array()) {
 		$query = (string) '';
 		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id']))
 			$query = '&amp;author_id='.((int) $options['author_id']);
+		elseif(is_numeric($options['topic_id']) and bibliographie_topics_get_data($options['topic_id']))
+			$query = '&amp;topic_id='.((int) $options['topic_id']);
 ?>
 
 	<div id="bibliographie_tag_cloud" style="border: 1px solid #aaa; border-radius: 20px; font-size: 0.8em; text-align: center; padding: 20px;">

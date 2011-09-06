@@ -204,7 +204,7 @@ LIMIT 1");
  * @param int $topic_id The id of a topic.
  * @return mixed Object on success or false otherwise.
  */
-function bibliographie_topics_get_topic_data ($topic_id, $type = 'object') {
+function bibliographie_topics_get_data ($topic_id, $type = 'object') {
 	if(is_numeric($topic_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json')){
 			$assoc = false;
@@ -308,7 +308,7 @@ ORDER BY
  * @return mixed Name of a topic or false on error.
  */
 function bibliographie_topics_topic_by_id ($topic_id) {
-	$data = bibliographie_topics_get_topic_data($topic_id);
+	$data = bibliographie_topics_get_data($topic_id);
 	if($data){
 		return $data->name;
 	}
@@ -321,18 +321,41 @@ function bibliographie_topics_topic_by_id ($topic_id) {
  * @param type $topic_id
  * @return type
  */
-function bibliographie_topics_get_parent_topics ($topic_id) {
-	$topic = bibliographie_topics_get_topic_data($topic_id);
+function bibliographie_topics_get_parent_topics ($topic_id, $recursive = false) {
+	if(is_numeric($topic_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json'));
 
-	if(is_object($topic)){
-		$return = array();
+		$topic = bibliographie_topics_get_data($topic_id);
 
-		$parentTopics = mysql_query("SELECT `target_topic_id` FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic->topic_id));
-		if(mysql_num_rows($parentTopics) > 0)
-			while($parentTopic = mysql_fetch_object($parentTopics))
-				$return[] = $parentTopic->target_topic_id;
+		if(is_object($topic)){
+			$return = array();
 
-		return $return;
+			$parentTopics = mysql_query("SELECT `target_topic_id` FROM
+		`a2topictopiclink` relations,
+		`a2topics` topics
+	WHERE
+		`source_topic_id` = ".((int) $topic->topic_id)." AND
+		relations.`target_topic_id` = topics.`topic_id`
+	ORDER BY `name`");
+
+			if(mysql_num_rows($parentTopics) > 0){
+				while($parentTopic = mysql_fetch_object($parentTopics)){
+					$return[] = $parentTopic->target_topic_id;
+
+					if($recursive == true)
+						$return = array_merge($return, bibliographie_topics_get_parent_topics($parentTopic->target_topic_id, true));
+				}
+			}
+
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json', 'w+');
+				fwrite($cacheFile, json_encode($return));
+				fclose($cacheFile);
+			}
+
+			return array_unique($return);
+		}
 	}
 
 	return false;

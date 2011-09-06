@@ -9,7 +9,7 @@ $text = 'An error occured!';
 $status = 'error';
 switch($_GET['task']){
 	case 'getSubgraph':
-		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if(is_object($topic)){
 			ob_clean();
 			$walkedBy = array();

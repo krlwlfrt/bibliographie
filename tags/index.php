@@ -10,14 +10,20 @@ switch($_GET['task']){
 	case 'showTag':
 		$tag = bibliographie_tags_get_data($_GET['tag_id']);
 		if(is_object($tag)){
+			$options = array();
 			if(is_numeric($_GET['author_id']) and bibliographie_authors_get_data($_GET['author_id'])){
 				$author = bibliographie_authors_get_data($_GET['author_id']);
+				$options = array('author_id' => $_GET['author_id']);
 				echo '<h3>Publications of '.bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true)).' tagged with <em>'.htmlspecialchars($tag->tag).'</em></h3>';
+			}elseif(is_numeric($_GET['topic_id']) and bibliographie_topics_get_data($_GET['topic_id'])){
+				$topic = bibliographie_topics_get_data($_GET['topic_id']);
+				$options = array('topic_id' => $_GET['topic_id']);
+				echo '<h3>Publications in <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.$topic->name.'</a> tagged with <em>'.htmlspecialchars($tag->tag).'</em></h3>';
 			}else
 				echo '<h3>Publications tagged with <em>'.htmlspecialchars($tag->tag).'</em></h3>';
 
 			bibliographie_publications_print_list(
-				bibliographie_tags_get_publications($tag->tag_id, array('author_id' => $_GET['author_id'])),
+				bibliographie_tags_get_publications($tag->tag_id, $options),
 				BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $_GET['tag_id']),
 				$_GET['bookmarkBatch']
 			);

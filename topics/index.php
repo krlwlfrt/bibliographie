@@ -17,7 +17,7 @@ switch($_GET['task']){
 		$topic = null;
 
 		if(!empty($_GET['topic_id']) and !in_array($_GET['topic_id'], bibliographie_topics_get_locked_topics()))
-			$topic = bibliographie_topics_get_topic_data($_GET['topic_id'], 'assoc');
+			$topic = bibliographie_topics_get_data($_GET['topic_id'], 'assoc');
 
 		if($_SERVER['REQUEST_METHOD'] == 'GET'){
 			if(is_array($topic)){
@@ -196,50 +196,60 @@ $(function () {
 	break;
 
 	case 'showTopic':
-		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if($topic){
 			$title = 'Topic: '.htmlspecialchars($topic->name);
 
-			$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
-			$subTopics = bibliographie_topics_get_subtopics($topic->topic_id);
+			$family = array_merge(array($topic->topic_id), bibliographie_topics_get_parent_topics($topic->topic_id, true));
+			if(count(array_intersect($family, bibliographie_topics_get_locked_topics())) == 0)
+				echo '<em style="float: right"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic->topic_id.'">'.bibliographie_icon_get('folder-edit').' Edit topic</a></em>';
+			else
+				echo '<p class="notice">This or at least one of the parent topics is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
 
-			if(in_array($topic->topic_id, bibliographie_topics_get_locked_topics()))
-				echo '<p class="error">This topic is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
+			$publications = bibliographie_topics_get_publications($topic->topic_id, true);
+			$tagsArray = array();
+			if(count($publications) > 0){
+				$where_clause = (string) "";
+				foreach($publications as $publication){
+					if(!empty($where_clause))
+						$where_clause .= " OR ";
 
-			if(!empty($topic->description))
-				$topic->description = '<p>'.htmlspecialchars($topic->description).'</p>';
+					$where_clause .= "`pub_id` = ".((int) $publication);
+				}
 
-			if(!in_array($topic->topic_id, bibliographie_topics_get_locked_topics())){
-?>
+				$tags = mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+	SELECT * FROM `a2tags`
+) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
 
-<em style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=topicEditor&amp;topic_id=<?php echo $topic->topic_id?>">Edit topic</a></em>
-<?php
+				if(mysql_num_rows($tags))
+					while($tag = mysql_fetch_object($tags))
+						$tagsArray[] = $tag;
 			}
-?>
 
-<h3>Data of <?php echo htmlspecialchars($topic->name)?></h3><?php echo $topic->description?>
-<ul>
-	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>">Show publications (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], false))?>)</a></li>
-<?php
-			if(count($subTopics) > 0){
-?>
+			echo '<h3><em>'.htmlspecialchars($topic->name).'</em></h3>';
+			if(!empty($topic->description))
+				echo '<p>'.htmlspecialchars($topic->description).'</p>';
 
-	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&topic_id=<?php echo $topic->topic_id?>&includeSubtopics=1">Show publications including all subtopics (<?php echo count(bibliographie_topics_get_publications($_GET['topic_id'], true))?>)</a></li>
-	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph&topic_id=<?php echo $topic->topic_id?>">Show subgraph</a></li>
-<?php
+			echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'">';
+			echo bibliographie_icon_get('page-white-stack').' Show publications</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], false)).')</p>';
+
+			if(count(bibliographie_topics_get_subtopics($topic->topic_id)) > 0){
+				echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'&ampincludeSubtopics=1">';
+				echo bibliographie_icon_get('page-white-stack').' Show publications including all subtopics</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], true)).')';
+				echo '<br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showGraph&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('sitemap').' Show subgraph</a></p>';
 			}
 ?>
 
 </ul>
 <?php
-			if(count($parentTopics) > 0){
+			if(count(bibliographie_topics_get_parent_topics($topic->topic_id)) > 0){
 ?>
 
 <h4>Parent topics</h4>
 <ul>
 <?php
-				foreach($parentTopics as $parentTopic){
-					$parentTopic = bibliographie_topics_get_topic_data($parentTopic);
+				foreach(bibliographie_topics_get_parent_topics($topic->topic_id) as $parentTopic){
+					$parentTopic = bibliographie_topics_get_data($parentTopic);
 					echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$parentTopic->topic_id.'">'.$parentTopic->name.'</a></li>';
 				}
 ?>
@@ -247,11 +257,19 @@ $(function () {
 </ul>
 <?php
 			}
+
+			if(count($tagsArray) > 0){
+?>
+
+<h4>Publications have the following tags</h4>
+<?php
+				bibliographie_tags_print_cloud($tagsArray, array('topic_id' => $topic->topic_id));
+			}
 		}
 	break;
 
 	case 'showPublications':
-		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if($topic){
 			$includeSubtopics = '';
 			$title = '';
@@ -277,7 +295,7 @@ $(function () {
 
 		$top = (int) 1;
 		$title = 'Topic graph';
-		$topic = bibliographie_topics_get_topic_data($_GET['topic_id']);
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if(is_object($topic)){
 			$top = (int) $topic->topic_id;
 			$title = 'Topic subgraph for <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$topic->topic_id.'">'.htmlspecialchars($topic->name).'</a></em>';
