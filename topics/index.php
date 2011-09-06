@@ -230,32 +230,31 @@ $(function () {
 			if(!empty($topic->description))
 				echo '<p>'.htmlspecialchars($topic->description).'</p>';
 
-			echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'">';
-			echo bibliographie_icon_get('page-white-stack').' Show publications</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], false)).')</p>';
+			echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('page-white-stack').' Show publications</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], false)).')';
 
 			if(count(bibliographie_topics_get_subtopics($topic->topic_id)) > 0){
-				echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'&ampincludeSubtopics=1">';
+				echo '<br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'&amp;includeSubtopics=1">';
 				echo bibliographie_icon_get('page-white-stack').' Show publications including all subtopics</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], true)).')';
-				echo '<br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showGraph&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('sitemap').' Show subgraph</a></p>';
 			}
-?>
+			echo '</p>';
 
-</ul>
-<?php
 			if(count(bibliographie_topics_get_parent_topics($topic->topic_id)) > 0){
-?>
-
-<h4>Parent topics</h4>
-<ul>
-<?php
+				echo '<h4>Parent topics</h4><ul>';
 				foreach(bibliographie_topics_get_parent_topics($topic->topic_id) as $parentTopic){
 					$parentTopic = bibliographie_topics_get_data($parentTopic);
-					echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$parentTopic->topic_id.'">'.$parentTopic->name.'</a></li>';
+					if($parentTopic->topic_id != 1)
+						$parentTopic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $parentTopic->topic_id).'">'.htmlspecialchars($parentTopic->name).'</a>';
+					echo '<li>'.$parentTopic->name.'</li>';
 				}
-?>
+				echo '</ul>';
+			}
 
-</ul>
-<?php
+			if(count(bibliographie_topics_get_subtopics($topic->topic_id)) > 0){
+				echo '<h4>Subordinated topics</h4>';
+				echo '<span style="float: right"><a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a> <a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a> all subtopics</span>';
+				echo '<div class="bibliographie_topics_topic_graph">';
+				bibliographie_topics_traverse($topic->topic_id);
+				echo '</div>';
 			}
 
 			if(count($tagsArray) > 0){
@@ -281,11 +280,7 @@ $(function () {
 
 <h3>Publications assigned to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></a><?php echo $title?></h3>
 <?php
-			$publications = bibliographie_topics_get_publications($topic->topic_id, ((bool) $_GET['includeSubtopics']));
-			if(count($publications) > 0)
-				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $_GET['bookmarkBatch']);
-			else
-				echo '<p class="error">No publications are assigned to this topic!</p>';
+			bibliographie_publications_print_list(bibliographie_topics_get_publications($topic->topic_id, ((bool) $_GET['includeSubtopics'])), BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $_GET['bookmarkBatch']);
 		}
 	break;
 
