@@ -80,17 +80,30 @@ function bibliographie_tags_get_data ($tag_id, $type = 'object') {
  * @param int $tag_id
  * @return mixed Array on success, false on error.
  */
-function bibliographie_tags_get_publications ($tag_id) {
+function bibliographie_tags_get_publications ($tag_id, $options = array()) {
 	if(is_numeric($tag_id)){
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'));
+
+		/*if(BIBLIOGRAPHIE_CACHING){
+			if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id']) and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_author_'.((int) $options['author_id']).'_publications.json'))
+				return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_author_'.((int) $options['author_id']).'_publications.json'));
+
+			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'))
+				return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'));
+		}*/
+
+		$where_clause = (string) "";
+		$add_table = (string) "";
+		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id'])){
+			$add_table .= ", `a2publicationauthorlink` authors ";
+			$where_clause = " AND publications.`pub_id` = authors.`pub_id` AND authors.`author_id` = ".((int) $options['author_id'])." ";
+		}
 
 		$publicationsResult = mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
-	`a2publication` publications
+	`a2publication` publications".$add_table."
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
-	relations.`tag_id` = ".((int) $tag_id)."
+	relations.`tag_id` = ".((int) $tag_id).$where_clause."
 ORDER BY
 	publications.`year` DESC");
 
@@ -109,4 +122,31 @@ ORDER BY
 	}
 
 	return false;
+}
+
+function bibliographie_tags_print_cloud ($tags, $options = array()) {
+	if(count($tags) > 0){
+		$query = (string) '';
+		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id']))
+			$query = '&amp;author_id='.((int) $options['author_id']);
+?>
+
+	<div id="bibliographie_tag_cloud" style="border: 1px solid #aaa; border-radius: 20px; font-size: 0.8em; text-align: center; padding: 20px;">
+<?php
+		foreach($tags as $tag){
+			/**
+			 * Converges against BIBLIOGRAPHIE_TAG_SIZE_FACTOR.
+			 */
+			$size = BIBLIOGRAPHIE_TAG_SIZE_FACTOR * $tag->count / ($tag->count + BIBLIOGRAPHIE_TAG_SIZE_FLATNESS);
+			$size = ($size < BIBLIOGRAPHIE_TAG_SIZE_MINIMUM) ? BIBLIOGRAPHIE_TAG_SIZE_MINIMUM : $size;
+?>
+
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&amp;tag_id=<?php echo $tag->tag_id.$query?>" style="font-size: <?php echo round($size, 2).'px'?>; line-height: <?php echo $size.'px'?>;padding: 10px; text-transform: lowercase;" title="<?php echo $tag->count?> publications"><?php echo $tag->tag?></a>
+<?php
+		}
+?>
+
+</div>
+<?php
+	}
 }

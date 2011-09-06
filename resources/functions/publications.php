@@ -383,51 +383,59 @@ ORDER BY authors.`surname`, authors.`firstname`");
  * Print a list of publications.
  * @param array $publications
  * @param string $baseLink
+ * @param string $bookmarkBatch
+ * @param bool $showBookmarkingLink
  */
 function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null, $showBookmarkingLink = true){
-	if($bookmarkBatch == 'add'){
-		$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
-		echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications in the shown list were bookmarked already.</p>';
-	}elseif($bookmarkBatch == 'remove'){
-		$bookmarks = bibliographie_bookmarks_unset_bookmarks_for_list($publications);
-		echo '<p class="notice">The bookmarks of '.$bookmarks.' publications were deleted! '.(count($publications) - $bookmarks).' publications in the shown list weren\'t bookmarked.</p>';
-	}
+	if(count($publications) > 0){
+		if($bookmarkBatch == 'add'){
+			$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
+			echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications in the shown list were bookmarked already.</p>';
+		}elseif($bookmarkBatch == 'remove'){
+			$bookmarks = bibliographie_bookmarks_unset_bookmarks_for_list($publications);
+			echo '<p class="notice">The bookmarks of '.$bookmarks.' publications were deleted! '.(count($publications) - $bookmarks).' publications in the shown list weren\'t bookmarked.</p>';
+		}
 
-	$pageData = bibliographie_print_pages(count($publications), $baseLink);
-	$exportList = bibliographie_publications_cache_list($publications);
+		$pageData = bibliographie_print_pages(count($publications), $baseLink);
+		$exportList = bibliographie_publications_cache_list($publications);
 
-	echo '<p class="bibliographie_operations">';
-	echo '<span style="float: left">List contains '.count($publications).' publications...</span>';
-	echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
-	if($showBookmarkingLink){
-		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
-		echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
-	}
-	echo '</p>';
+		echo '<p class="bibliographie_operations">';
+		if(count($publications) > 1)
+			echo '<span style="float: left">List contains '.count($publications).' publication(s)...</span>';
 
-	$lastYear = null;
-	$ceiling = $pageData['offset'] + $pageData['perPage'];
-	if($ceiling > count($publications))
-		$ceiling = count($publications);
+		echo '<strong>List operations: </strong> <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=exportPublications&amp;exportList='.$exportList.'"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
 
-	for($i = $pageData['offset']; $i < $ceiling; $i++){
-		$publication = bibliographie_publications_get_data($publications[$i]);
+		if(count($publications) > 1 and $showBookmarkingLink){
+			echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
+			echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
+		}
+		echo '</p>';
 
-		if($publication->year != $lastYear)
-			echo '<h4>Publications in '.((int) $publication->year).'</h4>';
+		$lastYear = null;
+		$ceiling = $pageData['offset'] + $pageData['perPage'];
+		if($ceiling > count($publications))
+			$ceiling = count($publications);
 
-		echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
-		if(bibliographie_bookmarks_check_publication($publication->pub_id))
-			echo ' bibliographie_publication_bookmarked';
-		echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
+		for($i = $pageData['offset']; $i < $ceiling; $i++){
+			$publication = bibliographie_publications_get_data($publications[$i]);
 
-		$lastYear = $publication->year;
-	}
+			if($publication->year != $lastYear)
+				echo '<h4>Publications in '.((int) $publication->year).'</h4>';
 
-	if($pageData['pages'] > 1)
-		bibliographie_print_pages(count($publications), $baseLink);
+			echo '<div id="publication_container_'.((int) $publication->pub_id).'" class="bibliographie_publication';
+			if(bibliographie_bookmarks_check_publication($publication->pub_id))
+				echo ' bibliographie_publication_bookmarked';
+			echo '">'.bibliographie_bookmarks_print_html($publication->pub_id).bibliographie_publications_parse_data($publication->pub_id).'</div>';
 
-	bibliographie_bookmarks_print_javascript();
+			$lastYear = $publication->year;
+		}
+
+		if($pageData['pages'] > 1)
+			bibliographie_print_pages(count($publications), $baseLink);
+
+		bibliographie_bookmarks_print_javascript();
+	}else
+		echo '<p class="error">List of publications is empty...</p>';
 }
 
 function bibliographie_publications_get_authors ($publication_id) {

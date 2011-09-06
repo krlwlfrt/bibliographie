@@ -42,13 +42,13 @@ switch($_GET['task']){
 						break;
 ?>
 
-<p class="notice">Query expansion produced <?php echo count($searchTerms)?> words to search for. You can have <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>&amp;noQueryExpansion=1">exact term matching</a>, too.</p>
+<em style="float: right; font-size: 0.8em;">expanded to <?php echo count($searchTerms)?> words, <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>&amp;noQueryExpansion=1">use exact matching</a></em>
 <?php
 			}else{
-				$searchTerms = explode(' ', bibliographie_search_expand_query($_GET['q']));
+				$searchTerms = explode(' ', $_GET['q']);
 ?>
 
-<p class="notice">This is exact matching search. You can have <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>">query expansion</a>, too.</p>
+<em style="float: right; font-size: 0.8em;"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=simpleSearch&amp;q=<?php echo htmlspecialchars($_GET['q'])?>">use query expansion</a></em>
 <?php
 			}
 
@@ -74,28 +74,32 @@ $(function () {
 				$title = 'Simple search';
 
 				$text = (string) '';
-				echo '<strong>Categories</strong><ul>'.PHP_EOL;
+				echo '<ul style="display: none">'.PHP_EOL;
 				foreach($bibliographie_search_categories as $category){
 					$categoryTitle = mb_strtoupper(mb_substr($category, 0, 1)).mb_substr($category, 1);
 
-					echo '<li id="bibliographie_search_'.htmlspecialchars($category).'_link"><a href="#bibliographie_search_'.htmlspecialchars($category).'_title">'.htmlspecialchars($categoryTitle).'</a></li>'.PHP_EOL;
+					echo '<li id="bibliographie_search_'.htmlspecialchars($category).'_link" style="display: none;"><a href="#bibliographie_search_'.htmlspecialchars($category).'_title">'.htmlspecialchars($categoryTitle).'</a></li>'.PHP_EOL;
 
-					$text .= '<h3 id="bibliographie_search_'.htmlspecialchars($category).'_title">'.htmlspecialchars($categoryTitle).'</h3>'
-						.'<div id="bibliographie_search_'.htmlspecialchars($category).'_container">'
-						.'<img src="'.BIBLIOGRAPHIE_WEB_ROOT.'/resources/images/loading.gif" alt="loading" /> result pending...'
-						.'</div>'.PHP_EOL;
+					$text .= '<h3 id="bibliographie_search_'.htmlspecialchars($category).'_title" style="display: none">'.htmlspecialchars($categoryTitle).'</h3>'
+						.'<div id="bibliographie_search_'.htmlspecialchars($category).'_container" style="display: none" class="bibliographie_search_container"></div>'.PHP_EOL;
 				}
 				echo '</ul>'.PHP_EOL;
 				echo $text;
 ?>
 
+<p id="bibliographie_search_result_is_empty" style="display: none;" class="error">Sorry, but your search did not give any results!</p>
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
 	$.each(<?php echo json_encode($bibliographie_search_categories)?>, function (dummy, category) {
 		bibliographie_search_simple(category, 1);
 	});
-	//bibliographie_search_simple('topics', 1);
+
+	$('#bibliographie_search_result_is_empty').ajaxStop(function () {
+		if($('.bibliographie_search_container:visible').length == 0){
+			$(this).show('slow');
+		}
+	});
 });
 	/* ]]> */
 </script>
@@ -125,7 +129,13 @@ function bibliographie_search_simple (category, limit) {
 				$('#bibliographie_search_'+category+'_container').remove();
 				$('#bibliographie_search_'+category+'_link').remove();
 			}else{
-				$('#bibliographie_search_'+category+'_link').append(' ('+$('#bibliographie_search_'+category+'_results_count').html()+' results)');
+				if($('#bibliographie_search_'+category+'_link').parent().is(':visible') == false)
+					$('#bibliographie_search_'+category+'_link').parent().show();
+
+				$('#bibliographie_search_'+category+'_link').show('slow').append(' ('+$('#bibliographie_search_'+category+'_results_count').html()+' results)');
+				$('#bibliographie_search_'+category+'_title').show('slow');
+				$('#bibliographie_search_'+category+'_container').show('slow');
+				$('#bibliographie_search_'+category+'_link').show();
 			}
 		}
 	})

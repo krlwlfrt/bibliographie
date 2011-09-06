@@ -80,12 +80,31 @@ switch($_GET['task']){
 	break;
 
 	case 'showAuthor':
-		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
-		if(mysql_num_rows($author) == 1){
-			$author = mysql_fetch_object($author);
+		$author = bibliographie_authors_get_data($_GET['author_id']);
+
+		if(is_object($author)){
+			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 0)));
+			$tagsArray = array();
+			if(count($publications) > 0){
+				$where_clause = (string) "";
+				foreach($publications as $publication){
+					if(!empty($where_clause))
+						$where_clause .= " OR ";
+
+					$where_clause .= "`pub_id` = ".((int) $publication);
+				}
+
+				$tags = mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+	SELECT * FROM `a2tags`
+) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
+
+				if(mysql_num_rows($tags))
+					while($tag = mysql_fetch_object($tags))
+						$tagsArray[] = $tag;
+			}
 ?>
 
-<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author:id=<?php echo ((int) $author->author_id)?>">Edit author</a></em>
+<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author_id=<?php echo ((int) $author->author_id)?>">Edit author</a></em>
 <h3><?php echo bibliographie_authors_parse_data($author)?></h3>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=0">Show publications as author (<?php echo count(bibliographie_authors_get_publications($author->author_id, 0))?>)</a></li>
@@ -93,6 +112,13 @@ switch($_GET['task']){
 </ul>
 
 <?php
+			if(count($tagsArray) > 0){
+?>
+
+<h4>Publications have the following tags</h4>
+<?php
+				bibliographie_tags_print_cloud($tagsArray, array('author_id' => $author->author_id));
+			}
 		}
 	break;
 
@@ -102,14 +128,10 @@ switch($_GET['task']){
 			$author = mysql_fetch_object($author);
 ?>
 
-<h3>Publications of <?php echo bibliographie_authors_parse_data($author)?></h3>
+<h3>Publications of <?php echo bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true))?></h3>
 <?php
 			$publications = bibliographie_authors_get_publications($_GET['author_id'], $_GET['asEditor']);
-
-			if(count($publications) > 0)
-				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&author_id='.((int) $_GET['author_id'].'&asEditor='.((int) $_GET['asEditor'])));
-			else
-				echo '<p class="error">This author has no publications!</p>';
+			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&author_id='.((int) $_GET['author_id'].'&asEditor='.((int) $_GET['asEditor'])), $_GET['bookmarkBatch']);
 		}
 	break;
 

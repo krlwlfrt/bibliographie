@@ -9,16 +9,18 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 switch($_GET['task']){
 	case 'showTag':
 		$tag = bibliographie_tags_get_data($_GET['tag_id']);
-		if($tag){
-?>
+		if(is_object($tag)){
+			if(is_numeric($_GET['author_id']) and bibliographie_authors_get_data($_GET['author_id'])){
+				$author = bibliographie_authors_get_data($_GET['author_id']);
+				echo '<h3>Publications of '.bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true)).' tagged with <em>'.htmlspecialchars($tag->tag).'</em></h3>';
+			}else
+				echo '<h3>Publications tagged with <em>'.htmlspecialchars($tag->tag).'</em></h3>';
 
-<h3>Publications assigned to <?php echo htmlspecialchars($tag->tag)?></h3>
-<?php
-			$publications = bibliographie_tags_get_publications($tag->tag_id);
-			if(count($publications) > 0)
-				bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $_GET['tag_id']), $_GET['bookmarkBatch']);
-			else
-				echo '<p class="error">No publications are assigned to this tag!</p>';
+			bibliographie_publications_print_list(
+				bibliographie_tags_get_publications($tag->tag_id, array('author_id' => $_GET['author_id'])),
+				BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $_GET['tag_id']),
+				$_GET['bookmarkBatch']
+			);
 		}
 	break;
 
@@ -40,13 +42,10 @@ switch($_GET['task']){
 				 */
 				$size = BIBLIOGRAPHIE_TAG_SIZE_FACTOR * $tag->count / ($tag->count + BIBLIOGRAPHIE_TAG_SIZE_FLATNESS);
 				$size = ($size < BIBLIOGRAPHIE_TAG_SIZE_MINIMUM) ? BIBLIOGRAPHIE_TAG_SIZE_MINIMUM : $size;
-
-				//if($size > BIBLIOGRAPHIE_TAG_SIZE_MINIMUM){
 ?>
 
 	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/?task=showTag&amp;tag_id=<?php echo $tag->tag_id?>" style="font-size: <?php echo round($size, 2).'px'?>; line-height: <?php echo $size.'px'?>;padding: 10px; text-transform: lowercase;" title="<?php echo $tag->count?> publications"><?php echo $tag->tag?></a>
 <?php
-				//}
 			}
 ?>
 

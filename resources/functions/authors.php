@@ -48,9 +48,31 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	return $return;
 }
 
+function bibliographie_authors_get_data ($author_id) {
+	if(is_numeric($author_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'));
+
+		$author = mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
+		if(mysql_num_rows($author) == 1){
+			$author = mysql_fetch_object($author);
+
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json', 'w+');
+				fwrite($cacheFile, json_encode($author));
+				fclose($cacheFile);
+			}
+
+			return $author;
+		}
+	}
+
+	return false;
+}
+
 function bibliographie_authors_parse_data ($author, $options = array()) {
 	if(is_numeric($author))
-		$author = mysql_fetch_object(mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $author)));
+		$author = bibliographie_authors_get_data($author);
 
 	if(is_object($author)){
 		if($options['forBibTex'] == true)
@@ -69,13 +91,18 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 		if(!empty($author->jr))
 			$author->surname = $author->surname.' '.$author->jr;
 
-		if($options['firstnameFirst'] == true)
-			return $author->firstname.' '.$author->surname;
-
 		if($options['splitNames'] == true)
 			return array('firstname' => $author->firstname, 'surname' => $author->surname);
 
-		return $author->surname.', '.$author->firstname;
+		$return = $author->surname.', '.$author->firstname;
+
+		if($options['firstnameFirst'] == true)
+			$return = $author->firstname.' '.$author->surname;
+
+		if($options['linkProfile'] == true)
+			$return = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.$author->author_id.'">'.$return.'</a>';
+
+		return $return;
 	}
 
 	return false;
