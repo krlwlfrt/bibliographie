@@ -59,7 +59,7 @@ function bibliographie_search_get_plurals () {
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'), true);
 
 	$return = array();
-	$result = mysql_query("SELECT * FROM `singulars_and_plurals`");
+	$result = _mysql_query("SELECT * FROM `singulars_and_plurals`");
 	if(mysql_num_rows($result) > 0){
 		while($pair = mysql_fetch_object($result))
 			$return[$pair->singular] = $pair->plural;

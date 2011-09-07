@@ -10,7 +10,7 @@ switch($_GET['task']){
 	case 'consistencyChecks':
 		switch($_GET['consistencyCheckID']){
 			case 'authors_charsetArtifacts':
-				$result = mysql_query("SELECT * FROM `a2author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP '^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$' ORDER BY `surname`, `firstname`");
+				$result = _mysql_query("SELECT * FROM `a2author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP '^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$' ORDER BY `surname`, `firstname`");
 
 				if(mysql_num_rows($result) > 0){
 					echo '<strong style="display: block;">Found '.mysql_num_rows($result).' authors...</strong>';
@@ -21,7 +21,7 @@ switch($_GET['task']){
 			break;
 
 			case 'topics_loosenedSubgraphs':
-				$result = mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1");
+				$result = _mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1");
 
 				if(mysql_num_rows($result) > 0){
 					while($topic = mysql_fetch_object($result))
@@ -31,7 +31,7 @@ switch($_GET['task']){
 			break;
 
 			case 'topics_doubledNames':
-				$result = mysql_query("SELECT * FROM (SELECT *, COUNT(*) AS `count` FROM `a2topics` GROUP BY `name`) counts WHERE `count` > 1 ORDER BY `name`");
+				$result = _mysql_query("SELECT * FROM (SELECT *, COUNT(*) AS `count` FROM `a2topics` GROUP BY `name`) counts WHERE `count` > 1 ORDER BY `name`");
 
 				if(mysql_num_rows($result)){
 					while($topic = mysql_fetch_object($result)){

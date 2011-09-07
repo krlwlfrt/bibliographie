@@ -11,7 +11,7 @@
  * @return mixed False or array of data on success.
  */
 function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute) {
-	$return = mysql_query("INSERT INTO `a2author` (
+	$return = _mysql_query("INSERT INTO `a2author` (
 	`firstname`,
 	`von`,
 	`surname`,
@@ -53,7 +53,7 @@ function bibliographie_authors_get_data ($author_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'));
 
-		$author = mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
+		$author = _mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
 		if(mysql_num_rows($author) == 1){
 			$author = mysql_fetch_object($author);
 
@@ -122,7 +122,7 @@ function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 		else
 			$mysql_editor = 'Y';
 
-		$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
+		$publicationsResult = _mysql_query("SELECT publications.`pub_id` FROM
 		`a2publicationauthorlink` relations,
 		`a2publication` publications
 	WHERE

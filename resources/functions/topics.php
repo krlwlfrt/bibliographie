@@ -51,7 +51,7 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
  * @return boolean True on success or false otherwise.
  */
 function bibliographie_topics_create_topic ($name, $description, $url, $topics) {
-	$return = mysql_query("INSERT INTO `a2topics` (
+	$return = _mysql_query("INSERT INTO `a2topics` (
 	`name`,
 	`description`,
 	`url`
@@ -65,7 +65,7 @@ function bibliographie_topics_create_topic ($name, $description, $url, $topics) 
 
 	if(count($topics) > 0)
 		foreach($topics as $parentTopic)
-			mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
+			_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
 
 	$data = json_encode(array(
 		'topic_id' => (int) $topic_id,
@@ -91,7 +91,7 @@ function bibliographie_topics_get_subtopics ($topic_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics.json'));
 
-		$subtopics = mysql_query("SELECT `source_topic_id` FROM `a2topictopiclink` WHERE `target_topic_id` = ".((int) $topic_id));
+		$subtopics = _mysql_query("SELECT `source_topic_id` FROM `a2topictopiclink` WHERE `target_topic_id` = ".((int) $topic_id));
 
 		$subtopicsArray = array();
 		while($subtopic = mysql_fetch_object($subtopics)){
@@ -121,7 +121,7 @@ function bibliographie_topics_parse_subtopics ($topic_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'));
 
-		$topics = mysql_query("SELECT `topic_id`, `name`, `amount_of_subtopics` FROM
+		$topics = _mysql_query("SELECT `topic_id`, `name`, `amount_of_subtopics` FROM
 	`a2topictopiclink` relations,
 	`a2topics` topics
 LEFT JOIN (
@@ -169,9 +169,9 @@ ORDER BY
  * @param type $topics
  */
 function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, $topics) {
-	mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." LIMIT ".count(bibliographie_topics_get_parent_topics($topic_id)));
+	_mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." LIMIT ".count(bibliographie_topics_get_parent_topics($topic_id)));
 
-	$return = mysql_query("UPDATE `a2topics` SET
+	$return = _mysql_query("UPDATE `a2topics` SET
 	`name`= '".mysql_real_escape_string(stripslashes($name))."',
 	`description` = '".mysql_real_escape_string(stripslashes($description))."',
 	`url` = '".mysql_real_escape_string(stripslashes($url))."'
@@ -181,7 +181,7 @@ LIMIT 1");
 
 	if(count($topics) > 0)
 		foreach($topics as $parentTopic)
-			mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
+			_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
 
 	$data = json_encode(array(
 		'topic_id' => (int) $topic_id,
@@ -214,7 +214,7 @@ function bibliographie_topics_get_data ($topic_id, $type = 'object') {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'), $assoc);
 		}
 
-		$topic = mysql_query("SELECT `topic_id`, `name`, `description`, `url` FROM `a2topics` WHERE `topic_id` = ".((int) $topic_id));
+		$topic = _mysql_query("SELECT `topic_id`, `name`, `description`, `url` FROM `a2topics` WHERE `topic_id` = ".((int) $topic_id));
 		if(mysql_num_rows($topic) == 1){
 			if($type == 'object')
 				$topic = mysql_fetch_object($topic);
@@ -242,7 +242,7 @@ function bibliographie_topics_get_locked_topics () {
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'));
 
 	$topicsArray = array();
-	$topics = mysql_query("SELECT `topic_id` FROM `lockedtopics` ORDER BY `topic_id`");
+	$topics = _mysql_query("SELECT `topic_id` FROM `lockedtopics` ORDER BY `topic_id`");
 	if(mysql_num_rows($topics)){
 		while($topic = mysql_fetch_object($topics))
 			$topicsArray[] = $topic->topic_id;
@@ -277,7 +277,7 @@ function bibliographie_topics_get_publications ($topic_id, $includeSubtopics) {
 					$mysqlString .= " OR relations.`topic_id` = ".((int) $subtopic);
 		}
 
-		$publicationsResult = mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
+		$publicationsResult = _mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2topicpublicationlink` relations,
 	`a2publication` publications
 WHERE
@@ -331,7 +331,7 @@ function bibliographie_topics_get_parent_topics ($topic_id, $recursive = false) 
 		if(is_object($topic)){
 			$return = array();
 
-			$parentTopics = mysql_query("SELECT `target_topic_id` FROM
+			$parentTopics = _mysql_query("SELECT `target_topic_id` FROM
 		`a2topictopiclink` relations,
 		`a2topics` topics
 	WHERE
@@ -355,6 +355,27 @@ function bibliographie_topics_get_parent_topics ($topic_id, $recursive = false) 
 			}
 
 			return array_unique($return);
+		}
+	}
+
+	return false;
+}
+
+/**
+ *
+ * @param type $topic_id
+ * @param type $options
+ */
+function bibliographie_topics_parse_name ($topic_id, $options = array()) {
+	if(is_numeric($topic_id)){
+		$topic = bibliographie_topics_get_data($topic_id);
+
+		if(is_object($topic)){
+			$topic->name = htmlspecialchars($topic->name);
+			if($options['linkProfile'] == true and $topic->topic_id != 1)
+				$topic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.$topic->name.'</a>';
+
+			return $topic->name;
 		}
 	}
 

@@ -94,7 +94,7 @@ switch($_GET['task']){
 					$where_clause .= "`pub_id` = ".((int) $publication);
 				}
 
-				$tags = mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
 	SELECT * FROM `a2tags`
 ) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
 
@@ -123,7 +123,7 @@ switch($_GET['task']){
 	break;
 
 	case 'showPublications':
-		$author = mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
+		$author = _mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
 		if(mysql_num_rows($author) == 1){
 			$author = mysql_fetch_object($author);
 ?>
@@ -136,9 +136,9 @@ switch($_GET['task']){
 	break;
 
 	case 'showList':
-		$initialsResult = mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
+		$initialsResult = _mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
 
-		$miscResult = mysql_num_rows(mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
+		$miscResult = mysql_num_rows(_mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
 
 		$whereClause = "";
 		if(empty($_GET['initial'])){
@@ -178,7 +178,7 @@ switch($_GET['task']){
 
 <h3>List of authors</h3>
 <?php
-		$authorsResult = mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
+		$authorsResult = _mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
 
 		if(mysql_num_rows($authorsResult) > 0){
 ?>

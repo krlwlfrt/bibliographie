@@ -19,7 +19,7 @@ switch($_GET['task']){
 					'number'
 				);
 
-			$result = mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
+			$result = _mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
 
 			if(mysql_num_rows($result) > 0){
 				echo '<h3>Chronology of '.htmlspecialchars($_GET['container']).'</h3>';
@@ -50,7 +50,7 @@ switch($_GET['task']){
 					'number'
 				);
 
-			$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
+			$result = _mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
 
 			if(mysql_num_rows($result) > 0){
 	?>
@@ -888,16 +888,58 @@ $(function() {
 				if(!empty($publication[$dataKey])){
 					if($dataKey == 'url')
 						$publication['url'] = '<a href="'.$publication['url'].'">'.$publication['url'].'</a>';
+
 					elseif($dataKey == 'booktitle')
 						$publication['booktitle'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&amp;container='.htmlspecialchars($publication['booktitle']).'">'.htmlspecialchars($publication['booktitle']).'</a>';
+
 					elseif($dataKey == 'journal')
 						$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&amp;container='.htmlspecialchars($publication['journal']).'">'.htmlspecialchars($publication['journal']).'</a>';
+
 					elseif($dataKey == 'user_id')
 						$publication['user_id'] = bibliographie_user_get_name($publication['user_id']);
+
 					else
 						$publication[$dataKey] = htmlspecialchars($publication[$dataKey]);
 
 					echo '<tr><td><strong>'.$dataLabel.'</strong></td><td>'.$publication[$dataKey].'</td></tr>';
+				}elseif(in_array($dataKey, array('authors', 'editors', 'topics', 'tags'))){
+					$notEmpty = false;
+					if($dataKey == 'authors'){
+						$authors = bibliographie_publications_get_authors($publication['pub_id'], 'name');
+						if(is_array($authors) and count($authors) > 0){
+							$notEmpty = true;
+
+							foreach($authors as $author)
+								$publication['authors'] .= bibliographie_authors_parse_data($author, array('linkProfile' => true)).'<br />';
+						}
+					}elseif($dataKey == 'editors'){
+						$editors = bibliographie_publications_get_editors($publication['pub_id'], 'name');
+						if(is_array($editors) and count($editors) > 0){
+							$notEmpty = true;
+
+							foreach($editors as $editor)
+								$publication['editors'] .= bibliographie_authors_parse_data($editor, array('linkProfile' => true)).'<br />';
+						}
+					}elseif($dataKey == 'topics'){
+						$topics = bibliographie_publications_get_topics($publication['pub_id']);
+						if(is_array($topics) and count($topics) > 0){
+							$notEmpty = true;
+
+							foreach($topics as $topic)
+								$publication['topics'] .= bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'<br />';
+						}
+					}elseif($dataKey == 'tags'){
+						$tags = bibliographie_publications_get_tags($publication['pub_id']);
+						if(is_array($tags) and count($tags) > 0){
+							$notEmpty = true;
+
+							foreach($tags as $tag)
+								$publication['tags'] .= bibliographie_tags_parse_tag($tag, array('linkProfile' => true)).'<br />';
+						}
+					}
+
+					if($notEmpty)
+						echo '<tr><td><strong>'.$dataLabel.'</strong></td><td>'.$publication[$dataKey].'</td></tr>';
 				}
 			}
 			echo '</table>';

@@ -51,14 +51,16 @@ if(mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPH
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	exit('Sorry, but we have no access to the database.');
 
+$bibliographie_database_queries = array();
+
 if(!bibliographie_user_get_id())
 	exit('<!DOCTYPE html><html lang="de"><title>Account missing!</title></head><body><h1>Account missing!</h1><p>Sorry, but you do not have an account for bibliographie!</p></body></html>');
 
 /**
  * Initialize UTF-8.
  */
-mysql_query("SET NAMES 'utf8'");
-mysql_query("SET CHARACTER SET 'utf8'");
+_mysql_query("SET NAMES 'utf8'");
+_mysql_query("SET CHARACTER SET 'utf8'");
 
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -120,7 +122,7 @@ function bibliographie_log ($category, $action, $data) {
 	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
 	$time = date('r');
 
-	mysql_query("INSERT INTO `log` (
+	_mysql_query("INSERT INTO `log` (
 	`log_file`,
 	`log_time`
 ) VALUES (
@@ -235,7 +237,7 @@ function bibliographie_user_get_id ($name = null) {
 		$name = $_SERVER['PHP_AUTH_USER'];
 
 	if(empty($cache[$name])){
-		$user = mysql_query("SELECT * FROM `a2users` WHERE `login` = '".mysql_real_escape_string(stripslashes($name))."'");
+		$user = _mysql_query("SELECT * FROM `a2users` WHERE `login` = '".mysql_real_escape_string(stripslashes($name))."'");
 		if(mysql_num_rows($user)){
 			$user = mysql_fetch_object($user);
 			if($user->login == $name)
@@ -248,7 +250,7 @@ function bibliographie_user_get_id ($name = null) {
 
 function bibliographie_user_get_name ($user_id) {
 	if(is_numeric($user_id)){
-		$user = mysql_query("SELECT * FROM `a2users` WHERE `user_id` = ".((int) $user_id));
+		$user = _mysql_query("SELECT * FROM `a2users` WHERE `user_id` = ".((int) $user_id));
 
 		if(mysql_num_rows($user) == 1){
 			$user = mysql_fetch_object($user);
@@ -267,6 +269,45 @@ function bibliographie_user_get_name ($user_id) {
  */
 function bibliographie_dialog_create ($id, $title, $text) {
 	echo '<div id="'.$id.'" title="'.$title.'" class="ui-dialog">'.$text.'</div>';
+}
+
+function _mysql_query($query) {
+	global $bibliographie_database_queries;
+
+	$timer = microtime(true);
+	$return = mysql_query($query);
+
+	$error = (string) '';
+	if(mysql_errno() != 0)
+		$error = mysql_errno().': '.mysql_error();
+
+	$callStack = debug_backtrace();
+	$function = (string) '';
+	if(!empty($callStack[1]['function'])){
+		$args = (string) '';
+		if(is_array($callStack[1]['args']) and count($callStack[1]['args']))
+			$args = implode(',', $callStack[1]['args']);
+		$function = ' in '.$callStack[1]['function'].'('.$args.')';
+	}
+
+	$bibliographie_database_queries[] = array (
+		'query' => htmlspecialchars($query),
+		'time' => round(microtime(true) - $timer, 5),
+		'error' => $error,
+		'callStack' => 'from '.$callStack[0]['file'].':'.$callStack[0]['line'].$function
+	);
+
+	return $return;
+}
+
+function bibliographie_database_total_query_time () {
+	global $bibliographie_database_queries;
+
+	$time = 0;
+	foreach($bibliographie_database_queries as $query)
+		$time += $query['time'];
+
+	return $time;
 }
 
 /**

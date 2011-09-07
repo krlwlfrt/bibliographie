@@ -35,7 +35,7 @@ switch($_GET['task']){
 				$mysql_string .= "`pub_id` = ".((int) $publication);
 			}
 
-			$result = mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
+			$result = _mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
 			if(mysql_num_rows($result) > 0){
 				$bibtex = new Structures_BibTex(array(
 					'stripDelimiter' => true,
@@ -364,7 +364,7 @@ switch($_GET['task']){
 		if(mb_strlen($_GET['title']) >= 3){
 			$result['status'] = 'success';
 
-			$searchResults = mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['title']))."' IN NATURAL LANGUAGE MODE)) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `pub_id` != ".((int) $_GET['pub_id'])." AND `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$searchResults = _mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['title']))."' IN NATURAL LANGUAGE MODE)) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `pub_id` != ".((int) $_GET['pub_id'])." AND `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 			$results = array();
 			if(mysql_num_rows($searchResults) > 0){

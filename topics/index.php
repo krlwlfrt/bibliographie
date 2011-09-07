@@ -217,7 +217,7 @@ $(function () {
 					$where_clause .= "`pub_id` = ".((int) $publication);
 				}
 
-				$tags = mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
 	SELECT * FROM `a2tags`
 ) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
 

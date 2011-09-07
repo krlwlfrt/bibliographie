@@ -5,7 +5,7 @@
  * @return int
  */
 function bibliographie_tags_create_tag ($tag) {
-	$return = mysql_query("INSERT INTO `a2tags` (
+	$return = _mysql_query("INSERT INTO `a2tags` (
 	`tag`
 ) VALUES (
 	'".mysql_real_escape_string(stripslashes($tag))."'
@@ -30,7 +30,7 @@ function bibliographie_tags_create_tag ($tag) {
  * @return mixed String on success, false on error.
  */
 function bibliographie_tags_tag_by_id ($tag_id) {
-	$tag_result = mysql_query("SELECT * FROM `a2tags` WHERE `tag_id` = ".((int) $tag_id));
+	$tag_result = _mysql_query("SELECT * FROM `a2tags` WHERE `tag_id` = ".((int) $tag_id));
 	if(mysql_num_rows($tag_result)){
 		$tag = mysql_fetch_object($tag_result);
 		return $tag->tag;
@@ -55,7 +55,7 @@ function bibliographie_tags_get_data ($tag_id, $type = 'object') {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_data.json'), $assoc);
 		}
 
-		$tag = mysql_query("SELECT * FROM `a2tags` WHERE `tag_id` = ".((int) $tag_id));
+		$tag = _mysql_query("SELECT * FROM `a2tags` WHERE `tag_id` = ".((int) $tag_id));
 		if(mysql_num_rows($tag) == 1){
 			if($type == 'object')
 				$tag = mysql_fetch_object($tag);
@@ -101,7 +101,7 @@ function bibliographie_tags_get_publications ($tag_id, $options = array()) {
 			$where_clause = " AND publications.`pub_id` = topics.`pub_id` AND topics.`topic_id` = ".((int) $options['topic_id'])." ";
 		}
 
-		$publicationsResult = mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
+		$publicationsResult = _mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
 	`a2publication` publications".$add_table."
 WHERE
@@ -154,4 +154,21 @@ function bibliographie_tags_print_cloud ($tags, $options = array()) {
 </div>
 <?php
 	}
+}
+
+function bibliographie_tags_parse_tag ($tag_id, $options = array()) {
+	if(is_numeric($tag_id)){
+		$tag = bibliographie_tags_get_data($tag_id);
+
+		if(is_object($tag)){
+			$tag->tag = htmlspecialchars($tag->tag);
+
+			if($options['linkProfile'] == true)
+				$tag->tag = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $tag->tag_id).'">'.$tag->tag.'</a>';
+
+			return $tag->tag;
+		}
+	}
+
+	return false;
 }

@@ -56,7 +56,7 @@ switch($_GET['task']){
 			
 			$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
 
-			$authors = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$authors = _mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 			if(mysql_num_rows($authors)){
 				while($author = mysql_fetch_object($authors)){

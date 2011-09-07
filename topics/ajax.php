@@ -40,7 +40,7 @@ function bibliographie_topics_toggle_visibility_of_subtopics (topic_id, repeat_i
 		$result = array();
 
 		if(mb_strlen($_GET['query']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
-			$topics = mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['query'])))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$topics = _mysql_query("SELECT * FROM (SELECT `topic_id`, `name`, (MATCH(`name`, `description`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['query'])))."')) AS `relevancy` FROM `a2topics`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 			if(mysql_num_rows($topics) > 0){
 				while($topic = mysql_fetch_object($topics))
