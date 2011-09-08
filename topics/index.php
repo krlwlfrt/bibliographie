@@ -156,6 +156,7 @@ $(function () {
 		theme: 'facebook',
 		prePopulate: <?php echo json_encode($prePopulateTopics)?>,
 		noResultsText: 'Results are in the container to the right!',
+		queryParam: 'query',
 		onResult: function (results) {
 			$('#topicsContainer').html('<div style="margin-bottom: 10px;"><strong>Topics search result</strong></div>');
 			if(results.length > 0){

@@ -316,17 +316,21 @@ function bibliographie_publications_get_data ($publication_id, $type = 'object')
  * @param bool $textOnly
  * @return string
  */
-function bibliographie_publications_parse_data ($publication_id, $style = 'standard', $textOnly = false) {
+function bibliographie_publications_parse_data ($publication_id, $style = 'standard', array $options = array()) {
 	if(is_numeric($publication_id) and strpos($style, '..') === false and strpos($style, '/') === false){
 		$fileExtension = 'html';
-		if($textOnly)
+		if($options['plainText'] == true)
 			$fileExtension = 'txt';
+
+		$optionsSerialized = md5('');
+		if(count($optionsSerialized) > 0)
+			$optionsSerialized = md5(implode(',', array_keys($options)).';'.implode(',', array_values($options)));
 
 		/**
 		 * Return cached result if possible.
 		 */
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'.'.$fileExtension))
-			return file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'.'.$fileExtension);
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'_'.$optionsSerialized.'.'.$fileExtension))
+			return file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'_'.$optionsSerialized.'.'.$fileExtension);
 
 		/**
 		 * Get data of publication.
@@ -372,7 +376,10 @@ ORDER BY authors.`surname`, authors.`firstname`");
 				else
 					$parsedAuthor = $author->firstname.' '.$author->surname;
 
-				$parsedAuthors .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
+				if($options['noLinks'] != true)
+					$parsedAuthor = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
+
+				$parsedAuthors .= $parsedAuthor;
 
 				$i++;
 			}
@@ -382,15 +389,16 @@ ORDER BY authors.`surname`, authors.`firstname`");
 			if($settings['title']['titleStyle'] == 'italic')
 				$publication['title'] = '<em>'.$publication['title'].'</em>';
 
-			$publication['title'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&pub_id='.$publication['pub_id'].'">'.$publication['title'].'</a>';
+			if($options['noLinks'] != true)
+				$publication['title'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&pub_id='.$publication['pub_id'].'">'.$publication['title'].'</a>';
 
 			if(empty($publication['pages']) and !empty($publication['firstpage']) and !empty($publication['lastPage']))
 				$publication['pages'] = ((int) $publication['firstpage']).'-'.((int) $publication['lastpage']);
 
-			if(!empty($publication['journal']))
+			if(!empty($publication['journal']) and $options['noLinks'] != true)
 				$publication['journal'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&amp;container='.htmlspecialchars($publication['journal']).'">'.htmlspecialchars($publication['journal']).'</a>';
 
-			if(!empty($publication['booktitle']))
+			if(!empty($publication['booktitle']) and $options['noLinks'] != true)
 				$publication['booktitle'] = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&amp;container='.htmlspecialchars($publication['booktitle']).'">'.htmlspecialchars($publication['booktitle']).'</a>';
 
 			foreach($publication as $key => $value){
@@ -400,17 +408,41 @@ ORDER BY authors.`surname`, authors.`firstname`");
 				$parsedPublication = str_replace('['.$key.']', $value, $parsedPublication);
 			}
 
-			if($textOnly)
+			if($options['plainText'])
 				$parsedPublication = strip_tags($parsedPublication);
 
 			if(BIBLIOGRAPHIE_CACHING){
-				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication['pub_id'].'_parsed_'.$style.'.'.$fileExtension, 'w+');
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.$publication_id.'_parsed_'.$style.'_'.$optionsSerialized.'.'.$fileExtension, 'w+');
 				fwrite($cacheFile, $parsedPublication);
 				fclose($cacheFile);
 			}
 
 			return $parsedPublication;
 		}
+	}
+
+	return false;
+}
+
+function bibliographie_publications_parse_list (array $publications, $type = 'html') {
+	if(count($publications) > 0){
+		if(!in_array($type, array('html', 'text')))
+			$type = 'html';
+
+		$newLine = '<br />'.PHP_EOL;
+		$options = array (
+			'noLinks' => true
+		);
+		if($type == 'text'){
+			header('Content-Type: text/plain; charset=UTF-8');
+			$newLine = PHP_EOL;
+			$options = array (
+				'plainText' => true
+			);
+		}
+
+		foreach($publications as $publication)
+			echo bibliographie_publications_parse_data($publication, 'standard', $options).$newLine;
 	}
 
 	return false;

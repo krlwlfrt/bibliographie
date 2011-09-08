@@ -15,6 +15,8 @@ switch($_GET['task']){
 			$title = 'Choose export format';
 			$text = '<h3>Export publications</h3>
 <p class="notice">You\'re about to export '.count($publications).' publication(s). Please choose the format that you want to export into.</p>
+	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=html&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-code').' HTML</a><br />
+		<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=text&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-text').' Text</a><br />
 <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-actionscript').' BibTex</a><br />
 <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-word').' RTF</a>';
 		}
@@ -26,63 +28,68 @@ switch($_GET['task']){
 		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
 
 		if(is_array($publications) and count($publications) > 0){
-			$mysql_string = "";
+			if(in_array($_GET['target'], array('html', 'text'))){
+				bibliographie_publications_parse_list($publications, $_GET['target']);
+			}else{
+				$mysql_string = "";
 
-			foreach($publications as $publication){
-				if(!empty($mysql_string))
-					$mysql_string .= " OR ";
+				foreach($publications as $publication){
+					if(!empty($mysql_string))
+						$mysql_string .= " OR ";
 
-				$mysql_string .= "`pub_id` = ".((int) $publication);
-			}
-
-			$result = _mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
-			if(mysql_num_rows($result) > 0){
-				$bibtex = new Structures_BibTex(array(
-					'stripDelimiter' => true,
-					'validate' => true,
-					'unwrap' => true,
-					'removeCurlyBraces' => true,
-					'extractAuthors' => true
-				));
-
-				while($publication = mysql_fetch_assoc($result)){
-					$publication['entryType'] = $publication['pub_type'];
-					if(empty($publication['bibtex_id']))
-						$publication['bibtex_id'] = md5($publication['title']);
-					$publication['cite'] = $publication['bibtex_id'];
-
-					$authors = bibliographie_publications_get_authors($publication['pub_id']);
-					$editors = bibliographie_publications_get_editors($publication['pub_id']);
-
-					unset($publication['pub_id'], $publication['pub_type'], $publication['bibtex_id']);
-
-					if(is_array($authors) and count($authors) > 0)
-						foreach($authors as $author)
-							$publication['author'][] = bibliographie_authors_parse_data($author, array('forBibTex' => true));
-
-					if(is_array($editors) and count($editors) > 0)
-						foreach($editors as $editor)
-							$publication['editor'][] = bibliographie_authors_parse_data($editor, array('forBibTex' => true));
-
-					$_publication = array();
-					foreach($publication as $key => $field)
-						if(!empty($field))
-							$_publication[$key] = $field;
-
-					$bibtex->data[] = $_publication;
+					$mysql_string .= "`pub_id` = ".((int) $publication);
 				}
 
-				if($_GET['target'] == 'bibTex'){
-					header('Content-Type: text/plain; charset=UTF-8');
-					echo $bibtex->bibtex();
-				}elseif($_GET['target'] == 'rtf'){
-					$rtf = $bibtex->rtf();
-					$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');
-					fwrite($file, $rtf);
-					fclose($file);
-					header('Location: '.BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf');
-				}
+				$result = _mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE ".$mysql_string." ORDER BY `title`");
+				if(mysql_num_rows($result) > 0){
+					if(in_array($_GET['target'], array('bibTex', 'rtf'))){
+						$bibtex = new Structures_BibTex(array(
+							'stripDelimiter' => true,
+							'validate' => true,
+							'unwrap' => true,
+							'removeCurlyBraces' => true,
+							'extractAuthors' => true
+						));
 
+						while($publication = mysql_fetch_assoc($result)){
+							$publication['entryType'] = $publication['pub_type'];
+							if(empty($publication['bibtex_id']))
+								$publication['bibtex_id'] = md5($publication['title']);
+							$publication['cite'] = $publication['bibtex_id'];
+
+							$authors = bibliographie_publications_get_authors($publication['pub_id']);
+							$editors = bibliographie_publications_get_editors($publication['pub_id']);
+
+							unset($publication['pub_id'], $publication['pub_type'], $publication['bibtex_id']);
+
+							if(is_array($authors) and count($authors) > 0)
+								foreach($authors as $author)
+									$publication['author'][] = bibliographie_authors_parse_data($author, array('forBibTex' => true));
+
+							if(is_array($editors) and count($editors) > 0)
+								foreach($editors as $editor)
+									$publication['editor'][] = bibliographie_authors_parse_data($editor, array('forBibTex' => true));
+
+							$_publication = array();
+							foreach($publication as $key => $field)
+								if(!empty($field))
+									$_publication[$key] = $field;
+
+							$bibtex->data[] = $_publication;
+						}
+
+						if($_GET['target'] == 'bibTex'){
+							header('Content-Type: text/plain; charset=UTF-8');
+							echo $bibtex->bibtex();
+						}elseif($_GET['target'] == 'rtf'){
+							$rtf = $bibtex->rtf();
+							$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');
+							fwrite($file, $rtf);
+							fclose($file);
+							header('Location: '.BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf');
+						}
+					}
+				}
 			}
 		}
 	break;

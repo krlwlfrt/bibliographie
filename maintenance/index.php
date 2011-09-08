@@ -80,6 +80,16 @@ function bibliographie_maintenance_run_consistency_check (id) {
 		$title = 'ToDo list';
 ?>
 
+<h4>Publication editor</h4>
+<ul>
+	<li>Editor Felder ausblenden, wenn nicht verfügbar...</li>
+	<li>Unscharfe Topic und Tag Suche</li>
+	<li>Alle nicht obligatorischen Text-Felder zusammenklappen</li>
+	<li>jQuery-Plugin Felder stylen... Obligatorische Felder rot färben.</li>
+	<li>Sonderzeichen Tabelle</li>
+	<li>Auf fehlende Felder einmal hinweisen, und beim zweiten speichern ignorieren ...</li>
+</ul>
+
 <h4>Topics</h4>
 <ul>
 	<li>Detect circles</li>
@@ -89,6 +99,19 @@ function bibliographie_maintenance_run_consistency_check (id) {
 <h4>Notes</h4>
 <ul>
 	<li>private Notizen</li>
+</ul>
+
+<h4>Publikation</h4>
+<ul>
+	<li>Alle Publikationen ohne Topic anzeigen</li>
+</ul>
+
+<h4>Import</h4>
+<ul>
+	<li>Autoren-approval rückgängig machen... Und neu approven...</li>
+	<li>Alle Autoren einer Publikation approven</li>
+	<li>Quellen: Amazon und PubMED</li>
+	<li>Möglichst buttons statt links</li>
 </ul>
 
 <h4>Parsing</h4>
@@ -101,6 +124,12 @@ function bibliographie_maintenance_run_consistency_check (id) {
 <ul>
 	<li>Detect wrong coded authors by searching for entries which do not REGEXP against [:alpha:].</li>
 	<li>Datenbank aus Log wiederherstellen...</li>
+</ul>
+
+<h4>Suche</h4>
+<ul>
+	<li>Set von Autoren</li>
+	<li>Zeiträume</li>
 </ul>
 <?php
 	break;
