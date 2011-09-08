@@ -481,22 +481,26 @@ function bibliographie_fetch_data_proceed (data) {
 
 		<p id="authorOrEditorNotice" class="notice" style="display: none;"><span class="silk-icon silk-icon-asterisk-yellow"></span> Either you have to fill an author or an editor!</p>
 
-		<label for="author" class="block">Author(s)</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('author')"><span class="silk-icon silk-icon-user-add"></span> Add new author</a></em>
-		<input type="text" id="author" name="author" style="width: 100%" value="<?php echo htmlspecialchars($_POST['author'])?>" />
+		<div id="authorContainer">
+			<label for="author" class="block">Author(s)</label>
+			<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('author')"><span class="silk-icon silk-icon-user-add"></span> Add new author</a></em>
+			<input type="text" id="author" name="author" style="width: 100%" value="<?php echo htmlspecialchars($_POST['author'])?>" />
+		</div>
 
-		<label for="editor" class="block">Editor(s)</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('editor')"><span class="silk-icon silk-icon-user-add"></span> Add new editor</a></em>
-		<input type="text" id="editor" name="editor" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editor'])?>" />
+		<div id="editorContainer">
+			<label for="editor" class="block">Editor(s)</label>
+			<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_person_form('editor')"><span class="silk-icon silk-icon-user-add"></span> Add new editor</a></em>
+			<input type="text" id="editor" name="editor" style="width: 100%" value="<?php echo htmlspecialchars($_POST['editor'])?>" />
+		</div>
 
 		<label for="title" class="block">Title</label>
-		<input type="text" id="title" name="title" style="width: 80%" value="<?php echo htmlspecialchars($_POST['title'])?>" />
+		<input type="text" id="title" name="title" style="width: 80%" value="<?php echo htmlspecialchars($_POST['title'])?>" class="bibtex" />
 		<div id="similarTitleContainer" style="background: #fff; border: 1px solid #aaa; color: #000; display: none; float: right; font-size: 0.8em; padding: 5px; width: 80%"></div>
 		<br style="clear: both;" />
 
 		<div style="float: right; width: 50%">
 			<label for="month" class="block">Month</label>
-			<select id="month" name="month" style="width: 100%">
+			<select id="month" name="month" style="width: 100%" class="bibtex">
 				<option value=""></option>
 <?php
 			foreach($bibliographie_publication_months as $month){
@@ -511,93 +515,8 @@ function bibliographie_fetch_data_proceed (data) {
 		</div>
 
 		<label for="year" class="block">Year</label>
-		<input type="text" id="year" name="year" style="width: 45%" value="<?php echo htmlspecialchars($_POST['year'])?>" />
+		<input type="text" id="year" name="year" style="width: 45%" value="<?php echo htmlspecialchars($_POST['year'])?>" class="bibtex" />
 	</div>
-
-
-	<div class="unit collapsible"><h4>Association</h4>
-		<label for="booktitle" class="block">Booktitle</label>
-		<input type="text" id="booktitle" name="booktitle" style="width: 100%" value="<?php echo htmlspecialchars($_POST['booktitle'])?>" />
-
-		<label for="chapter" class="block">Chapter</label>
-		<input type="text" id="chapter" name="chapter" style="width: 100%" value="<?php echo htmlspecialchars($_POST['chapter'])?>" />
-
-		<label for="series" class="block">Series</label>
-		<input type="text" id="series" name="series" style="width: 100%" value="<?php echo htmlspecialchars($_POST['series'])?>" />
-
-		<label for="journal" class="block">Journal</label>
-		<input type="text" id="journal" name="journal" style="width: 100%" value="<?php echo htmlspecialchars($_POST['journal'])?>" />
-
-		<label for="volume" class="block">Volume</label>
-		<input type="text" id="volume" name="volume" style="width: 100%" value="<?php echo htmlspecialchars($_POST['volume'])?>" />
-
-		<label for="number" class="block">Number</label>
-		<input type="text" id="number" name="number" style="width: 100%" value="<?php echo htmlspecialchars($_POST['number'])?>" />
-
-		<label for="edition" class="block">Edition</label>
-		<input type="text" id="edition" name="edition" style="width: 100%" value="<?php echo htmlspecialchars($_POST['edition'])?>" />
-	</div>
-
-
-	<div class="unit collapsible"><h4>Publishing & organization</h4>
-		<label for="publisher" class="block">Publisher</label>
-		<input type="text" id="publisher" name="publisher" style="width: 100%" value="<?php echo htmlspecialchars($_POST['publisher'])?>" />
-
-		<label for="location" class="block">Location <em>of publisher</em></label>
-		<input type="text" id="location" name="location" style="width: 100%" value="<?php echo htmlspecialchars($_POST['location'])?>" />
-
-		<label for="howpublished" class="block">How published</label>
-		<input type="text" id="howpublished" name="howpublished" style="width: 100%" value="<?php echo htmlspecialchars($_POST['howpublished'])?>" />
-
-		<label for="organization" class="block">Organization</label>
-		<input type="text" id="organization" name="organization" style="width: 100%" value="<?php echo htmlspecialchars($_POST['organization'])?>" />
-
-		<label for="institution" class="block">Institution</label>
-		<input type="text" id="institution" name="institution" style="width: 100%" value="<?php echo htmlspecialchars($_POST['institution'])?>" />
-
-		<label for="school" class="block">School</label>
-		<input type="text" id="school" name="school" style="width: 100%" value="<?php echo htmlspecialchars($_POST['school'])?>" />
-
-		<label for="address" class="block">Address</label>
-		<input type="text" id="address" name="address" style="width: 100%" value="<?php echo htmlspecialchars($_POST['address'])?>" />
-	</div>
-
-
-	<div class="unit collapsible"><h4>Pagination</h4>
-		<label for="pages" class="block">Pages</label>
-		<input type="text" id="pages" name="pages" style="width: 50%" value="<?php echo htmlspecialchars(str_replace('--', '-', $_POST['pages']))?>" />
-	</div>
-
-
-	<div class="unit"><h4>Descriptional stuff</h4>
-		<label for="note" class="block">Note</label>
-		<textarea id="note" name="note" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['note'])?></textarea>
-
-		<label for="abstract" class="block">Abstract</label>
-		<textarea id="abstract" name="abstract" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['abstract'])?></textarea>
-
-		<label for="userfields" class="block">User fields</label>
-		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
-
-		<label for="bibtex_id" class="block">bibtex_id</label>
-		<input id="bibtex_id" name="bibtex_id" style="width: 100%" value="<?php echo htmlspecialchars($_POST['bibtex_id'])?>" />
-	</div>
-
-
-	<div class="unit"><h4>Identification</h4>
-		<label for="isbn" class="block">ISBN <em>for books</em></label>
-		<input type="text" id="isbn" name="isbn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['isbn'])?>" />
-
-		<label for="issn" class="block">ISSN <em>for journals</em></label>
-		<input type="text" id="issn" name="issn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['issn'])?>" />
-
-		<label for="doi" class="block">DOI <em>of publication</em></label>
-		<input type="text" id="doi" name="doi" style="width: 100%" value="<?php echo htmlspecialchars($_POST['doi'])?>" />
-
-		<label for="url" class="block">URL <em>of publication</em></label>
-		<input type="text" id="url" name="url" style="width: 100%" value="<?php echo htmlspecialchars($_POST['url'])?>" />
-	</div>
-
 
 	<div class="unit"><h4>Topics & tags</h4>
 		<label for="topics" class="block">Topics</label>
@@ -608,6 +527,85 @@ function bibliographie_fetch_data_proceed (data) {
 		<label for="tags" class="block">Tags</label>
 		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a></em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
+	</div>
+
+	<div class="unit bibtex"><h4>Association</h4>
+		<label for="booktitle" class="block">Booktitle</label>
+		<input type="text" id="booktitle" name="booktitle" style="width: 100%" value="<?php echo htmlspecialchars($_POST['booktitle'])?>" class="bibtex" />
+
+		<label for="chapter" class="block">Chapter</label>
+		<input type="text" id="chapter" name="chapter" style="width: 100%" value="<?php echo htmlspecialchars($_POST['chapter'])?>" class="bibtex" />
+
+		<label for="series" class="block">Series</label>
+		<input type="text" id="series" name="series" style="width: 100%" value="<?php echo htmlspecialchars($_POST['series'])?>" class="bibtex" />
+
+		<label for="journal" class="block">Journal</label>
+		<input type="text" id="journal" name="journal" style="width: 100%" value="<?php echo htmlspecialchars($_POST['journal'])?>" class="bibtex" />
+
+		<label for="volume" class="block">Volume</label>
+		<input type="text" id="volume" name="volume" style="width: 100%" value="<?php echo htmlspecialchars($_POST['volume'])?>" class="bibtex" />
+
+		<label for="number" class="block">Number</label>
+		<input type="text" id="number" name="number" style="width: 100%" value="<?php echo htmlspecialchars($_POST['number'])?>" class="bibtex" />
+
+		<label for="edition" class="block">Edition</label>
+		<input type="text" id="edition" name="edition" style="width: 100%" value="<?php echo htmlspecialchars($_POST['edition'])?>" class="bibtex" />
+	</div>
+
+	<div class="unit bibtex"><h4>Publishing & organization</h4>
+		<label for="publisher" class="block">Publisher</label>
+		<input type="text" id="publisher" name="publisher" style="width: 100%" value="<?php echo htmlspecialchars($_POST['publisher'])?>" class="bibtex" />
+
+		<label for="location" class="block">Location <em>of publisher</em></label>
+		<input type="text" id="location" name="location" style="width: 100%" value="<?php echo htmlspecialchars($_POST['location'])?>" class="bibtex" />
+
+		<label for="howpublished" class="block">How published</label>
+		<input type="text" id="howpublished" name="howpublished" style="width: 100%" value="<?php echo htmlspecialchars($_POST['howpublished'])?>" class="bibtex" />
+
+		<label for="organization" class="block">Organization</label>
+		<input type="text" id="organization" name="organization" style="width: 100%" value="<?php echo htmlspecialchars($_POST['organization'])?>" class="bibtex" />
+
+		<label for="institution" class="block">Institution</label>
+		<input type="text" id="institution" name="institution" style="width: 100%" value="<?php echo htmlspecialchars($_POST['institution'])?>" class="bibtex" />
+
+		<label for="school" class="block">School</label>
+		<input type="text" id="school" name="school" style="width: 100%" value="<?php echo htmlspecialchars($_POST['school'])?>" class="bibtex" />
+
+		<label for="address" class="block">Address</label>
+		<input type="text" id="address" name="address" style="width: 100%" value="<?php echo htmlspecialchars($_POST['address'])?>" class="bibtex" />
+	</div>
+
+	<div class="unit bibtex"><h4>Pagination</h4>
+		<label for="pages" class="block">Pages</label>
+		<input type="text" id="pages" name="pages" style="width: 50%" value="<?php echo htmlspecialchars(str_replace('--', '-', $_POST['pages']))?>" class="bibtex" />
+	</div>
+
+	<div class="unit"><h4>Descriptional stuff</h4>
+		<label for="note" class="block">Note</label>
+		<textarea id="note" name="note" cols="10" rows="10" style="width: 100%" class="bibtex"><?php echo htmlspecialchars($_POST['note'])?></textarea>
+
+		<label for="abstract" class="block">Abstract</label>
+		<textarea id="abstract" name="abstract" cols="10" rows="10" style="width: 100%" class="collapsible"><?php echo htmlspecialchars($_POST['abstract'])?></textarea>
+
+		<label for="userfields" class="block">User fields</label>
+		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%" class="collapsible"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
+
+		<label for="bibtex_id" class="block">BibTex cite ID</label>
+		<input id="bibtex_id" name="bibtex_id" style="width: 100%" value="<?php echo htmlspecialchars($_POST['bibtex_id'])?>" class="collapsible" />
+	</div>
+
+	<div class="unit"><h4>Identification</h4>
+		<label for="isbn" class="block">ISBN <em>for books</em></label>
+		<input type="text" id="isbn" name="isbn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['isbn'])?>" class="collapsible" />
+
+		<label for="issn" class="block">ISSN <em>for journals</em></label>
+		<input type="text" id="issn" name="issn" style="width: 100%" value="<?php echo htmlspecialchars($_POST['issn'])?>" class="collapsible" />
+
+		<label for="doi" class="block">DOI <em>of publication</em></label>
+		<input type="text" id="doi" name="doi" style="width: 100%" value="<?php echo htmlspecialchars($_POST['doi'])?>" class="collapsible" />
+
+		<label for="url" class="block">URL <em>of publication</em></label>
+		<input type="text" id="url" name="url" style="width: 100%" value="<?php echo htmlspecialchars($_POST['url'])?>" class="collapsible" />
 	</div>
 
 	<div class="submit"><input type="submit" value="save" /></div>
@@ -624,6 +622,50 @@ function bibliographie_fetch_data_proceed (data) {
 			echo ';';
 ?>
 
+$('input, textarea').bind('focus', function (event) {
+	$('.bibliographie_charmap').remove();
+	var field = event.target;
+	var left = field.offsetLeft;
+	var top = field.offsetTop+field.offsetHeight;
+
+	$('#dialogContainer').append('<div id="charmap_'+field.id+'" style="border: 1px solid #000; background: #fff; color: #000; display: none; font-size: 1.2em; left: '+left+'px; position: absolute; top: '+top+'px" class="bibliographie_charmap"></div>');
+	$('div#charmap_'+field.id).show('fast');
+
+	var equivalentsContainer = '';
+	$('div#charmap_'+field.id).append('<div class="bibliographie_charmap_header" style="background: #8d8; padding: 5px;"></div>');
+	$.each(bibliographie_charmap_chars, function (latinChar, equivalents) {
+		$('div#charmap_'+field.id+' .bibliographie_charmap_header').append('<a href="javascript:;" onmouseover="$(\'.bibliographie_charmap_equivalent_container\').hide(); $(\'#charmapEquivalentContainer_'+latinChar+'\').show();" style="border: 1px solid #aaa; margin: 1px; padding: 0 5px;">'+latinChar+'</a>');
+
+		equivalentsContainer += '<div id="charmapEquivalentContainer_'+latinChar+'" class="bibliographie_charmap_equivalent_container" style="display: none;">';
+		equivalentsContainer += '<div style="padding: 10px;">Upper case ';
+		$.each(equivalents.upper, function (key, value) {
+			equivalentsContainer += '<a href="javascript:;" onclick="$(\'#'+field.id+'\').val($(\'#'+field.id+'\').val() + \''+value+'\'); $(\'#charmap_'+field.id+'\').remove();" style="border: 1px solid #aaa; margin: 1px; padding: 2px 5px;">'+value+'</a>';
+		});
+		equivalentsContainer += '</div>';
+		if(equivalents.lower != null){
+			equivalentsContainer += '<div style="padding: 10px;">Lower case ';
+			$.each(equivalents.lower, function (key, value) {
+				equivalentsContainer += '<a href="javascript:;" onclick="$(\'#'+field.id+'\').val($(\'#'+field.id+'\').val() + \''+value+'\'); $(\'#charmap_'+field.id+'\').remove();" style="border: 1px solid #aaa; margin: 1px; padding: 2px 5px;">'+value+'</a>';
+			});
+			equivalentsContainer += '</div>';
+		}
+		equivalentsContainer += '</div>';
+	});
+	$('div#charmap_'+field.id).append(equivalentsContainer);
+});
+
+$(window).bind('blur', function () {
+	$('.bibliographie_charmap').remove();
+})
+/*
+ .bind('blur', function (event) {
+	var field = event.target;
+	$('div#charmap_'+field.id).hide('fast', function () {
+		$('div#charmap_'+field.id).remove();
+	});
+})
+*/
+
 function bibliographie_publications_show_fields (selectedType) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
@@ -634,22 +676,57 @@ function bibliographie_publications_show_fields (selectedType) {
 		dataType: 'json',
 		success: function (json) {
 			if(json != ''){
-				$('.collapsible, .collapsible input, .collapsible textarea, .collapsible select, .collapsible label').hide();
-				$('input, textarea, select').removeClass('obligatory');
-				$('label span').remove();
+				$('div.bibtex').hide();
+				/**
+				 * Hide all input fields that are representing BibTex fields...
+				 */
+				$.each($('input.bibtex, textarea.bibtex, select.bibtex'), function (key, element) {
+					$(this).hide().removeClass('bibtexObligatory');
+					$('label[for="'+$(this).attr('id')+'"]').hide();
+				});
+
+				/**
+				 * Hide all collapsible fields...
+				 */
+				$.each($('input.collapsible, textarea.collapsible, select.collapsible'), function (key, element) {
+					$(this).hide();
+				});
+
+				$('#authorContainer').hide();
+				$('#editorContainer').hide();
+
+				/**
+				 * Hide all marks for obligatory fields and all links to show optional fields in field labels.
+				 */
+				$('label span, label a').remove();
+
 				$('#authorOrEditorNotice').hide();
 
 				$.each(json, function(key, value){
 					if(value.field == 'author,editor'){
 						$('#authorOrEditorNotice').show();
+						$('#authorContainer').show();
+						$('#editorContainer').show();
 					}else{
-						$('.collapsible #'+value.field).show().parent().show();
-						$('label[for="'+value.field+'"]').show();
+						if(value.field == 'author')
+							$('#authorContainer').show();
+						if(value.field == 'editor')
+							$('#editorContainer').show();
+
+						$('label[for="'+value.field+'"]').show().parent().show();
+
 						if(value.flag == 0){
-							$('#'+value.field).addClass('obligatory');
 							$('label[for="'+value.field+'"]').prepend('<span class="silk-icon silk-icon-asterisk-yellow"></span> ');
+							$('#'+value.field).addClass('bibtexObligatory');
 						}
 					}
+				});
+
+				$.each($('input.bibtex, textarea.bibtex, select.bibtex, input.collapsible, textarea.collapsible, select.collapsible'), function (key, element) {
+					if($(this).hasClass('bibtexObligatory') || $(this).val() != '')
+						$(this).show();
+					else
+						$('label[for="'+$(this).attr('id')+'"]').prepend('<a href="javascript:;" onclick="$(\'#'+$(this).attr('id')+'\').show(\'slow\'); $(this).remove();"><span class="silk-icon silk-icon-arrow-down"></span> unfold</a> ');
 				});
 			}else
 				$.jGrowl('Something bad happened! Could not fetch the field specifications for the publication type.');

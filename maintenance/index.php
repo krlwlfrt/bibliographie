@@ -82,18 +82,12 @@ function bibliographie_maintenance_run_consistency_check (id) {
 
 <h4>Publication editor</h4>
 <ul>
-	<li>Editor Felder ausblenden, wenn nicht verfügbar...</li>
-	<li>Unscharfe Topic und Tag Suche</li>
-	<li>Alle nicht obligatorischen Text-Felder zusammenklappen</li>
-	<li>jQuery-Plugin Felder stylen... Obligatorische Felder rot färben.</li>
-	<li>Sonderzeichen Tabelle</li>
 	<li>Auf fehlende Felder einmal hinweisen, und beim zweiten speichern ignorieren ...</li>
 </ul>
 
 <h4>Topics</h4>
 <ul>
 	<li>Detect circles</li>
-	<li>Detect loosened graphs: <code>SELECT * FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` FROM `a2topictopiclink`)</code></li>
 </ul>
 
 <h4>Notes</h4>

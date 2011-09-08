@@ -35,7 +35,7 @@ switch($_GET['task']){
 	case 'searchTags':
 		$result = array();
 		if(mb_strlen($_GET['q']) >= 3){
-			$tags = _mysql_query("SELECT * FROM `a2tags` WHERE `tag` LIKE '%".mysql_real_escape_string(stripslashes($_GET['q']))."%' ORDER BY `tag`");
+			$tags = _mysql_query("SELECT * FROM `a2tags` WHERE `tag` LIKE '%".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['q'])))."%' ORDER BY `tag`");
 			if(mysql_num_rows($tags))
 				while($tag = mysql_fetch_object($tags)){
 					$result[] = array (
