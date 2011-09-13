@@ -600,27 +600,44 @@ function bibliographie_publications_get_editors ($publication_id, $order = 'rank
 }
 
 function bibliographie_publications_get_tags ($publication_id) {
-	$tags = _mysql_query("SELECT * FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $publication_id));
+	if(is_numeric($publication_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_tags.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_tags.json'));
 
-	if(mysql_num_rows($tags)){
+		$tags = _mysql_query("SELECT * FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $publication_id));
+
 		$return = array();
-		while($tag = mysql_fetch_object($tags))
-			$return[] = $tag->tag_id;
+		if(mysql_num_rows($tags))
+			while($tag = mysql_fetch_object($tags))
+				$return[] = $tag->tag_id;
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_tags.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
 
 		return $return;
 	}
-
 	return false;
 }
 
 function bibliographie_publications_get_topics ($publication_id) {
-	$topics = _mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $publication_id));
+	if(is_numeric($publication_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_topics.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_topics.json'));
+		$topics = _mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $publication_id));
 
-	if(mysql_num_rows($topics)){
 		$return = array();
+		if(mysql_num_rows($topics))
+			while($topic = mysql_fetch_object($topics))
+				$return[] = $topic->topic_id;
 
-		while($topic = mysql_fetch_object($topics))
-			$return[] = $topic->topic_id;
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_topics.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
 
 		return $return;
 	}

@@ -20,6 +20,30 @@ switch($_GET['task']){
 					echo '<p class="success">No authors with charset artifacts.</p>';
 			break;
 
+			case 'publications_withoutTopic':
+				$result = _mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2topicpublicationlink`)");
+
+				if(mysql_num_rows($result) > 0){
+					$publications = array();
+					while($publication = mysql_fetch_object($result))
+						$publications[] = $publication->pub_id;
+
+					bibliographie_publications_print_list($publications, '', null, false);
+				}
+			break;
+
+			case 'publications_withoutTag':
+				$result = _mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)");
+
+				if(mysql_num_rows($result) > 0){
+					$publications = array();
+					while($publication = mysql_fetch_object($result))
+						$publications[] = $publication->pub_id;
+
+					bibliographie_publications_print_list($publications, '', null, false);
+				}
+			break;
+
 			case 'topics_loosenedSubgraphs':
 				$result = _mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1");
 

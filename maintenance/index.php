@@ -12,6 +12,11 @@ $bibliographie_consistency_checks = array (
 		'charsetArtifacts'
 	),
 
+	'publications' => array (
+		'withoutTopic',
+		'withoutTag'
+	),
+
 	'topics' => array (
 		'loosenedSubgraphs',
 		'doubledNames'
@@ -80,24 +85,19 @@ function bibliographie_maintenance_run_consistency_check (id) {
 		$title = 'ToDo list';
 ?>
 
-<h4>Publication editor</h4>
-<ul>
-	<li>Auf fehlende Felder einmal hinweisen, und beim zweiten speichern ignorieren ...</li>
-</ul>
-
 <h4>Topics</h4>
 <ul>
 	<li>Detect circles</li>
 </ul>
 
+<h4>Publication editor</h4>
+<ul>
+	<li>Auf fehlende Felder einmal hinweisen, und beim zweiten speichern ignorieren ...</li>
+</ul>
+
 <h4>Notes</h4>
 <ul>
 	<li>private Notizen</li>
-</ul>
-
-<h4>Publikation</h4>
-<ul>
-	<li>Alle Publikationen ohne Topic anzeigen</li>
 </ul>
 
 <h4>Import</h4>
@@ -116,7 +116,6 @@ function bibliographie_maintenance_run_consistency_check (id) {
 
 <h4>Maintenance</h4>
 <ul>
-	<li>Detect wrong coded authors by searching for entries which do not REGEXP against [:alpha:].</li>
 	<li>Datenbank aus Log wiederherstellen...</li>
 </ul>
 

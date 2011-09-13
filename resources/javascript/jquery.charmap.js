@@ -26,7 +26,7 @@ var jquery_charmap_field = null;
 function jquery_charmap_insert_char (substituteChar) {
 	var firstPart = $(jquery_charmap_field).val().slice(0, jquery_charmap_field.selectionStart);
 	var secondPart = $(jquery_charmap_field).val().slice(jquery_charmap_field.selectionEnd);
-	$(jquery_charmap_field).val(firstPart+substituteChar+secondPart);
+	$(jquery_charmap_field).val(firstPart+substituteChar+secondPart).focus();
 }
 
 (function($){
