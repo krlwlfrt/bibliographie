@@ -494,7 +494,7 @@ function bibliographie_fetch_data_proceed (data) {
 		</div>
 
 		<label for="title" class="block">Title</label>
-		<input type="text" id="title" name="title" style="width: 80%" value="<?php echo htmlspecialchars($_POST['title'])?>" class="bibtex" />
+		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" class="bibtex" />
 		<div id="similarTitleContainer" style="background: #fff; border: 1px solid #aaa; color: #000; display: none; float: right; font-size: 0.8em; padding: 5px; width: 80%"></div>
 		<br style="clear: both;" />
 
@@ -621,51 +621,6 @@ function bibliographie_fetch_data_proceed (data) {
 				echo 0;
 			echo ';';
 ?>
-
-$('input, textarea').bind('focus', function (event) {
-	$('.bibliographie_charmap').remove();
-	var field = event.target;
-	var left = field.offsetLeft;
-	var top = field.offsetTop+field.offsetHeight;
-
-	$('#dialogContainer').append('<div id="charmap_'+field.id+'" style="border: 1px solid #000; background: #fff; color: #000; display: none; font-size: 1.2em; left: '+left+'px; position: absolute; top: '+top+'px" class="bibliographie_charmap"></div>');
-	$('div#charmap_'+field.id).show('fast');
-
-	var equivalentsContainer = '';
-	$('div#charmap_'+field.id).append('<div class="bibliographie_charmap_header" style="background: #8d8; padding: 5px;"></div>');
-	$.each(bibliographie_charmap_chars, function (latinChar, equivalents) {
-		$('div#charmap_'+field.id+' .bibliographie_charmap_header').append('<a href="javascript:;" onmouseover="$(\'.bibliographie_charmap_equivalent_container\').hide(); $(\'#charmapEquivalentContainer_'+latinChar+'\').show();" style="border: 1px solid #aaa; margin: 1px; padding: 0 5px;">'+latinChar+'</a>');
-
-		equivalentsContainer += '<div id="charmapEquivalentContainer_'+latinChar+'" class="bibliographie_charmap_equivalent_container" style="display: none;">';
-		equivalentsContainer += '<div style="padding: 10px;">Upper case ';
-		$.each(equivalents.upper, function (key, value) {
-			equivalentsContainer += '<a href="javascript:;" onclick="$(\'#'+field.id+'\').val($(\'#'+field.id+'\').val() + \''+value+'\'); $(\'#charmap_'+field.id+'\').remove();" style="border: 1px solid #aaa; margin: 1px; padding: 2px 5px;">'+value+'</a>';
-		});
-		equivalentsContainer += '</div>';
-		if(equivalents.lower != null){
-			equivalentsContainer += '<div style="padding: 10px;">Lower case ';
-			$.each(equivalents.lower, function (key, value) {
-				equivalentsContainer += '<a href="javascript:;" onclick="$(\'#'+field.id+'\').val($(\'#'+field.id+'\').val() + \''+value+'\'); $(\'#charmap_'+field.id+'\').remove();" style="border: 1px solid #aaa; margin: 1px; padding: 2px 5px;">'+value+'</a>';
-			});
-			equivalentsContainer += '</div>';
-		}
-		equivalentsContainer += '</div>';
-	});
-	$('div#charmap_'+field.id).append(equivalentsContainer);
-});
-
-$(window).bind('blur', function () {
-	$('.bibliographie_charmap').remove();
-})
-/*
- .bind('blur', function (event) {
-	var field = event.target;
-	$('div#charmap_'+field.id).hide('fast', function () {
-		$('div#charmap_'+field.id).remove();
-	});
-})
-*/
-
 function bibliographie_publications_show_fields (selectedType) {
 	$.ajax({
 		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
@@ -769,7 +724,6 @@ function bibliographie_publications_create_person_form (role) {
 			$('#dialogContainer').append(html);
 			$('#createPersonForm').dialog({
 				width: 400,
-				modal: true,
 				buttons: {
 					'Create & add': function () {
 						bibliographie_publications_create_person($('#firstname').val(), $('#von').val(), $('#surname').val(), $('#jr').val(), role);
@@ -937,8 +891,14 @@ $(function() {
 		delayRequest('bibliographie_publications_check_title', Array(event.target.value));
 	});
 
+	$('input, textarea').charmap({
+		'left': 1000
+	});
+
 	bibliographie_publications_show_fields($('#pub_type').val());
-	delayRequest('bibliographie_publications_check_title', Array($('#title').val()));
+
+	if(pub_id != 0)
+		delayRequest('bibliographie_publications_check_title', Array($('#title').val()));
 });
 	/* ]]> */
 </script>

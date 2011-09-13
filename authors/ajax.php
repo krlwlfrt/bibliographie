@@ -46,6 +46,8 @@ switch($_GET['task']){
 		$text .= '<label for="surname" class="block">Surname*</label>';
 		$text .= '<input type="text" id="surname" name="surname" style="width: 100%" />';
 
+		$text .= '<script type="text/javascript">/* <![CDATA[ */ $(\'#firstname, #jr, #von, #surname\').charmap({left: 1000}); /* ]]> */</script>';
+
 		bibliographie_dialog_create('createPersonForm', 'Create person', $text);
 	break;
 
@@ -53,7 +55,7 @@ switch($_GET['task']){
 		$result = array();
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			$options = array('suffixes' => true, 'plurals' => false, 'umlauts' => true);
-			
+
 			$expandedQuery = bibliographie_search_expand_query($_GET['q'], $options);
 
 			$authors = _mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
