@@ -55,44 +55,86 @@ function bibliographie_topics_create_topic ($name, $description, $url, $topics, 
 }
 
 /**
- *
- * @param type $topic_id
- * @param type $name
- * @param type $description
- * @param type $url
- * @param type $topics
+ * Edit an existing topic.
+ * @param int $topic_id
+ * @param string $name
+ * @param string $description
+ * @param string $url
+ * @param array $topics
  */
 function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, array $topics) {
+	/**
+	 * Get subtopics recursively and direct parent topics.
+	 */
 	$subTopics = bibliographie_topics_get_subtopics($topic_id, true);
 	$parentTopics = bibliographie_topics_get_parent_topics($topic_id);
+	/**
+	 * Add the topic itself to the subtopics for circle prevention.
+	 */
+	$subTopics[] = $topic_id;
 
-	$safeTopics = array_values(array_diff($topics, $subTopics));
+	/**
+	 * Fetch the data of the topic before editing it.
+	 */
+	$dataBefore = bibliographie_topics_get_data($topic_id, 'assoc');
+	$dataBefore['topics'] = $parentTopics;
 
-	if(count($safeTopics) != count($topics))
+	/**
+	 * Check for potential circles... Exclude those topics that would produce a circle from the list of parent topics.
+	 */
+	$safeTopics = array_diff($topics, $subTopics);
+	if(count($safeTopics) != count($topics)){
 		echo '<p class="error">There was at least one parent topic that would have produced a circle. Those topics were left out!</p>';
+		echo '<strong>Those are the topics, that have been left out:</strong><ul>';
+		foreach(array_diff($topics, $safeTopics) as $topic)
+			echo '<li>'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</li>';
+		echo '</ul>';
+	}
 
-	_mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." LIMIT ".count(bibliographie_topics_get_parent_topics($topic_id)));
-
-	$return = _mysql_query("UPDATE `a2topics` SET
-	`name`= '".mysql_real_escape_string(stripslashes($name))."',
-	`description` = '".mysql_real_escape_string(stripslashes($description))."',
-	`url` = '".mysql_real_escape_string(stripslashes($url))."'
-WHERE
-	`topic_id` = ".((int) $topic_id)."
-LIMIT 1");
-
-	if(count($safeTopics) > 0)
-		foreach($safeTopics as $parentTopic){
-			_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
-			bibliographie_purge_cache('topic_'.((int) $parentTopic).'_');
+	/**
+	 * Delete the links to topics that are no longer in the list of parent topics.
+	 */
+	$deleteTopicLinks = array_diff($dataBefore['topics'], $safeTopics);
+	if(count($deleteTopicLinks) > 0){
+		foreach($deleteTopicLinks as $deleteTopicLink){
+			bibliographie_purge_cache('topic_'.$deleteTopicLink.'_');
+			_mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." AND `target_topic_id` = ".((int) $deleteTopicLink));
 		}
+	}
+
+	/**
+	 * Update the topic data itself.
+	 */
+	if($name != $dataBefore['name'] or $description != $dataBefore['description'] or $url != $dataBefore['url']){
+		$return = _mysql_query("UPDATE `a2topics` SET
+		`name`= '".mysql_real_escape_string(stripslashes($name))."',
+		`description` = '".mysql_real_escape_string(stripslashes($description))."',
+		`url` = '".mysql_real_escape_string(stripslashes($url))."'
+	WHERE
+		`topic_id` = ".((int) $topic_id)."
+	LIMIT 1");
+	}
+
+	/**
+	 * Add links to topics that were not int the list of parent topics before.
+	 */
+	$addTopicLinks = array_diff($safeTopics, $dataBefore['topics']);
+	if(count($addTopicLinks) > 0){
+		foreach($safeTopics as $addTopic){
+			_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $addTopic).")");
+			bibliographie_purge_cache('topic_'.((int) $addTopic).'_');
+		}
+	}
 
 	$data = json_encode(array(
-		'topic_id' => (int) $topic_id,
-		'name' => $name,
-		'description' => $description,
-		'url' => $url,
-		'topics' => $safeTopics
+		'dataBefore' => $dataBefore,
+		'dataAfter' => array (
+			'topic_id' => (int) $topic_id,
+			'name' => $name,
+			'description' => $description,
+			'url' => $url,
+			'topics' => $safeTopics
+		)
 	));
 
 	if($return)
@@ -112,6 +154,7 @@ LIMIT 1");
 /**
  * Get the data of a topic.
  * @param int $topic_id The id of a topic.
+ * @param string $type
  * @return mixed Object on success or false otherwise.
  */
 function bibliographie_topics_get_data ($topic_id, $type = 'object') {

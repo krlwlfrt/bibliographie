@@ -54,6 +54,7 @@ This is a list of stuff that i didn't handcraft myself but took from other nice 
 * jQuery UI http://www.jquery-ui.com/
 * jGrowl http://plugins.jquery.com/project/jGrowl
 * jQuery TokenInput http://loopj.com/jquery-tokeninput/
+* Structures_BibTex http://pear.php.net/package/Structures_BibTex (heavily modified)
 
 ## Adjust 3rd party libraries ##
 From file `resources/javascript/jquery.tokeninput.js` remove all lines where it says `cache.add(SOMETHING)`. This is already done in the file that is redistributed with bibliographie.

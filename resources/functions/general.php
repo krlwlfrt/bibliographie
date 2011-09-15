@@ -79,9 +79,8 @@ function bibliographie_purge_cache ($pattern) {
 	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
 		$files = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache');
 		foreach($files as $file)
-			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file)){
+			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file))
 				unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
-			}
 	}
 }
 
