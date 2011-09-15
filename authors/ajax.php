@@ -46,7 +46,7 @@ switch($_GET['task']){
 		$text .= '<label for="surname" class="block">Surname*</label>';
 		$text .= '<input type="text" id="surname" name="surname" style="width: 100%" />';
 
-		$text .= '<script type="text/javascript">/* <![CDATA[ */ $(\'#firstname, #jr, #von, #surname\').charmap({left: 1000}); /* ]]> */</script>';
+		$text .= '<script type="text/javascript">/* <![CDATA[ */ $(\'input, textarea\').charmap(); /* ]]> */</script>';
 
 		bibliographie_dialog_create('createPersonForm', 'Create person', $text);
 	break;

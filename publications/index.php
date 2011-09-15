@@ -891,18 +891,17 @@ $(function() {
 		delayRequest('bibliographie_publications_check_title', Array(event.target.value));
 	});
 
-	$('input, textarea').charmap({
-		'left': 1000
-	});
-
 	bibliographie_publications_show_fields($('#pub_type').val());
 
 	if(pub_id != 0)
 		delayRequest('bibliographie_publications_check_title', Array($('#title').val()));
+
+	$('input, textarea').charmap();
 });
 	/* ]]> */
 </script>
 <?php
+			bibliographie_charmap_print_charmap();
 		}
 	break;
 

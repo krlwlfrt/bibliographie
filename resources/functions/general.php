@@ -246,6 +246,7 @@ function bibliographie_exit ($title, $message) {
  */
 require dirname(__FILE__).'/authors.php';
 require dirname(__FILE__).'/bookmarks.php';
+require dirname(__FILE__).'/charmap.php';
 require dirname(__FILE__).'/maintenance.php';
 require dirname(__FILE__).'/publications.php';
 require dirname(__FILE__).'/search.php';
