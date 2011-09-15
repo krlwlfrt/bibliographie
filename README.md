@@ -43,7 +43,7 @@ If you have the user 'foobar' in your .htaccess file, you'll need a row in the `
 
 Access the app via a browser at the path you set in the config file. Follow the instructions to convert/create the database.
 
-## Rech the finish line ##
+## Reach the finish line ##
 
 All done... You can now start using bibliographie...
 
