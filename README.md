@@ -41,7 +41,11 @@ If you have the user 'foobar' in your .htaccess file, you'll need a row in the `
 
 ## 3. Step ##
 
-All done... You can now start using bibliogrpahie...
+Access the app via a browser at the path you set in the config file. Follow the instructions to convert/create the database.
+
+## Rech the finish line ##
+
+All done... You can now start using bibliographie...
 
 # 3rd party libraries #
 This is a list of stuff that i didn't handcraft myself but took from other nice people because their software suits my needs.
