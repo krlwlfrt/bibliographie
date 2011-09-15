@@ -10,7 +10,7 @@ session_start();
  * Check for config file.
  */
 if(!file_exists(dirname(__FILE__).'/config.php'))
-	exit('<!DOCTYPE html><html lang="de"><title>Config file missing!</title></head><body><h1>Config file missing!</h1><p>Sorry, but we have no config file!</p></body></html>');
+	bibliographie_exit('Config file missing!', 'Sorry, but we have no config file!');
 require dirname(__FILE__).'/config.php';
 
 /**
@@ -26,7 +26,7 @@ if(@mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAP
 		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
 
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
-	exit('<!DOCTYPE html><html lang="de"><title>No database connection</title></head><body><h1>No database connection</h1><p>Sorry, but we have no connection to the database!</p></body></html>');
+	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!');
 
 
 /**
@@ -47,7 +47,8 @@ if(!isset($_SERVER['PHP_AUTH_USER'])){
 }
 
 if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
-	echo '<!DOCTYPE html><html lang="de"><title>Initialize database</title></head><body><h1>Initialize database</h1>';
+	echo '<!DOCTYPE html><html lang="de"><head><title>Initialize database</title></head><body><h1>Initialize database</h1>';
+
 	if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'a2publication'")) == 1){
 		/**
 		 * Aigaion scheme is present... Just convert it, to the bibliographie scheme...
@@ -318,7 +319,7 @@ ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
 }
 
 if(!bibliographie_user_get_id())
-	exit('<!DOCTYPE html><html lang="de"><title>Account missing!</title></head><body><h1>Account missing!</h1><p>Sorry, but you do not have an account for bibliographie!</p></body></html>');
+	bibliographie_exit('Account missing!', 'Sorry, but you do not have an account for bibliographie!');
 
 /**
  * Check for necessary directories.

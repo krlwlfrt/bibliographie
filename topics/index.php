@@ -72,7 +72,7 @@ switch($_GET['task']){
 					foreach($topics as $parentTopic){
 						$prePopulateTopics[] = array (
 							'id' => $parentTopic,
-							'name' => bibliographie_topics_topic_by_id($parentTopic)
+							'name' => bibliographie_topics_parse_name($parentTopic)
 						);
 					}
 				}
@@ -233,7 +233,7 @@ $(function () {
 
 			echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('page-white-stack').' Show publications</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], false)).')';
 
-			if(count(bibliographie_topics_get_subtopics($topic->topic_id)) > 0){
+			if(count(bibliographie_topics_get_subtopics($topic->topic_id, true)) > 0){
 				echo '<br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'&amp;includeSubtopics=1">';
 				echo bibliographie_icon_get('page-white-stack').' Show publications including all subtopics</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], true)).')';
 			}
@@ -250,7 +250,7 @@ $(function () {
 				echo '</ul>';
 			}
 
-			if(count(bibliographie_topics_get_subtopics($topic->topic_id)) > 0){
+			if(count(bibliographie_topics_get_subtopics($topic->topic_id, true)) > 0){
 				echo '<h4>Subordinated topics</h4>';
 				echo '<span style="float: right"><a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a> <a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a> all subtopics</span>';
 				echo '<div class="bibliographie_topics_topic_graph">';

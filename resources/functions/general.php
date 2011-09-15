@@ -79,8 +79,9 @@ function bibliographie_purge_cache ($pattern) {
 	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
 		$files = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache');
 		foreach($files as $file)
-			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file))
+			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file)){
 				unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
+			}
 	}
 }
 
@@ -225,6 +226,20 @@ function bibliographie_database_total_query_time () {
 		$time += $query['time'];
 
 	return $time;
+}
+
+function bibliographie_exit ($title, $message) {
+	ob_end_clean();
+?><!DOCTYPE html>
+<html lang="en">
+	<head><title><?php echo htmlspecialchars($title)?> | bibliographie</title></head>
+	<body>
+		<h1><?php echo htmlspecialchars($title)?></h1>
+		<p><?php echo $message?></p>
+	</body>
+</html>
+<?php
+	exit();
 }
 
 /**

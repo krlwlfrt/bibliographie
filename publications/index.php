@@ -430,7 +430,7 @@ function bibliographie_fetch_data_proceed (data) {
 					foreach($topics as $topic){
 						$prePopulateTopics[] = array (
 							'id' => $topic,
-							'name' => bibliographie_topics_topic_by_id($topic)
+							'name' => bibliographie_topics_parse_name($topic)
 						);
 					}
 				}
