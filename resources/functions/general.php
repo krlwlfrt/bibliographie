@@ -39,7 +39,7 @@ function bibliographie_log ($category, $action, $data) {
 	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
 	$time = date('r');
 
-	_mysql_query("INSERT INTO `log` (
+	_mysql_query("INSERT INTO `bibliographie_log` (
 	`log_file`,
 	`log_time`
 ) VALUES (

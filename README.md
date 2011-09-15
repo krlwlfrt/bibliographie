@@ -1,10 +1,9 @@
-Intents to be a bibliography management tool that derives from the database scheme of aigaion2.
+Intents to be a bibliography management tool that derives from the database scheme of aigaion v2.1.2.
 
 # Get it running #
-## Config file ##
+## 1. step: config file ##
 
-All you need is a yet existent aigaion2 database and a config file named 'config.php' that you put in the root of this app.
-The file should look something like that:
+You need a config file named 'config.php' that you put in the root of this app. The file should look something like that:
 
 ```php
 <?php
@@ -29,101 +28,22 @@ define('BIBLIOGRAPHIE_TAG_SIZE_FLATNESS', 40);
 define('BIBLIOGRAPHIE_ISBNDB_KEY', '');
 
 // One of 'errors', 'all' or false
-define(BIBLIOGRAPHIE_DATABASE_DEBUG, false);
+define('BIBLIOGRAPHIE_DATABASE_DEBUG', false);
 
 // Wether to use caching or not. Highly recommended for large databases.
 define('BIBLIOGRAPHIE_CACHING', true);
 ```
 
-## Drop unnecessary aigaion2 tables ##
-Since we do not implement such neat user priviliges we don't need all of that stuff!
+## 2. Step ##
 
-* a2aigaiongeneral
-* a2availablerights
-* a2changehistory
-* a2config
-* a2grouprightsprofilelink
-* a2logintegration
-* a2rightsprofilerightlink
-* a2rightsprofiles
-* a2usergrouplink
-* a2userrights
+You need a server side directory authentication, e.g. via apaches .htaccess. And the appropriate authentication names in the database table `a2users` with the names in the `login` field.
+If you have the user 'foobar' in your .htaccess file, you'll need a row in the `a2users` table with the login field having the value 'foobar'.
 
-```sql
-DROP TABLE a2aigaiongeneral, a2availablerights, a2changehistory, a2config, a2grouprightsprofilelink, a2logintegration, a2rightsprofilerightlink, a2rightsprofiles, a2usergrouplink, a2userrights
-```
+## 3. Step ##
 
-## Change existing tables ##
-To make the code consistent and more straight forward we want to rename the a2keywords to a2tags
+All done... You can now start using bibliogrpahie...
 
-### Rename keywords to tags ##
-
-```sql
-ALTER TABLE `a2keywords` RENAME TO `a2tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
-ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;
-```
-
-### Alter publication table ###
-
-```sql
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);
-
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);
-
-ALTER TABLE `a2publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;
-```
-
-### Alter topic table ###
-
-```sql
-ALTER TABLE `a2topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
-```
-
-### Alter author table ###
-
-```sql
-ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
-```
-
-### Alter tag table ###
-```sql
-ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);
-```
-
-## Add new tables ##
-This is a new table that we need to cross reference with the file log.
-
-```sql
-CREATE TABLE `log` (
-	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`log_file` TEXT NOT NULL,
-	`log_time` TEXT NOT NULL,
-	PRIMARY KEY (`log_id`)
-) COLLATE='utf8_general_ci' ENGINE=MyISAM;
-```
-
-This is a new table that we need to lock tables against editing.
-
-```sql
-CREATE TABLE `lockedtables` (
-	`topic_id` INT(10) UNSIGNED NOT NULL
-)
-COLLATE='utf8_general_ci'
-ENGINE=MyISAM;
-```
-
-This is a new table used to expand search queries with singulars and plurals of entered words.
-```sql
-CREATE TABLE `singulars_and_plurals` (
-	`ln` VARCHAR(2) NOT NULL DEFAULT 'en' COLLATE 'utf8_general_ci',
-	`singular` TINYTEXT NOT NULL COLLATE 'utf8_general_ci',
-	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
-) COLLATE='utf8_general_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT
-```
-
-## 3rd party libraries ##
+# 3rd party libraries #
 This is a list of stuff that i didn't handcraft myself but took from other nice people because their software suits my needs.
 
 * jQuery http://www.jquery.com/
@@ -131,5 +51,16 @@ This is a list of stuff that i didn't handcraft myself but took from other nice 
 * jGrowl http://plugins.jquery.com/project/jGrowl
 * jQuery TokenInput http://loopj.com/jquery-tokeninput/
 
-### Adjust 3rd party libraries ###
-From file `resources/javascript/jquery.tokeninput.js` remove all lines where it says `cache.add(SOMETHING)`. This is already done in the file that is distributed with bibliographie.
+## Adjust 3rd party libraries ##
+From file `resources/javascript/jquery.tokeninput.js` remove all lines where it says `cache.add(SOMETHING)`. This is already done in the file that is redistributed with bibliographie.
+
+Additionally at the block (lines 198 to 201)
+
+```js
+.blur(function () {
+	hide_dropdown();
+	$(this).val("");
+})
+```
+
+remove the line `$(this.val(""));`. This is also already done in the redistributed file.

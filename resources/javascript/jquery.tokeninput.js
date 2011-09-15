@@ -209,7 +209,8 @@ $.TokenList = function (input, url_or_data, settings) {
                 case KEY.RIGHT:
                 case KEY.UP:
                 case KEY.DOWN:
-                    if(!$(this).val()) {
+                    if(!$(this).val()
+					  ) {
                         previous_token = input_token.prev();
                         next_token = input_token.next();
 
