@@ -21,7 +21,10 @@
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/all.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/charmap.css" />
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/charmap.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/maintenance.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/publications.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/search.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/topics.js"></script>
 	</head>
 
 	<body id="top">
@@ -44,6 +47,13 @@
 				/* <![CDATA[ */
 var jQueryLoading = 0;
 
+var bibliographie_web_root = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>';
+var bibliographie_search_min_chars = <?php echo BIBLIOGRAPHIE_SEARCH_MIN_CHARS?>;
+var bibliographie_request_delay = 500;
+
+$.jGrowl.defaults.position = 'bottom-right';
+$.jGrowl.defaults.life = 10000;
+
 $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 	$('body').css('cursor', 'wait');
 	if(jQueryLoading == 0)
@@ -60,6 +70,10 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 		$(this).hide('fade');
 });
 
+jQuery.ajaxSetup({
+	cache: false
+});
+
 /**
  * Enable expected behaviour by sending the placeholder content if no input was provided...
  */
@@ -67,15 +81,6 @@ $('#search').bind('submit', function (event) {
 	if($('#q').val() == '' && $('#q').attr('placeholder') != '')
 		$('#q').val($('#q').attr('placeholder'));
 });
-
-$.jGrowl.defaults.position = 'bottom-right';
-$.jGrowl.defaults.life = 10000;
-jQuery.ajaxSetup({
-	cache: false
-});
-
-var bibliographie_web_root = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>';
-var bibliographie_search_min_chars = <?php echo BIBLIOGRAPHIE_SEARCH_MIN_CHARS?>;
 				/* ]]> */
 			</script>
 

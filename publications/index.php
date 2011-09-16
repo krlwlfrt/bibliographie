@@ -84,7 +84,7 @@ switch($_GET['task']){
 	<div id="checkData_entryResult_<?php echo $outerID?>"></div>
 	<div class="innerData">
 		<span style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_check_data_approve_entry(<?php echo $outerID?>)"><?php echo bibliographie_icon_get('tick')?> Approve entry</a><br />
+			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $outerID?>)"><?php echo bibliographie_icon_get('tick')?> Approve entry</a><br />
 			<a href="javascript:;" onclick="$('#checkData_entry_<?php echo $outerID?>').remove()"><?php echo bibliographie_icon_get('cross')?> Remove entry</a>
 		</span>
 <?php
@@ -134,60 +134,6 @@ switch($_GET['task']){
 	/* <![CDATA[ */
 var persons = <?php echo json_encode($searchPersons)?>;
 
-function bibliographie_check_data_approve_entry (outerID) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
-		data: {
-			'task': 'checkData',
-			'subTask': 'approveEntry',
-			'outerID': outerID
-		},
-		dataType: 'json',
-		success: function (json) {
-			$('#checkData_entryResult_'+outerID).html(json.text);
-			if(json.status == 'success')
-				$('#checkData_entry_'+outerID+' .innerData').remove();
-		}
-	});
-}
-
-function bibliographie_check_data_create_person (role, outerID, innerID, first, von, last, jr) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
-		data: {
-			'task': 'checkData',
-			'subTask': 'createPerson',
-			'role': role,
-			'outerID': outerID,
-			'innerID': innerID,
-			'first': first,
-			'von': von,
-			'last': last,
-			'jr': jr
-		},
-		success: function (html) {
-			$('#checkData_'+role+'Result_'+outerID+'_'+innerID).html(html);
-		}
-	});
-}
-
-function bibliographie_check_data_approve_person (role, outerID, innerID) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
-		data: {
-			'task': 'checkData',
-			'subTask': 'approvePerson',
-			'role': role,
-			'outerID': outerID,
-			'innerID': innerID,
-			'personID': $('#checkData_'+role+'Select_'+outerID+'_'+innerID).val()
-		},
-		success: function (html) {
-			$('#checkData_'+role+'Result_'+outerID+'_'+innerID).html(html);
-		}
-	});
-}
-
 $(function () {
 	$.each(persons, function (role, persons) {
 		$.each(persons, function (key, person) {
@@ -202,14 +148,14 @@ $(function () {
 					if(json.length > 0){
 						$('#checkData_'+role+'Result_'+person.id)
 							.html('<select id="checkData_'+role+'Select_'+person.id+'" style="width: 45%;"></select>')
-							.append(' <a href="javascript:;" onclick="bibliographie_check_data_approve_person(\''+role+'\', '+person.outerID+', '+person.innerID+')"><span class="silk-icon silk-icon-tick"></span> Approve '+role)
-							.append(' <a href="javascript:;" onclick="bibliographie_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
+							.append(' <a href="javascript:;" onclick="bibliographie_publications_check_data_approve_person(\''+role+'\', '+person.outerID+', '+person.innerID+')"><span class="silk-icon silk-icon-tick"></span> Approve '+role)
+							.append(' <a href="javascript:;" onclick="bibliographie_publications_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
 
 						$.each(json, function (key, personResult) {
 							$('#checkData_'+role+'Select_'+person.id).append('<option value="'+personResult.id+'">'+personResult.name+'</option>');
 						});
 					}else
-						$('#checkData_'+role+'Result_'+person.id).html('<strong>No author was found.</strong> <a href="javascript:;" onclick="bibliographie_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
+						$('#checkData_'+role+'Result_'+person.id).html('<strong>No author was found.</strong> <a href="javascript:;" onclick="bibliographie_publications_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
 				}
 			});
 		});
@@ -242,23 +188,8 @@ $(function () {
 ?>
 	</select>
 
-	<button onclick="bibliographie_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
+	<button onclick="bibliographie_publications_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
 </div>
-
-<script type="text/javascript">
-	/* <![CDATA[ */
-function bibliographie_fetch_data_proceed (data) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php?task=fetchData_proceed',
-		data: data,
-		type: 'POST',
-		success: function (html) {
-			$('#fetchData_container').html(html);
-		}
-	})
-}
-	/* ]]> */
-</script>
 <?php
 	break;
 
@@ -632,21 +563,21 @@ $(function() {
 	});
 
 	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
-		searchDelay: 500,
+		searchDelay: bibliographie_request_delay,
 		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		prePopulate: <?php echo json_encode($prePopulateAuthor).PHP_EOL?>
 	});
 
 	$('#editor').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
-		searchDelay: 500,
+		searchDelay: bibliographie_request_delay,
 		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		prePopulate: <?php echo json_encode($prePopulateEditor).PHP_EOL?>
 	});
 
 	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
-		searchDelay: 500,
+		searchDelay: bibliographie_request_delay,
 		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		theme: 'facebook',

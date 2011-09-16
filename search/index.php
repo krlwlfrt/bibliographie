@@ -65,7 +65,7 @@ switch($_GET['task']){
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_search_simple('<?php echo htmlspecialchars($_GET['category'])?>', 0);
+	bibliographie_search_simple('<?php echo htmlspecialchars($_GET['category'])?>', 0, '<?php echo $_GET['q']?>', '<?php echo $_GET['noQueryExpansion']?>', <?php echo $highlightTerms?>);
 });
 	/* ]]> */
 </script>
@@ -92,7 +92,7 @@ $(function () {
 	/* <![CDATA[ */
 $(function () {
 	$.each(<?php echo json_encode($bibliographie_search_categories)?>, function (dummy, category) {
-		bibliographie_search_simple(category, 1);
+		bibliographie_search_simple(category, 1, '<?php echo $_GET['q']?>', '<?php echo $_GET['noQueryExpansion']?>', <?php echo $highlightTerms?>);
 	});
 
 	$('#bibliographie_search_result_is_empty').ajaxStop(function () {
@@ -106,43 +106,6 @@ $(function () {
 <?php
 				bibliographie_bookmarks_print_javascript();
 			}
-?>
-
-<script type="text/javascript">
-	/* <![CDATA[ */
-function bibliographie_search_simple (category, limit) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/ajax.php',
-		data: {
-			'task': 'simpleSearch',
-			'category': category,
-			'q': '<?php echo htmlspecialchars($_GET['q'])?>',
-			'limit': limit,
-			'noQueryExpansion': '<?php echo ((int) $_GET['noQueryExpansion'])?>'
-		},
-		success: function (html) {
-			$('#bibliographie_search_'+category+'_container').html(html);
-			$('#bibliographie_search_'+category+'_container').highlight(<?php echo $highlightTerms?>);
-
-			if($('#bibliographie_search_'+category+'_result').length == 0){
-				$('#bibliographie_search_'+category+'_title').remove();
-				$('#bibliographie_search_'+category+'_container').remove();
-				$('#bibliographie_search_'+category+'_link').remove();
-			}else{
-				if($('#bibliographie_search_'+category+'_link').parent().is(':visible') == false)
-					$('#bibliographie_search_'+category+'_link').parent().show();
-
-				$('#bibliographie_search_'+category+'_link').show('slow').append(' ('+$('#bibliographie_search_'+category+'_results_count').html()+' results)');
-				$('#bibliographie_search_'+category+'_title').show('slow');
-				$('#bibliographie_search_'+category+'_container').show('slow');
-				$('#bibliographie_search_'+category+'_link').show();
-			}
-		}
-	})
-}
-	/* ]]> */
-</script>
-<?php
 		}else
 				echo '<p class="error">Your search query was too short! You have to input at least '.BIBLIOGRAPHIE_SEARCH_MIN_CHARS.' chars.</p>';
 	break;

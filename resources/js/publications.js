@@ -114,6 +114,7 @@ function bibliographie_publications_create_person_form (role) {
 					$(this).remove();
 				}
 			});
+			$('input, textarea').charmap();
 		}
 	})
 }
@@ -196,7 +197,7 @@ function bibliographie_publications_check_title (title) {
 
 function bibliographie_publications_topic_input_tokenized (field, container, prePopulate) {
 	$('#'+field).tokenInput(bibliographie_web_root+'/topics/ajax.php?task=searchTopics', {
-		'searchDelay': 500,
+		'searchDelay': bibliographie_request_delay,
 		'minChars': bibliographie_search_min_chars,
 		'preventDuplicates': true,
 		'theme': 'facebook',
@@ -229,10 +230,101 @@ function bibliographie_publications_topic_input_tokenized (field, container, pre
 							.append('</div>');
 					}
 				});
+				$('#bibliographie_charmap').hide();
 			}else
 				$('#'+container).append('No results for search!');
 
 			return Array();
 		}
 	});
+}
+
+function bibliographie_publications_fetch_data_proceed (data) {
+	$.ajax({
+		url: bibliographie_web_root+'/publications/ajax.php?task=fetchData_proceed',
+		data: data,
+		type: 'POST',
+		success: function (html) {
+			$('#fetchData_container').html(html);
+		}
+	})
+}
+
+function bibliographie_publications_check_data_approve_entry (outerID) {
+	$.ajax({
+		url: bibliographie_web_root+'/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'approveEntry',
+			'outerID': outerID
+		},
+		dataType: 'json',
+		success: function (json) {
+			$('#checkData_entryResult_'+outerID).html(json.text);
+			if(json.status == 'success')
+				$('#checkData_entry_'+outerID+' .innerData').remove();
+		}
+	});
+}
+
+function bibliographie_publications_check_data_create_person (role, outerID, innerID, first, von, last, jr) {
+	$.ajax({
+		url: bibliographie_web_root+'/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'createPerson',
+			'role': role,
+			'outerID': outerID,
+			'innerID': innerID,
+			'first': first,
+			'von': von,
+			'last': last,
+			'jr': jr
+		},
+		success: function (html) {
+			$('#checkData_'+role+'Result_'+outerID+'_'+innerID).html(html);
+		}
+	});
+}
+
+function bibliographie_publications_check_data_approve_person (role, outerID, innerID) {
+	$.ajax({
+		url: bibliographie_web_root+'/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'approvePerson',
+			'role': role,
+			'outerID': outerID,
+			'innerID': innerID,
+			'personID': $('#checkData_'+role+'Select_'+outerID+'_'+innerID).val()
+		},
+		success: function (html) {
+			$('#checkData_'+role+'Result_'+outerID+'_'+innerID).html(html);
+		}
+	});
+}
+
+function bibliographie_publications_export_choose_type (exportList) {
+	$.ajax({
+		'url': bibliographie_web_root+'/publications/ajax.php',
+		'data': {
+			'task': 'exportChooseType',
+			'exportList': exportList
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#exportChooseType_'+exportList).dialog({
+				width: 500,
+				modal: true,
+				buttons: {
+					'Close': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	})
 }

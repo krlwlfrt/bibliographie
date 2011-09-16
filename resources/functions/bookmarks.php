@@ -98,14 +98,14 @@ function bibliographie_bookmarks_print_html ($pub_id) {
 /**
  * Print the javascript that is needed for bookmark interactions.
  */
-function bibliographie_bookmarks_print_javascript () {
+function bibliographie_bookmarks_print_javascript ($withHTML = true) {
+	if($withHTML)
+		echo '<script type="text/javascript"> /* <![CDATA[ */';
 ?>
 
-<script type="text/javascript">
-	/* <![CDATA[ */
 function bibliographie_bookmarks_set_bookmark (pub_id) {
 	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/ajax.php'?>',
+		url: bibliographie_web_root+'/bookmarks/ajax.php',
 		data: {
 			'task': 'setBookmark',
 			'pub_id': pub_id
@@ -119,7 +119,7 @@ function bibliographie_bookmarks_set_bookmark (pub_id) {
 
 function bibliographie_bookmarks_unset_bookmark (pub_id) {
 	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/ajax.php'?>',
+		url: bibliographie_web_root+'/bookmarks/ajax.php',
 		data: {
 			'task': 'unsetBookmark',
 			'pub_id': pub_id
@@ -130,9 +130,10 @@ function bibliographie_bookmarks_unset_bookmark (pub_id) {
 		}
 	})
 }
-	/* ]]> */
-</script>
+
 <?php
+	if($withHTML)
+		echo '/* ]]> */ </script>';
 }
 
 /**

@@ -47,35 +47,7 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-var consistencyChecks = <?php echo json_encode($bibliographie_consistency_checks)?>;
-var runChecks = Array();
-
-function bibliographie_maintenance_run_all_checks () {
-	$.each(consistencyChecks, function (category, checks){
-		$.each(checks, function (dummy, checkID) {
-			bibliographie_maintenance_run_consistency_check(category+'_'+checkID);
-		});
-	});
-}
-
-function bibliographie_maintenance_run_consistency_check (id) {
-	if($.inArray(id, runChecks) == -1){
-		runChecks.push(id);
-
-		$.ajax({
-			url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/ajax.php',
-			data: {
-				'task': 'consistencyChecks',
-				'consistencyCheckID': id
-			},
-			success: function (html) {
-				$('#'+id).html(html);
-			}
-		})
-	}
-}
-
-
+var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibliographie_consistency_checks)?>;
 	/* ]]> */
 </script>
 <?php
@@ -184,38 +156,18 @@ function bibliographie_maintenance_run_consistency_check (id) {
 <h3>Lock topics</h3>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
 	<div class="unit">
-		<label for="topics" class="block">Search for topics to lock.</label>
-		<input type="text" id="topics" name="topics" style="width: 100%" />
+		<label for="topics" class="block">Topics</label>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" tabindex="1" />
+		<br style="clear: both" />
 	</div>
 	<div class="submit"><input type="submit" value="Lock selected topics!" /></div>
 </form>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-function bibliographie_maintenance_unlock_topic (topic_id) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/maintenance/ajax.php'?>',
-		data: {
-			'task': 'unlockTopic',
-			'topic_id': topic_id
-		},
-		dataType: 'json',
-		success: function (json) {
-			$.jGrowl(json.text);
-			if(json.status == 'success')
-				$('#topic_'+topic_id).remove();
-		}
-	})
-}
-
 $(function () {
-	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopics', {
-		searchDelay: 500,
-		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
-		preventDuplicates: true,
-		theme: 'facebook',
-		queryParam: 'query'
-	});
+	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', []);
 });
 	/* ]]> */
 </script>
@@ -294,10 +246,6 @@ $(function () {
 <?php
 			}
 		}
-	break;
-
-	case 'consistencyChecks':
-
 	break;
 }
 

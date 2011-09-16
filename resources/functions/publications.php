@@ -505,37 +505,6 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 			bibliographie_print_pages(count($publications), $baseLink);
 
 		bibliographie_bookmarks_print_javascript();
-?>
-
-<script type="text/javascript">
-	/* <![CDATA[ */
-function bibliographie_publications_export_choose_type (exportList) {
-	$.ajax({
-		'url': '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/ajax.php',
-		'data': {
-			'task': 'exportChooseType',
-			'exportList': exportList
-		},
-		success: function (html) {
-			$('#dialogContainer').append(html);
-			$('#exportChooseType_'+exportList).dialog({
-				width: 500,
-				modal: true,
-				buttons: {
-					'Close': function () {
-						$(this).dialog('close');
-					}
-				},
-				close: function () {
-					$(this).remove();
-				}
-			});
-		}
-	})
-}
-	/* ]]> */
-</script>
-<?php
 	}else
 		echo '<p class="error">List of publications is empty...</p>';
 }

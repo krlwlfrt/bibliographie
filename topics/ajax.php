@@ -15,20 +15,6 @@ switch($_GET['task']){
 			$walkedBy = array();
 			bibliographie_topics_traverse($topic->topic_id, 1, $walkedBy, 'select');
 			$text = '<div class="bibliographie_topics_topic_graph">'.ob_get_clean().'</div>';
-			$text .= "<script type=\"text/javascript\">
-	/* <![CDATA[ */
-function bibliographie_topics_toggle_visibility_of_subtopics (topic_id, repeat_id) {
-	if($('#topic_'+topic_id+'_'+repeat_id+'_subtopics').is(':visible')){
-		$('#topic_'+topic_id+'_'+repeat_id+'_subtopics').hide();
-		$('#topic_'+topic_id+'_'+repeat_id+' span').removeClass('silk-icon-bullet-toggle-minus').addClass('silk-icon-bullet-toggle-plus');
-	}else{
-		$('#topic_'+topic_id+'_'+repeat_id+'_subtopics').show();
-		$('#topic_'+topic_id+'_'+repeat_id+' span').removeClass('silk-icon-bullet-toggle-plus').addClass('silk-icon-bullet-toggle-minus');
-	}
-}
-	/* ]]> */
-</script>";
-
 			$title = 'Topic subgraph for '.htmlspecialchars($topic->name);
 			ob_start();
 		}

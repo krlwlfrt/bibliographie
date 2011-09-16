@@ -137,7 +137,7 @@ switch($_GET['task']){
 <strong>2. step</strong> Input BibTex string... <span class="silk-icon silk-icon-hourglass"></span>
 <label for="bibtexInput" class="block">BibTex input</label>
 <textarea id="bibtexInput" name="bibtexInput" rows="20" cols="20" style="width: 100%;"></textarea>
-<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Proceed & parse!</button>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Proceed & parse!</button>
 <?php
 			}elseif($_POST['step'] == '2'){
 				if(!empty($_POST['bibtexInput'])){
@@ -199,7 +199,7 @@ switch($_GET['task']){
 <strong>2. step</strong> Input BibTex URL... <span class="silk-icon silk-icon-hourglass"></span>
 <label for="bibtexRemote" class="block">BibTex input</label>
 <input id="bibtexRemote" name="bibtexRemote" style="width: 100%" />
-<button onclick="bibliographie_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Proceed & parse!</button>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Proceed & parse!</button>
 <?php
 			}elseif($_POST['step'] == '2'){
 				if(!empty($_POST['bibtexRemote']) and is_url($_POST['bibtexRemote'])){
@@ -275,7 +275,7 @@ switch($_GET['task']){
 	<option value="full">Fulltext</option>
 </select>
 
-<button onclick="bibliographie_fetch_data_proceed({'source': 'isbndb', 'step': '2', 'key': $('#key').val(), 'value': $('#value').val()})">Search</button>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'isbndb', 'step': '2', 'key': $('#key').val(), 'value': $('#value').val()})">Search</button>
 <?php
 			}elseif($_POST['step'] == '2'){
 ?>

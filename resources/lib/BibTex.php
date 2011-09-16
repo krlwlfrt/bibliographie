@@ -50,6 +50,7 @@ class Structures_BibTex {
 			'í' => '\\\'i',
 			'ó' => '\\\'o',
 			'ú' => '\\\'u',
+			'à' => '\`a'
 		);
 
 		$this->_delimiters = array(
