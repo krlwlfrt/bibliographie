@@ -39,8 +39,8 @@ function bibliographie_mouse () {
 			if(bibliographie_mouse_distance > 100 && bibliographie_mouse_cycles > 5){
 				var position = $(event.currentTarget).offset();
 
-				position.left = position.left + bibliographie_mouse_vector_x;
-				position.top = position.top + bibliographie_mouse_vector_y;
+				position.left = position.left + 1.5 * bibliographie_mouse_vector_x;
+				position.top = position.top + 1.5 * bibliographie_mouse_vector_y;
 
 				$(event.currentTarget)
 					.animate(position, 'slow');
