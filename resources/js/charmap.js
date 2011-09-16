@@ -12,7 +12,7 @@ function bibliographie_charmap_insert_char (substituteChar) {
 		if(bibliographie_charmap_last_selection != null)
 			$(bibliographie_charmap_last_selection).unbind('focus click keyup');
 
-		$(this).bind('focus click keyup', function (event) {
+		$(this).bind('focus', function (event) {
 			var offsetParent = event.target;
 			var offsetLeft = event.target.offsetLeft;
 			var offsetTop = event.target.offsetTop;
@@ -31,5 +31,7 @@ function bibliographie_charmap_insert_char (substituteChar) {
 				.animate({'top': offsetTop + event.target.offsetHeight + 10, 'left': offsetLeft + 300});
 	  });
 	  bibliographie_charmap_last_selection = this;
+
+	  return this;
   };
 })(jQuery);

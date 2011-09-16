@@ -589,6 +589,7 @@ $(function() {
 	bibliographie_publications_show_fields($('#pub_type').val());
 
 	$('input, textarea').charmap();
+	$('#bibliographie_charmap').dodge();
 
 	if(pub_id != 0)
 		bibliographie_publications_check_title($('#title').val());
