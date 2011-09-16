@@ -85,11 +85,6 @@ function bibliographie_maintenance_run_consistency_check (id) {
 		$title = 'ToDo list';
 ?>
 
-<h4>Topics</h4>
-<ul>
-	<li>Detect circles</li>
-</ul>
-
 <h4>Publication editor</h4>
 <ul>
 	<li>Auf fehlende Felder einmal hinweisen, und beim zweiten speichern ignorieren ...</li>

@@ -28,7 +28,7 @@ function bibliographie_charmap_insert_char (substituteChar) {
 			bibliographie_charmap_field = event.target;
 			$('#bibliographie_charmap')
 				.show()
-				.animate({'top': offsetTop + event.target.offsetHeight + 5, 'left': offsetLeft + 200});
+				.animate({'top': offsetTop + event.target.offsetHeight + 10, 'left': offsetLeft + 300});
 	  });
 	  bibliographie_charmap_last_selection = this;
   };

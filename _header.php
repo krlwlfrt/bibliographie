@@ -3,23 +3,26 @@
 	<head>
 		<title><?php echo strip_tags($title)?> | bibliographie</title>
 
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/all.css" />
+		<!-- 3rd party libs -->
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/silk-icons.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/jquery.jgrowl.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/token-input.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/token-input-facebook.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/token-input.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/token-input-facebook.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jgrowl.css" />
+
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jgrowl.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.tokeninput.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.highlight.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-ui.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-plugins.js"></script>
+
+		<!-- bibliographie stuff -->
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/all.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/stylesheets/charmap.css" />
-
-		<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/jquery.jgrowl.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/jquery.tokeninput.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/jquery.highlight.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/jquery-plugins.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/javascript/charmap.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/charmap.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/js/publications.js"></script>
 	</head>
-
 
 	<body id="top">
 		<div id="jQueryLoading" style="display: none;"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" width="16" height="11" />&nbsp;Actions pending <span id="jQueryLoadingAmount"></span></div>
@@ -47,7 +50,7 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 		$(this).show();
 	jQueryLoading++;
 	$('#jQueryLoadingAmount').html('('+jQueryLoading+')');
-	//$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
+	$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
 }).bind('ajaxComplete', function(){
 	$('body').css('cursor', 'auto');
 	jQueryLoading--;
@@ -70,6 +73,9 @@ $.jGrowl.defaults.life = 10000;
 jQuery.ajaxSetup({
 	cache: false
 });
+
+var bibliographie_web_root = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>';
+var bibliographie_search_min_chars = <?php echo BIBLIOGRAPHIE_SEARCH_MIN_CHARS?>;
 				/* ]]> */
 			</script>
 

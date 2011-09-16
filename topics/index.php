@@ -123,72 +123,8 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-function bibliographie_publications_show_subgraph (topic) {
-	$.ajax({
-		url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php',
-		data: {
-			'task': 'getSubgraph',
-			'topic_id': topic
-		},
-		success: function (html) {
-			$('#dialogContainer').append(html);
-			$('#selectFromTopicSubgraph').dialog({
-				width: 600,
-				modal: true,
-				buttons: {
-					'Ok': function () {
-						$(this).dialog('close');
-					}
-				},
-				close: function () {
-					$(this).remove();
-				}
-			});
-		}
-	});
-}
-
 $(function () {
-	$('#topics').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/ajax.php?task=searchTopics', {
-		searchDelay: 500,
-		minChars: 3,
-		preventDuplicates: true,
-		theme: 'facebook',
-		prePopulate: <?php echo json_encode($prePopulateTopics)?>,
-		noResultsText: 'Results are in the container to the right!',
-		queryParam: 'query',
-		onResult: function (results) {
-			$('#topicsContainer').html('<div style="margin-bottom: 10px;"><strong>Topics search result</strong></div>');
-			if(results.length > 0){
-				$.each(results, function (key, value) {
-					var selected = false;
-					var topicsArray = $('#topics').tokenInput('get')
-
-					$.each(topicsArray, function (selectedKey, selectedValue) {
-						if(selectedValue.name == value.name)
-							selected = true;
-					});
-
-					if(selected){
-						$('#topicsContainer')
-							.append('<div>')
-							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
-							.append('<span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>');
-					}else{
-						$('#topicsContainer')
-							.append('<div>')
-							.append('<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''+value.id+'\',name:\''+value.name+'\'})" style="float: right;"><span class="silk-icon silk-icon-add"></span> add</a>')
-							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
-							.append('<em>'+value.name+'</em>')
-							.append('</div>');
-					}
-				});
-			}else
-				$('#topicsContainer').append('No results for search!');
-
-			return Array();
-		}
-	});
+	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
 });
 	/* ]]> */
 </script>
