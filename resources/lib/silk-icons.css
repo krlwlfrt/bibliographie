@@ -1,11 +1,11 @@
 ﻿.silk-icon
 {
-    background-image:url('../images/silk-icons.png');
+    background-image:url('silk-icons.png');
     background-repeat:no-repeat; height:16px; width:16px; overflow:hidden; margin:0 1px;
     /*display:-moz-inline-box;Firefox 2.x support*/ display:inline-block; vertical-align:middle;
  }
 /* IE6 Icon Support since PNG Transparency is not supported by IE6*/
-* html .silk-icon {background-image:url('../images/silk-icons.gif');}
+* html .silk-icon {background-image:url('silk-icons.gif');}
 
 .silk-icon-accept{background-position:0 0;}
 .silk-icon-add{background-position:0 -16px;}
