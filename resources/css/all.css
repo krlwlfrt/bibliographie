@@ -314,6 +314,17 @@
 		background-color: #ffa;
 		color: #000;
 	}
+
+	.bibliographie_similarity_container {
+		background: #fff;
+		border: 1px solid #aaa;
+		color: #000;
+		display: none;
+		float: right;
+		font-size: 0.8em;
+		padding: 5px;
+		width: 80%;
+	}
 }
 
 @media print {

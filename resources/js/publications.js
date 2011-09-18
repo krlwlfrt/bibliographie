@@ -58,7 +58,7 @@ function bibliographie_publications_show_fields (selectedType) {
 					if($(this).hasClass('bibtexObligatory') || $(this).val() != '')
 						$(this).show();
 					else
-						$('label[for="'+$(this).attr('id')+'"]').prepend('<a href="javascript:;" onclick="$(\'#'+$(this).attr('id')+'\').show(\'slow\'); $(this).remove();"><span class="silk-icon silk-icon-arrow-down"></span> unfold</a> ');
+						$('label[for="'+$(this).attr('id')+'"]').prepend('<a href="javascript:;" onclick="$(\'#'+$(this).attr('id')+'\').show(\'fast\', function () {$(this).focus();}); $(this).remove();"><span class="silk-icon silk-icon-arrow-down"></span> unfold</a> ');
 				});
 			}else
 				$.jGrowl('Something bad happened! Could not fetch the field specifications for the publication type.');
@@ -216,19 +216,20 @@ function bibliographie_publications_topic_input_tokenized (field, container, pre
 							selected = true;
 					});
 
+					var str = '';
+					str = '<div>';
+					if(value.subtopics > 0)
+						str = str + '<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>';
+
 					if(selected){
-						$('#'+container)
-							.append('<div>')
-							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
-							.append('<span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.</div>');
+						str = str += '<span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.';
 					}else{
-						$('#'+container)
-							.append('<div>')
-							.append('<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''+value.id+'\',name:\''+value.name+'\'})" style="float: right;"><span class="silk-icon silk-icon-add"></span> add</a>')
-							.append('<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>')
-							.append('<em>'+value.name+'</em>')
-							.append('</div>');
+						str = str + '<a href="javascript:;" onclick="$(\'#topics\').tokenInput(\'add\', {id:\''+value.id+'\',name:\''+value.name+'\'})" style="float: right;"><span class="silk-icon silk-icon-add"></span> add</a>';
+						str = str + '<em>'+value.name+'</em>';
 					}
+					str = str + '</div>';
+
+					$('#'+container).append(str);
 				});
 				$('#bibliographie_charmap').hide();
 			}else

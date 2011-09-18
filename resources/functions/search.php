@@ -88,6 +88,9 @@ function bibliographie_search_get_plurals () {
 function bibliographie_search_expand_query ($q, $_options = array(), $iteration = 1) {
 	global $bibliographie_search_queries_suffixes, $bibliographie_search_queries_umlaut_substitutes;
 
+	if(empty($q))
+		return '';
+
 	$expandedQuery = (string) '';
 	$words = preg_split('~[\s\-\,]~', $q);
 

@@ -30,7 +30,11 @@ switch($_GET['task']){
 
 			if(mysql_num_rows($topics) > 0){
 				while($topic = mysql_fetch_object($topics))
-					$result[] = array('id' => $topic->topic_id, 'name' => $topic->name);
+					$result[] = array (
+						'id' => $topic->topic_id,
+						'name' => $topic->name,
+						'subtopics' => count(bibliographie_topics_get_subtopics($topic->topic_id, false))
+					);
 			}
 		}
 

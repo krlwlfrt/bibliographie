@@ -8,7 +8,7 @@
 			</div>
 <?php
 if(count($bibliographie_database_queries) > 0 and BIBLIOGRAPHIE_DATABASE_DEBUG != false){
-	echo '<h2>Database queries</h2><table class="dataContainer" style="font-size: 0.7em">';
+	echo '<table class="dataContainer" style="font-size: 0.7em">';
 	foreach($bibliographie_database_queries as $no => $query){
 		if((BIBLIOGRAPHIE_DATABASE_DEBUG == 'errors' and !empty($query['error'])) or BIBLIOGRAPHIE_DATABASE_DEBUG == 'all'){
 			$query['query'] = '<strong>'.$query['query'].'</strong>';

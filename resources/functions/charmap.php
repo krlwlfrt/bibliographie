@@ -77,6 +77,7 @@ function bibliographie_charmap_print_charmap () {
 ?>
 			</td><td id="bibliographie_charmap_magnifier"></td></tr>
 	</table>
+	<em>You don't have to close me. You can push me away with your mouse!</em>
 </div>
 <?php
 }

@@ -7,6 +7,7 @@ var bibliographie_mouse_current_y = 0;
 var bibliographie_mouse_vector_x = 0;
 var bibliographie_mouse_vector_y = 0;
 var bibliographie_mouse_distance = 0;
+var bibliographie_mouse_velocity = 0;
 
 var bibliographie_mouse_cycles = 0;
 var bibliographie_mouse_tracker = false;
@@ -16,6 +17,7 @@ function bibliographie_mouse () {
 	bibliographie_mouse_vector_x = bibliographie_mouse_current_x - bibliographie_mouse_last_x;
 	bibliographie_mouse_vector_y = bibliographie_mouse_current_y - bibliographie_mouse_last_y;
 	bibliographie_mouse_distance = Math.ceil(Math.sqrt(bibliographie_mouse_vector_x * bibliographie_mouse_vector_x + bibliographie_mouse_vector_y * bibliographie_mouse_vector_y));
+	bibliographie_mouse_velocity = Math.floor(bibliographie_mouse_velocity + bibliographie_mouse_distance / 25) / 2;
 	bibliographie_mouse_last_x = bibliographie_mouse_current_x;
 	bibliographie_mouse_last_y = bibliographie_mouse_current_y;
 }
@@ -29,14 +31,14 @@ function bibliographie_mouse () {
 			});
 
 			$(function () {
-				setInterval('bibliographie_mouse()', 50);
+				setInterval('bibliographie_mouse()', 25);
 			});
 
 			bibliographie_mouse_tracker = true;
 		}
 
 		$(this).mouseover(function (event) {
-			if(bibliographie_mouse_distance > 100 && bibliographie_mouse_cycles > 5){
+			if(bibliographie_mouse_velocity > 3 && bibliographie_mouse_cycles > 10){
 				var position = $(event.currentTarget).offset();
 
 				position.left = position.left + 1.5 * bibliographie_mouse_vector_x;

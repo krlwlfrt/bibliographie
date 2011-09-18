@@ -37,6 +37,8 @@ switch($_GET['task']){
 		if(!$created){
 ?>
 
+<p class="notice">On this page you can create and edit authors! Just fill in the required fields and hit save!</p>
+
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=createAuthor'?>" method="post">
 	<div class="unit">
 		<div style="float: right; padding-left: 10px; width: 10%;">
@@ -54,19 +56,18 @@ switch($_GET['task']){
 
 		<label for="firstname" class="block">First name(s)*</label>
 		<input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($_POST['firstname'])?>" style="width: 35%" tabindex="1" />
+
+		<div id="similarNameContainer" class="bibliographie_similarity_container"></div>
+		<br style="clear: both;" />
 	</div>
 
 	<div class="unit">
-		<div style="float: right; width: 50%;">
-			<label for="url" class="block">URL</label>
-			<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" tabindex="6" />
-		</div>
-
 		<label for="email" class="block">Mail address</label>
-		<input type="text" id="email" name="email" value="<?php echo htmlspecialchars($_POST['email'])?>" style="width: 45%" tabindex="5" />
-	</div>
+		<input type="text" id="email" name="email" value="<?php echo htmlspecialchars($_POST['email'])?>" style="width: 100%" tabindex="5" />
 
-	<div class="unit">
+		<label for="url" class="block">URL</label>
+		<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" tabindex="6" />
+
 		<label for="institute" class="block">Institute</label>
 		<input type="text" id="institute" name="institute" value="<?php echo htmlspecialchars($_POST['institute'])?>" style="width: 100%" tabindex="7" />
 	</div>
@@ -75,7 +76,20 @@ switch($_GET['task']){
 		<input type="submit" value="save" tabindex="8"  />
 	</div>
 </form>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+$(function () {
+	$('input, textarea').charmap();
+	$('#bibliographie_charmap').dodge();
+
+	$('#firstname, #surname').bind('keyup change', function (event) {
+		delayRequest('bibliographie_authors_check_name', Array($('#firstname').val(), $('#surname').val()));
+	});
+});
+</script>
 <?php
+			bibliographie_charmap_print_charmap();
 		}
 	break;
 

@@ -125,10 +125,14 @@ switch($_GET['task']){
 	/* <![CDATA[ */
 $(function () {
 	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+
+	$('input, textarea').charmap();
+	$('#bibliographie_charmap').dodge();
 });
 	/* ]]> */
 </script>
 <?php
+			bibliographie_charmap_print_charmap();
 		}
 	break;
 

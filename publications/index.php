@@ -426,7 +426,7 @@ $(function () {
 
 		<label for="title" class="block">Title</label>
 		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" class="bibtex" tabindex="4" />
-		<div id="similarTitleContainer" style="background: #fff; border: 1px solid #aaa; color: #000; display: none; float: right; font-size: 0.8em; padding: 5px; width: 80%"></div>
+		<div id="similarTitleContainer" class="bibliographie_similarity_container"></div>
 		<br style="clear: both;" />
 
 		<div style="float: right; width: 50%">

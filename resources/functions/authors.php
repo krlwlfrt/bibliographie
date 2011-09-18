@@ -10,7 +10,7 @@
  * @param string $institute
  * @return mixed False or array of data on success.
  */
-function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute) {
+function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute, $author_id = null) {
 	$return = _mysql_query("INSERT INTO `a2author` (
 	`firstname`,
 	`von`,

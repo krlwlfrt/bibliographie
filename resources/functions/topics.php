@@ -257,6 +257,7 @@ function bibliographie_topics_get_parent_topics ($topic_id, $recursive = false) 
 /**
  * Get a list of subtopics recursively with their own subtopics and so on.
  * @param int $topic_id The id of a topic.
+ * @param bool $recursive Wether or not to fetch all subtopics recursively or just the direct children.
  * @return mixed An array on success or error otherwise.
  */
 function bibliographie_topics_get_subtopics ($topic_id, $recursive = false, $initial = null) {
