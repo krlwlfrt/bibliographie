@@ -313,30 +313,8 @@ $(function () {
 			/**
 			 * Fill the prePropulateAuthor array.
 			 */
-			if(!empty($_POST['author'])){
-				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['author'])){
-					$authors = explode(',', $_POST['author']);
-					foreach($authors as $author)
-						$prePopulateAuthor[] = array (
-							'id' => $author,
-							'name' => bibliographie_authors_parse_data($author)
-						);
-				}
-			}
-
-			/**
-			 * Fill the prePropulateEditor array.
-			 */
-			if(!empty($_POST['editor'])){
-				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['editor'])){
-					$editors = explode(',', $_POST['editor']);
-					foreach($editors as $editor)
-						$prePopulateEditor[] = array (
-							'id' => $editor,
-							'name' => bibliographie_authors_parse_data($editor)
-						);
-				}
-			}
+			$prePopulateAuthor = bibliographie_authors_populate_input($_POST['author']);
+			$prePopulateEditor = bibliographie_authors_populate_input($_POST['editor']);
 
 			/**
 			 * Fill the prePropulateTags array.
@@ -555,26 +533,15 @@ $(function () {
 
 $(function() {
 	$('#pub_type').bind('mouseup keyup', function (event) {
-		bibliographie_publications_show_fields(event.target.value);
+		delayRequest('bibliographie_publications_show_fields', Array(event.target.value));
 	});
 
 	$('#title').bind('change keyup', function (event) {
 		delayRequest('bibliographie_publications_check_title', Array(event.target.value));
 	});
 
-	$('#author').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
-		searchDelay: bibliographie_request_delay,
-		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
-		preventDuplicates: true,
-		prePopulate: <?php echo json_encode($prePopulateAuthor).PHP_EOL?>
-	});
-
-	$('#editor').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php?task=searchAuthors', {
-		searchDelay: bibliographie_request_delay,
-		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
-		preventDuplicates: true,
-		prePopulate: <?php echo json_encode($prePopulateEditor).PHP_EOL?>
-	});
+	bibliographie_authors_input_tokenized ('author', <?php echo json_encode($prePopulateAuthor)?>);
+	bibliographie_authors_input_tokenized ('editor', <?php echo json_encode($prePopulateEditor)?>);
 
 	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
 		searchDelay: bibliographie_request_delay,
@@ -584,7 +551,7 @@ $(function() {
 		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>
 	});
 
-	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
 
 	bibliographie_publications_show_fields($('#pub_type').val());
 

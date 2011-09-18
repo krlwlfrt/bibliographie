@@ -38,8 +38,12 @@
 			<div id="header">
 				<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/" method="get" id="search">
 					<div>
-						<input type="hidden" id="task" name="task" value="simpleSearch" />
-						<input type="text" id="q" name="q" style="width: 80%" placeholder="<?php echo htmlspecialchars($_GET['q'])?>" />
+						<div id="complexSearches">
+							<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=authorSets">Search author sets</a>
+						</div>
+
+						<input type="hidden" name="task" value="simpleSearch" />
+						<input type="text" id="q" name="q" style="width: 50%" placeholder="<?php echo htmlspecialchars($_GET['q'])?>" />
 						<button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button>
 					</div>
 				</form>

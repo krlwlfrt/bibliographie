@@ -31,3 +31,12 @@ function bibliographie_authors_check_name (firstname, surname) {
 		}
 	})
 }
+
+function bibliographie_authors_input_tokenized (field, prePopulate) {
+	$('#'+field).tokenInput(bibliographie_web_root+'/authors/ajax.php?task=searchAuthors', {
+		'searchDelay': bibliographie_request_delay,
+		'minChars': bibliographie_search_min_chars,
+		'preventDuplicates': true,
+		'prePopulate': prePopulate
+	});
+}

@@ -147,3 +147,21 @@ function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 
 	return false;
 }
+
+function bibliographie_authors_populate_input ($string) {
+	if(!empty($string) and is_csv($string, 'int')){
+		$authors = explode(',', $string);
+		if(count($authors) > 0){
+			$populate = array();
+			foreach($authors as $author)
+				$populate[] = array (
+					'id' => $author,
+					'name' => bibliographie_authors_parse_data($author)
+				);
+
+			return $populate;
+		}
+	}
+
+	return array();
+}

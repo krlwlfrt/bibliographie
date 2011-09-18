@@ -68,7 +68,20 @@
 
 	#search {
 		float: right;
-		width: 30%;
+		width: 40%;
+	}
+
+	#complexSearches {
+		float: right;
+		font-size: 0.7em;
+		font-weight: normal;
+		text-align: right;
+	}
+
+	#complexSearches a {
+		background: transparent;
+		color: #fff;
+		display: block;
 	}
 
 	#q {

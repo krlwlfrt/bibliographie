@@ -457,6 +457,11 @@ function bibliographie_publications_parse_list (array $publications, $type = 'ht
  */
 function bibliographie_publications_print_list (array $publications, $baseLink, $bookmarkBatch = null, $showBookmarkingLink = true, $onlyPublication = false){
 	if(count($publications) > 0){
+		/**
+		 * In case we have gaps in the array keys fetch it new.
+		 */
+		$publications = array_values($publications);
+
 		if($bookmarkBatch == 'add'){
 			$bookmarks = bibliographie_bookmarks_set_bookmarks_for_list($publications);
 			echo '<p class="notice">'.$bookmarks.' publications have been bookmarked! '.(count($publications) - $bookmarks).' publications in the shown list were bookmarked already.</p>';

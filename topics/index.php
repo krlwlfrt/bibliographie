@@ -124,7 +124,7 @@ switch($_GET['task']){
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
 
 	$('input, textarea').charmap();
 	$('#bibliographie_charmap').dodge();

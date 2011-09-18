@@ -88,7 +88,6 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 
 <h4>Suche</h4>
 <ul>
-	<li>Set von Autoren</li>
 	<li>Zeiträume</li>
 </ul>
 <?php

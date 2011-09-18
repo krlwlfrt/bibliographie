@@ -21,6 +21,17 @@ function is_mail ($mail) {
 }
 
 /**
+ * Check if a string is a csv list.
+ * @param string $csv
+ * @param string $type The type of the cs values. (int, etc.)
+ * @return bool
+ */
+function is_csv ($csv, $type = 'null') {
+	if($type == 'int')
+		return preg_match('~^[0-9]+(,[0-9]+)*$~', $csv);
+}
+
+/**
  * Give the HTML-snippet for an css-sprite icon.
  * @param string $name Identification of the icon.
  * @return string HTML-snippet

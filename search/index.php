@@ -17,6 +17,86 @@ $bibliographie_search_categories = array(
 <?php
 $title = 'Search';
 switch($_GET['task']){
+	case 'authorSets':
+?>
+
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=authorSets" method="get">
+	<div class="unit">
+		<label for="authors" class="block">Authors</label>
+		<input type="text" id="authors" name="authors" />
+
+		<label for="query" class="block">Query</label>
+		<input type="text" id="query" name="query" style="width: 100%" value="<?php echo htmlspecialchars($_GET['query'])?>" />
+	</div>
+
+	<div class="submit"><input type="hidden" name="task" value="authorSets" /><input type="submit" value="search" /></div>
+</form>
+<?php
+		bibliographie_charmap_print_charmap();
+?>
+
+<div id="bibliographie_search_results">
+<?php
+		$query = '';
+		if(!empty($_GET['authors'])){
+			if(is_csv($_GET['authors'], 'int')){
+				$authors = explode(',', $_GET['authors']);
+
+				if(count($authors) == 1)
+					echo '<p class="notice">You just entered one author and get therefore a list of the publications of '.bibliographie_authors_parse_data($authors[0], array('linkProfile' => true)).'!</p>';
+
+				$publications = array();
+				foreach($authors as $author){
+					if(count($publications) > 0)
+						$publications = array_intersect($publications, bibliographie_authors_get_publications($author));
+					else
+						$publications = bibliographie_authors_get_publications($author);
+				}
+
+				if(!empty($_GET['query']) and count($publications) > 0){
+					$mysql_string = "";
+					foreach($publications as $publication){
+						if(!empty($mysql_string))
+							$mysql_string .= " OR ";
+
+						$mysql_string .= "`pub_id` = ".((int) $publication);
+					}
+
+					$query = bibliographie_search_expand_query($_GET['query']);
+					$publicationsResult = _mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($query))."')) AS `relevancy` FROM `a2publication` WHERE ".$mysql_string.") fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `title`");
+
+					if(mysql_num_rows($publicationsResult) > 0){
+						$publications = array();
+						while($publication = mysql_fetch_object($publicationsResult))
+							$publications[] = $publication->pub_id;
+					}else
+						echo '<p class="notice">There were no results for your query string! Showing all publications for this set of authors instead...</p>';
+				}
+
+				if(count($publications) > 0){
+					bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=authorSets&amp;authors='.$_GET['authors'], $_GET['bookmarkBatch']);
+				}else
+					echo '<p class="notice">No publications were found for this set of authors!</p>';
+
+			}
+		}
+?>
+
+</div>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+$(function () {
+	bibliographie_authors_input_tokenized('authors', <?php echo json_encode(bibliographie_authors_populate_input($_GET['authors']))?>);
+	$('input').charmap();
+	$('#bibliographie_charmap').dodge();
+	$('#bibliographie_search_results').highlight(<?php echo json_encode(explode(' ', $query))?>);
+});
+	/* ]]> */
+</script>
+<?php
+	break;
+
 	case 'showPublications':
 		$publications = bibliographie_publications_get_cached_list($_GET['publicationsList']);
 		if(is_array($publications) and count($publications) > 0){
