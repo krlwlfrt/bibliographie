@@ -55,9 +55,11 @@ function bibliographie_publications_show_fields (selectedType) {
 				});
 
 				$.each($('input.bibtex, textarea.bibtex, select.bibtex, input.collapsible, textarea.collapsible, select.collapsible'), function (key, element) {
-					if($(this).hasClass('bibtexObligatory') || $(this).val() != '')
+					if($(this).hasClass('bibtexObligatory') || $(this).val() != ''){
+						if($(this).val() != '' && $('label[for='+$(this).attr('id')+']').is(':visible') == false)
+							$('label[for='+$(this).attr('id')+']').show().prepend('<span style="background: transparent; color: #f00; font-weight: normal"><span class="silk-icon silk-icon-bug"></span> Field is filled, also it\'s not allowed for this publication type!</span> ');
 						$(this).show();
-					else
+					}else
 						$('label[for="'+$(this).attr('id')+'"]').prepend('<a href="javascript:;" onclick="$(\'#'+$(this).attr('id')+'\').show(\'fast\', function () {$(this).focus();}); $(this).remove();"><span class="silk-icon silk-icon-arrow-down"></span> unfold</a> ');
 				});
 			}else

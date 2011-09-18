@@ -558,8 +558,7 @@ $(function() {
 	$('input, textarea').charmap();
 	$('#bibliographie_charmap').dodge();
 
-	if(pub_id != 0)
-		bibliographie_publications_check_title($('#title').val());
+	bibliographie_publications_check_title($('#title').val());
 });
 	/* ]]> */
 </script>
@@ -575,7 +574,7 @@ $(function() {
 ?>
 
 <em style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=exportPublications&amp;exportList=<?php echo bibliographie_publications_cache_list(array($publication['pub_id']))?>"><em><?php echo bibliographie_icon_get('page-white-go')?> Export</em></a>
+	<a href="javascript:;" onclick="bibliographie_publications_export_choose_type('<?php echo bibliographie_publications_cache_list(array($publication['pub_id']))?>')"><em><?php echo bibliographie_icon_get('page-white-go')?> Export</em></a>
 	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit publication</a>
 </em>
 <h3><?php echo htmlspecialchars($publication['title'])?></h3>
