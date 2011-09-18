@@ -22,10 +22,11 @@ switch($_GET['task']){
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=authorSets" method="get">
 	<div class="unit">
+		<div id="coAuthorsContainer" class="bibliographie_similarity_container" style="float: right; max-height: 200px; overflow-y: scroll; width: 40%;"></div>
 		<label for="authors" class="block">Authors</label>
 		<input type="text" id="authors" name="authors" />
 
-		<label for="query" class="block">Query</label>
+		<label for="query" class="block" style="clear: both;">Query</label>
 		<input type="text" id="query" name="query" style="width: 100%" value="<?php echo htmlspecialchars($_GET['query'])?>" />
 	</div>
 
@@ -87,7 +88,37 @@ switch($_GET['task']){
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_authors_input_tokenized('authors', <?php echo json_encode(bibliographie_authors_populate_input($_GET['authors']))?>);
+	function bibliographie_authors_get_co_authors (field, container) {
+		setLoading('#'+container);
+		$.ajax({
+			url: bibliographie_web_root+'/search/ajax.php',
+			data: {
+				'task': 'coAuthors',
+				'selectedAuthors': $('#'+field).tokenInput('get')
+			},
+			dataType: 'json',
+			success: function (json) {
+				$('#'+container).html('<div style="margin-bottom: 10px;">Found '+json.length+' co authors.</div>').show();
+				$.each(json, function (dummy, value) {
+					$('#'+container).append('<div><a href="javascript:;" onclick="$(\'#authors\').tokenInput(\'add\', {\'id\': '+value.id+', \'name\': \''+value.name+'\'});" style="float: right;"><span class="silk-icon silk-icon-add"></span></a> '+value.name+'</div>');
+				});
+			}
+		})
+	}
+
+	$('#authors').tokenInput(bibliographie_web_root+'/authors/ajax.php?task=searchAuthors', {
+		'searchDelay': bibliographie_request_delay,
+		'minChars': bibliographie_search_min_chars,
+		'preventDuplicates': true,
+		'prePopulate': <?php echo json_encode(bibliographie_authors_populate_input($_GET['authors']))?>,
+		'onAdd': function (item) {
+			bibliographie_authors_get_co_authors('authors', 'coAuthorsContainer');
+		},
+		'onDelete': function (item) {
+			bibliographie_authors_get_co_authors('authors', 'coAuthorsContainer');
+		}
+	});
+
 	$('input').charmap();
 	$('#bibliographie_charmap').dodge();
 	$('#bibliographie_search_results').highlight(<?php echo json_encode(explode(' ', $query))?>);

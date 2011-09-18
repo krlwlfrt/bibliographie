@@ -13,7 +13,7 @@ function bibliographie_charmap_insert_char (substituteChar) {
 			$(bibliographie_charmap_last_selection).unbind('focus click keyup');
 
 		$(this).bind('focus', function (event) {
-			if($(event.target).is('input[type=submit]') == false){
+			if($(event.target).is('input[type=submit]') == false && $(event.target).is('input[type=checkbox]') == false && $('#bibliographie_charmap_pinner').is(':checked') == false){
 				var offsetParent = event.target;
 				var offsetLeft = event.target.offsetLeft;
 				var offsetTop = event.target.offsetTop;

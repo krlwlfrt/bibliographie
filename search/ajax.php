@@ -6,6 +6,45 @@ define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 
 switch($_GET['task']){
+	case 'coAuthors':
+		if(is_array($_GET['selectedAuthors']) and count($_GET['selectedAuthors']) > 0){
+			$selectedAuthors = array();
+			foreach($_GET['selectedAuthors'] as $selectedAuthor)
+				$selectedAuthors[] = ((int) $selectedAuthor['id']);
+
+			$publications = array();
+			foreach($selectedAuthors as $author){
+				if(count($publications) > 0)
+					$publications = array_intersect($publications, bibliographie_authors_get_publications($author));
+				else
+					$publications = bibliographie_authors_get_publications($author);
+			}
+
+			$authorsResult = _mysql_query("SELECT * FROM `a2author` authors, (
+	SELECT `author_id` FROM `a2publicationauthorlink` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."')
+) links
+WHERE
+	authors.`author_id` = links.`author_id` AND
+	NOT FIND_IN_SET(authors.`author_id`, '".implode(',', $selectedAuthors)."')
+ORDER BY `surname`, `firstname`");
+
+			$authors = array();
+			if(mysql_num_rows($authorsResult) > 0){
+				$_authors = array();
+				while($author = mysql_fetch_object($authorsResult))
+					$_authors[] = $author->author_id;
+
+				foreach(array_unique($_authors) as $author)
+					$authors[] = array(
+						'id' => $author,
+						'name' => bibliographie_authors_parse_data($author)
+					);
+			}
+
+			echo json_encode($authors);
+		}
+	break;
+
 	case 'simpleSearch':
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			$searchResults = null;

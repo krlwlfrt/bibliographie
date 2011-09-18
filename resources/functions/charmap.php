@@ -51,7 +51,8 @@ function bibliographie_charmap_print_charmap () {
 
 <div id="bibliographie_charmap">
 	<div id="bibliographie_charmap_header">
-		<a id="bibliographie_charmap_closer" href="javascript:;" onclick="$('#bibliographie_charmap').hide('clip');">close</a>
+		<a id="bibliographie_charmap_closer" href="javascript:;" onclick="$('#bibliographie_charmap').hide('clip');"><span class="silk-icon silk-icon-cross"></span> close</a>
+		<span style="float: right"><input type="checkbox" id="bibliographie_charmap_pinner" name="bibliographie_charmap_pinner" /> <label for="bibliographie_charmap_pinner">pin</label></span>
 		<strong>Charmap</strong>
 		<a href="javascript:;" onclick="$('#bibliographie_charmap_upper_substitutes').hide(); $('#bibliographie_charmap_lower_substitutes').show()">lower</a> /
 		<a href="javascript:;" onclick="$('#bibliographie_charmap_lower_substitutes').hide(); $('#bibliographie_charmap_upper_substitutes').show()">upper</a> case
@@ -77,7 +78,7 @@ function bibliographie_charmap_print_charmap () {
 ?>
 			</td><td id="bibliographie_charmap_magnifier"></td></tr>
 	</table>
-	<em>You don't have to close me. You can push me away with your mouse!</em>
+	<em>To get rid of me pin me or push me away with the mouse.</em>
 </div>
 <?php
 }

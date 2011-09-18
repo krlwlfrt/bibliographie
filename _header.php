@@ -77,6 +77,8 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 
 	if(jQueryLoading == 0)
 		$(this).hide('fade');
+}).bind('ajaxError', function (event, jqXHR, ajaxSettings, thrownError) {
+	$('#dialogContainer').append(ajaxSettings.url);
 });
 
 jQuery.ajaxSetup({

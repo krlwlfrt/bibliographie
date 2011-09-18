@@ -18,3 +18,7 @@ function delayRequest (functionName, params) {
 
 	bibliographie_request_timeouts[functionName] = setTimeout(call, bibliographie_request_delay);
 }
+
+function setLoading (selector) {
+	$(selector).html('<span><img src="'+bibliographie_web_root+'/resources/images/loading.gif" alt="loading"> loading</span>')
+}
