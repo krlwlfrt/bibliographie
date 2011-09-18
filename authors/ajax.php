@@ -28,8 +28,7 @@ switch($_GET['task']){
 			'text' => $text,
 			'status' => $status,
 			'author_id' => $author_id,
-			'name' => $name,
-			'print_r' => print_r($_GET, true)
+			'name' => $name
 		));
 	break;
 
