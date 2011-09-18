@@ -20,112 +20,50 @@ switch($_GET['task']){
 	case 'authorSets':
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/search/?task=authorSets" method="get">
-	<div class="unit">
-		<div id="coAuthorsContainer" class="bibliographie_similarity_container" style="float: right; max-height: 200px; overflow-y: scroll; width: 40%;"></div>
-		<label for="authors" class="block">Authors</label>
-		<input type="text" id="authors" name="authors" />
+<p class="notice">Select two or more authors and optionally provide a query string to search!</p>
+<div class="unit">
+	<div id="coAuthorsContainer" class="bibliographie_similarity_container" style="float: right; max-height: 200px; overflow-y: scroll; width: 40%;"></div>
+	<label for="authors" class="block">Authors</label>
+	<input type="text" id="authors" name="authors" />
 
-		<label for="query" class="block" style="clear: both;">Query</label>
-		<input type="text" id="query" name="query" style="width: 100%" value="<?php echo htmlspecialchars($_GET['query'])?>" />
-	</div>
-
-	<div class="submit"><input type="hidden" name="task" value="authorSets" /><input type="submit" value="search" /></div>
-</form>
-<?php
-		bibliographie_charmap_print_charmap();
-?>
-
-<div id="bibliographie_search_results">
-<?php
-		$query = '';
-		if(!empty($_GET['authors'])){
-			if(is_csv($_GET['authors'], 'int')){
-				$authors = explode(',', $_GET['authors']);
-
-				if(count($authors) == 1)
-					echo '<p class="notice">You just entered one author and get therefore a list of the publications of '.bibliographie_authors_parse_data($authors[0], array('linkProfile' => true)).'!</p>';
-
-				$publications = array();
-				foreach($authors as $author){
-					if(count($publications) > 0)
-						$publications = array_intersect($publications, bibliographie_authors_get_publications($author));
-					else
-						$publications = bibliographie_authors_get_publications($author);
-				}
-
-				if(!empty($_GET['query']) and count($publications) > 0){
-					$mysql_string = "";
-					foreach($publications as $publication){
-						if(!empty($mysql_string))
-							$mysql_string .= " OR ";
-
-						$mysql_string .= "`pub_id` = ".((int) $publication);
-					}
-
-					$query = bibliographie_search_expand_query($_GET['query']);
-					$publicationsResult = _mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($query))."')) AS `relevancy` FROM `a2publication` WHERE ".$mysql_string.") fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `title`");
-
-					if(mysql_num_rows($publicationsResult) > 0){
-						$publications = array();
-						while($publication = mysql_fetch_object($publicationsResult))
-							$publications[] = $publication->pub_id;
-					}else
-						echo '<p class="notice">There were no results for your query string! Showing all publications for this set of authors instead...</p>';
-				}
-
-				if(count($publications) > 0){
-					bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=authorSets&amp;authors='.$_GET['authors'], $_GET['bookmarkBatch']);
-				}else
-					echo '<p class="notice">No publications were found for this set of authors!</p>';
-
-			}
-		}
-?>
-
+	<label for="query" class="block" style="clear: both;">Query</label>
+	<input type="text" id="query" name="query" style="width: 100%" value="<?php echo htmlspecialchars($_GET['query'])?>" />
 </div>
-
+<div id="bibliographie_search_results"></div>
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	function bibliographie_authors_get_co_authors (field, container) {
-		setLoading('#'+container);
-		$.ajax({
-			url: bibliographie_web_root+'/search/ajax.php',
-			data: {
-				'task': 'coAuthors',
-				'selectedAuthors': $('#'+field).tokenInput('get')
-			},
-			dataType: 'json',
-			success: function (json) {
-				$('#'+container).html('<div style="margin-bottom: 10px;">Found '+json.length+' co authors.</div>').show();
-				$.each(json, function (dummy, value) {
-					$('#'+container).append('<div><a href="javascript:;" onclick="$(\'#authors\').tokenInput(\'add\', {\'id\': '+value.id+', \'name\': \''+value.name+'\'});" style="float: right;"><span class="silk-icon silk-icon-add"></span></a> '+value.name+'</div>');
-				});
-			}
-		})
-	}
-
 	$('#authors').tokenInput(bibliographie_web_root+'/authors/ajax.php?task=searchAuthors', {
 		'searchDelay': bibliographie_request_delay,
 		'minChars': bibliographie_search_min_chars,
 		'preventDuplicates': true,
-		'prePopulate': <?php echo json_encode(bibliographie_authors_populate_input($_GET['authors']))?>,
+		'prePopulate': null,
 		'onAdd': function (item) {
 			bibliographie_authors_get_co_authors('authors', 'coAuthorsContainer');
+			bibliographie_authors_get_publications_for_authors_set($('#authors').val(), $('#query').val());
 		},
 		'onDelete': function (item) {
-			bibliographie_authors_get_co_authors('authors', 'coAuthorsContainer');
+			if($('#authors').tokenInput('get').length > 0){
+				bibliographie_authors_get_co_authors('authors', 'coAuthorsContainer');
+				bibliographie_authors_get_publications_for_authors_set($('#authors').val(), $('#query').val());
+			}else{
+				$('#coAuthorsContainer').hide();
+				$('#bibliographie_search_results').empty();
+			}
 		}
+	});
+
+	$('#query').bind('keyup change', function () {
+		delayRequest('bibliographie_authors_get_publications_for_authors_set', Array($('#authors').val(), $('#query').val()));
 	});
 
 	$('input').charmap();
 	$('#bibliographie_charmap').dodge();
-	$('#bibliographie_search_results').highlight(<?php echo json_encode(explode(' ', $query))?>);
 });
 	/* ]]> */
 </script>
 <?php
+		bibliographie_charmap_print_charmap();
 	break;
 
 	case 'showPublications':

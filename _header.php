@@ -69,7 +69,7 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 		$(this).show();
 	jQueryLoading++;
 	$('#jQueryLoadingAmount').html('('+jQueryLoading+')');
-	$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
+	//$.jGrowl('Sending AJAX query to: <em>'+ajaxOptions.url+'</em>');
 }).bind('ajaxComplete', function(){
 	$('body').css('cursor', 'auto');
 	jQueryLoading--;
@@ -78,7 +78,7 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 	if(jQueryLoading == 0)
 		$(this).hide('fade');
 }).bind('ajaxError', function (event, jqXHR, ajaxSettings, thrownError) {
-	$('#dialogContainer').append(ajaxSettings.url);
+	alert('Request to '+ajaxSettings.url+' failed!');
 });
 
 jQuery.ajaxSetup({

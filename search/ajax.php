@@ -21,12 +21,15 @@ switch($_GET['task']){
 			}
 
 			$authorsResult = _mysql_query("SELECT * FROM `a2author` authors, (
-	SELECT `author_id` FROM `a2publicationauthorlink` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."')
+	SELECT `author_id`, `is_editor` FROM `a2publicationauthorlink` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."')
 ) links
 WHERE
 	authors.`author_id` = links.`author_id` AND
+	links.`is_editor` = 'N' AND
 	NOT FIND_IN_SET(authors.`author_id`, '".implode(',', $selectedAuthors)."')
 ORDER BY `surname`, `firstname`");
+
+			echo mysql_error();
 
 			$authors = array();
 			if(mysql_num_rows($authorsResult) > 0){
@@ -43,6 +46,47 @@ ORDER BY `surname`, `firstname`");
 
 			echo json_encode($authors);
 		}
+	break;
+
+	case 'authorSets':
+		if(!empty($_GET['authors'])){
+			if(is_csv($_GET['authors'], 'int')){
+				$authors = explode(',', $_GET['authors']);
+
+				if(count($authors) > 1){
+					$publications = array();
+					foreach($authors as $author){
+						if(count($publications) > 0)
+							$publications = array_intersect($publications, bibliographie_authors_get_publications($author));
+						else
+							$publications = bibliographie_authors_get_publications($author);
+					}
+
+					if(!empty($_GET['query']) and count($publications) > 0){
+						$publications = implode(',', $publications);
+
+						$query = bibliographie_search_expand_query($_GET['query']);
+
+						$publicationsResult = _mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`, `abstract`, `note`) AGAINST ('".mysql_real_escape_string(stripslashes($query))."')) AS `relevancy` FROM `a2publication` WHERE FIND_IN_SET(`pub_id`, '".$publications."')) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC, `title`");
+
+						if(mysql_num_rows($publicationsResult) > 0){
+							$publications = array();
+							while($publication = mysql_fetch_object($publicationsResult))
+								$publications[] = $publication->pub_id;
+						}else
+							echo '<p class="notice">There were no results for your query string! Showing all publications for this set of authors instead...</p>';
+					}
+
+					if(count($publications) > 0){
+						bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=authorSets&amp;authors='.$_GET['authors'], $_GET['bookmarkBatch']);
+					}else
+						echo '<p class="notice">No publications were found for this set of authors!</p>';
+
+				}else
+					echo '<p class="notice">To see a list of publications of '.bibliographie_authors_parse_data($authors[0], array('linkProfile' => true)).' visit his/her profile!</p>';
+			}
+		}else
+			echo '<p class="notice">You have to select at least two authors to search!</p>';
 	break;
 
 	case 'simpleSearch':

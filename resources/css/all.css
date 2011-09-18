@@ -131,7 +131,7 @@
 		text-align: right;
 	}
 
-	form .unit {
+	.unit {
 		background: #ddd;
 		border: 1px solid #aaa;
 		color: #000;
@@ -139,7 +139,7 @@
 		padding: 5px;
 	}
 
-	form .unit h4 {
+	.unit h4 {
 		border-bottom: 1px solid #000;
 		margin: 0 0 10px 0;
 		padding: 0 0 5px 0;
@@ -154,13 +154,13 @@
 		margin: 5px 0 5px 5px;
 	}
 
-	form .unit input, form .unit textarea, form .unit select {
+	.unit input, .unit textarea, .unit select {
 		background: #fff;
 		border: 1px solid #aaa;
 		color: #000;
 	}
 
-	form .unit input.obligatory, form .unit textarea.obligatory, form .unit select.obligatory {
+	.unit input.obligatory, .unit textarea.obligatory, .unit select.obligatory {
 		background: #faa;
 		border: 1px solid #f00;
 		color: #000;
