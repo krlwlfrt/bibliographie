@@ -10,7 +10,10 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
 $title = 'Authors';
 switch($_GET['task']){
 	case 'authorEditor':
-		$created = false;
+		$done = false;
+
+		$author = bibliographie_authors_get_data($_GET['author_id'], 'assoc');
+
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
 
@@ -24,29 +27,48 @@ switch($_GET['task']){
 				$errors[] = 'The mail address you filled is not valid.';
 
 			if(count($errors) == 0){
-				if(bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
-					echo '<p class="success">Author has been created!</p>';
-					$created = true;
-				}else
-					echo '<p class="error">Author could not have been created. '.mysql_error().'</p>';
+				if(is_array($author)){
+					if(bibliographie_authors_edit_author()){
+					}
+
+				}else{
+					if(bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
+						echo '<p class="success">Author has been created!</p>';
+						$done = true;
+					}else
+						echo '<p class="error">Author could not have been created. '.mysql_error().'</p>';
+				}
 			}else
 				foreach($errors as $error)
 					echo '<p class="error">'.$error.'</p>';
 		}
 
-		if(!$created){
+		if(!$done){
 ?>
 
 <p class="notice">On this page you can create and edit authors! Just fill in the required fields and hit save!</p>
 
+<?php
+			if(is_array($author)){
+				$_POST = $author;
+?>
+
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=createAuthor&amp;author_id='.((int) $_POST['author_id'])?>" method="post">
+<?php
+			}else{
+?>
+
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=createAuthor'?>" method="post">
+<?php
+			}
+?>
 	<div class="unit">
 		<div style="float: right; padding-left: 10px; width: 10%;">
 			<label for="jr" class="block">jr-part</label>
 			<input type="text" id="jr" name="jr" value="<?php echo htmlspecialchars($_POST['jr'])?>" style="width: 100%" tabindex="4" />
 		</div>
 		<div style="float: right; padding-left: 10px; width: 40%;">
-			<label for="surname" class="block">Last name(s)*</label>
+			<label for="surname" class="block"><span class="silk-icon silk-icon-asterisk-yellow"></span> Last name(s)</label>
 			<input type="text" id="surname" name="surname" value="<?php echo htmlspecialchars($_POST['surname'])?>" style="width: 100%" tabindex="3" />
 		</div>
 		<div style="float: right; padding-left: 10px; width: 10%;">
@@ -54,7 +76,7 @@ switch($_GET['task']){
 			<input type="text" id="von" name="von" value="<?php echo htmlspecialchars($_POST['von'])?>" style="width: 100%" tabindex="2" />
 		</div>
 
-		<label for="firstname" class="block">First name(s)*</label>
+		<label for="firstname" class="block"><span class="silk-icon silk-icon-asterisk-yellow"></span> First name(s)</label>
 		<input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($_POST['firstname'])?>" style="width: 35%" tabindex="1" />
 
 		<div id="similarNameContainer" class="bibliographie_similarity_container"></div>
@@ -79,6 +101,12 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
+var author_id = <?php
+			if(is_array($author))
+				echo ((int) $author['author_id']);
+			else
+				echo 0;
+?>;
 $(function () {
 	$('input, textarea').charmap();
 	$('#bibliographie_charmap').dodge();
@@ -86,6 +114,9 @@ $(function () {
 	$('#firstname, #surname').bind('keyup change', function (event) {
 		delayRequest('bibliographie_authors_check_name', Array($('#firstname').val(), $('#surname').val()));
 	});
+
+	if(author_id != 0)
+		bibliographie_authors_check_name($('#firstname').val(), $('#surname').val(), author_id);
 });
 </script>
 <?php

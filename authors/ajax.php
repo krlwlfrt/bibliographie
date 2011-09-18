@@ -57,10 +57,11 @@ switch($_GET['task']){
 
 			if(mysql_num_rows($authors)){
 				while($author = mysql_fetch_object($authors)){
-					$result[] = array (
-						'id' => $author->author_id,
-						'name' => bibliographie_authors_parse_data($author->author_id)
-					);
+					if(is_numeric($_GET['author_id']) and $_GET['author_id'] != $author->author_id)
+						$result[] = array (
+							'id' => $author->author_id,
+							'name' => bibliographie_authors_parse_data($author->author_id)
+						);
 				}
 			}
 		}

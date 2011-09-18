@@ -170,7 +170,7 @@ function bibliographie_publications_show_subgraph (topic) {
 	});
 }
 
-function bibliographie_publications_check_title (title) {
+function bibliographie_publications_check_title (title, pub_id) {
 	$.ajax({
 		url: bibliographie_web_root+'/publications/ajax.php',
 		data: {

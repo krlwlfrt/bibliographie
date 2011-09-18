@@ -48,14 +48,21 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	return $return;
 }
 
-function bibliographie_authors_get_data ($author_id) {
+function bibliographie_authors_get_data ($author_id, $type = 'object') {
 	if(is_numeric($author_id)){
+		$assoc = false;
+		if($type == 'assoc')
+			$assoc = true;
+
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'));
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'), $assoc);
 
 		$author = _mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
 		if(mysql_num_rows($author) == 1){
-			$author = mysql_fetch_object($author);
+			if($assoc)
+				$author = mysql_fetch_assoc($author);
+			else
+				$author = mysql_fetch_object($author);
 
 			if(BIBLIOGRAPHIE_CACHING){
 				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json', 'w+');

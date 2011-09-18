@@ -537,7 +537,7 @@ $(function() {
 	});
 
 	$('#title').bind('change keyup', function (event) {
-		delayRequest('bibliographie_publications_check_title', Array(event.target.value));
+		delayRequest('bibliographie_publications_check_title', Array(event.target.value, pub_id));
 	});
 
 	bibliographie_authors_input_tokenized ('author', <?php echo json_encode($prePopulateAuthor)?>);
@@ -558,7 +558,7 @@ $(function() {
 	$('input, textarea').charmap();
 	$('#bibliographie_charmap').dodge();
 
-	bibliographie_publications_check_title($('#title').val());
+	bibliographie_publications_check_title($('#title').val(), pub_id);
 });
 	/* ]]> */
 </script>

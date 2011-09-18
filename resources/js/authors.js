@@ -1,9 +1,10 @@
-function bibliographie_authors_check_name (firstname, surname) {
+function bibliographie_authors_check_name (firstname, surname, author_id) {
 	$.ajax({
 		url: bibliographie_web_root+'/authors/ajax.php',
 		data: {
 			'task': 'searchAuthors',
-			'q': firstname+' '+surname
+			'q': firstname+' '+surname,
+			'author_id': author_id
 		},
 		dataType: 'json',
 		success: function (json) {
