@@ -169,7 +169,7 @@ switch($_GET['task']){
 						'removeCurlyBraces' => true,
 						'extractAuthors' => true
 					));
-					$bibtex->loadContent($_POST['bibtexInput']);
+					$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
 
 					if($bibtex->parse() and count($bibtex->data) > 0){
 ?>
@@ -231,7 +231,7 @@ switch($_GET['task']){
 						'removeCurlyBraces' => true,
 						'extractAuthors' => true
 					));
-					$bibtex->loadContent(file_get_contents($_POST['bibtexRemote']));
+					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexRemote'])));
 
 					if($bibtex->parse() and count($bibtex->data) > 0){
 ?>
