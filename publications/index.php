@@ -92,9 +92,9 @@ switch($_GET['task']){
 	<div id="bibliographie_checkData_approvalResult_<?php echo $entryID?>"></div>
 
 	<div class="bibliographie_checkData_persons">
-		<span style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, false)">Approve entry <?php echo bibliographie_icon_get('tick')?> </a><br />
-			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, true)">Approve all persons and entry <?php echo bibliographie_icon_get('tick')?></a><br /><br />
+		<span style="float: right; font-size: 0.8em; text-align: right;">
+			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>)">Approve entry <?php echo bibliographie_icon_get('tick')?> </a><br />
+			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_all(<?php echo $entryID?>)">Approve all persons and entry <?php echo bibliographie_icon_get('tick')?></a><br />
 			<a href="javascript:;" onclick="$('#bibliographie_checkData_entry_<?php echo $entryID?>').hide('slow', function() {$(this).remove()})">Remove entry <?php echo bibliographie_icon_get('cross')?></a>
 		</span>
 <?php
@@ -122,7 +122,9 @@ switch($_GET['task']){
 								'first' => $person['first'],
 								'von' => $person['von'],
 								'last' => $person['last'],
-								'jr' => $person['jr']
+								'jr' => $person['jr'],
+
+								'approved' => false
 							);
 
 							if(!empty($person['jr']))

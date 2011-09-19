@@ -282,13 +282,14 @@ function bibliographie_publications_check_data_approve_person (entryID, role, pe
 			'entryID': entryID,
 			'role': role,
 			'personID': personID,
-			'selectedPerson': $('#bibliographie_checkData_personSelect_'+entryID+'_'+role+'_'+personID).val(),
-			'async': false
+			'selectedPerson': $('#bibliographie_checkData_personSelect_'+entryID+'_'+role+'_'+personID).val()
 		},
 		'success': function (html) {
 			$('#bibliographie_checkData_personResult_'+entryID+'_'+role+'_'+personID)
 				.html(html)
 				.append('<br /><a href="javascript:;" onclick="bibliographie_publications_check_data_undo_approval('+entryID+', \''+role+'\', '+personID+')"><span class="silk-icon silk-icon-arrow-undo"></span> Undo approval!</a>');
+
+			bibliographie_checkData_searchPersons[entryID][role][personID].approved = true;
 		}
 	});
 }
@@ -305,8 +306,9 @@ function bibliographie_publications_check_data_undo_approval (entryID, role, per
 			'role': role,
 			'personID': personID
 		}
-	})
+	});
 
+	bibliographie_checkData_searchPersons[entryID][role][personID].approved = false;
 	bibliographie_publications_search_author_for_approval(role, bibliographie_checkData_searchPersons[entryID][role][personID]);
 }
 
@@ -332,35 +334,35 @@ function bibliographie_publications_check_data_create_person (entryID, role, per
 	});
 }
 
-function bibliographie_publications_check_data_approve_entry (entryID, force) {
-	var notApprovablePersons = 0;
+function bibliographie_publications_check_data_approve_entry (entryID) {
+	$.ajax({
+		url: bibliographie_web_root+'/publications/ajax.php',
+		data: {
+			'task': 'checkData',
+			'subTask': 'approveEntry',
+			'entryID': entryID
+		},
+		dataType: 'json',
+		success: function (json) {
+			$('#bibliographie_checkData_approvalResult_'+entryID).html(json.text);
+			if(json.status == 'success')
+				$('#bibliographie_checkData_entry_'+entryID+' .bibliographie_checkData_persons').hide('slow', function () {$(this).remove()});
+		}
+	});
+}
 
-	if(force == true){
-		$.each(bibliographie_checkData_searchPersons[entryID], function (role, persons) {
-			$.each(persons, function (personID, person) {
-				if($('#bibliographie_checkData_personSelect_'+entryID+'_'+role+'_'+personID).is('select'))
-					bibliographie_publications_check_data_approve_person(entryID, role, personID);
-				else
-					notApprovablePersons++;
-			})
+function bibliographie_publications_check_data_approve_all (entryID) {
+	$('#bibliographie_checkData_entry_'+entryID).one('ajaxComplete', function () {
+		bibliographie_publications_check_data_approve_entry(entryID);
+	});
+
+	$.each(bibliographie_checkData_searchPersons[entryID], function (role, persons) {
+		$.each(persons, function (personID, person) {
+			if($('#bibliographie_checkData_personSelect_'+entryID+'_'+role+'_'+personID).is('select'))
+				bibliographie_publications_check_data_approve_person(entryID, role, personID);
+			else
+				if(person.approved == false)
+					bibliographie_publications_check_data_create_person (entryID, role, personID, person.first, person.von, person.last, person.jr);
 		})
-	}
-
-	if(notApprovablePersons == 0){
-		$.ajax({
-			url: bibliographie_web_root+'/publications/ajax.php',
-			data: {
-				'task': 'checkData',
-				'subTask': 'approveEntry',
-				'entryID': entryID
-			},
-			dataType: 'json',
-			success: function (json) {
-				$('#bibliographie_checkData_approvalResult_'+entryID).html(json.text);
-				if(json.status == 'success')
-					$('#bibliographie_checkData_entry_'+entryID+' .bibliographie_checkData_persons').hide('slow', function () {$(this).remove()});
-			}
-		});
-	}else
-		$('#bibliographie_checkData_approvalResult_'+entryID).html('<span class="silk-icon silk-icon-cross"></span> <strong>'+notApprovablePersons+' person</strong>(s) are not approvable because there were no results from the database!');
+	})
 }
