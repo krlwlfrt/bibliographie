@@ -96,32 +96,49 @@ switch($_GET['task']){
 
 	case 'checkData':
 		if($_GET['subTask'] == 'approvePerson'){
-			if(!is_array($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']]))
-				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']] = array();
+			if(is_numeric($_GET['selectedPerson'])){
+				if(!is_array($_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_'.$_GET['role']]))
+					$_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_'.$_GET['role']] = array();
 
-			$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']][$_GET['innerID']] = $_GET['personID'];
-			echo bibliographie_icon_get('tick').' Person has been approved as '.$_GET['role'].'!';
+				$_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_'.$_GET['role']][$_GET['personID']] = (int) $_GET['selectedPerson'];
+				echo bibliographie_icon_get('tick').' '.bibliographie_authors_parse_data($_GET['selectedPerson']).' has been approved as '.htmlspecialchars($_GET['role']).'!';
+			}else
+				echo '<p class="error">You did not select an author from the dropdown list!</p>';
+
+
+		}elseif($_GET['subTask'] == 'undoApproval'){
+			$_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_'.$_GET['role']][$_GET['personID']] = null;
+
+
 		}elseif($_GET['subTask'] == 'createPerson'){
 			$data = bibliographie_authors_create_author($_GET['first'], $_GET['von'], $_GET['last'], $_GET['jr'], '', '', '');
 			if(is_array($data)){
-				$_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_'.$_GET['role']][$_GET['innerID']] = $data['author_id'];
-				echo bibliographie_icon_get('tick').' Person has been created and approved as '.$_GET['role'].'!';
+				$_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_'.$_GET['role']][$_GET['personID']] = $data['author_id'];
+				echo bibliographie_icon_get('tick').' '.bibliographie_authors_parse_data($data['author_id']).' has been created and approved as '.htmlspecialchars($_GET['role']).'!';
 			}else
 				echo '<p class="error">Person could not be created!</p>';
-		}elseif($_GET['subTask'] == 'approveEntry'){
-			if(count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_author']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['author'])
-				and count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['checked_editor']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']]['editor'])){
-				$_SESSION['publication_prefetchedData_checked'][$_GET['outerID']] = $_SESSION['publication_prefetchedData_unchecked'][$_GET['outerID']];
 
-				echo json_encode(array(
-					'text' => bibliographie_icon_get('tick').' Parsed entry has been approved and added to queue!',
-					'status' => 'success'
-				));
-			}else
-				echo json_encode(array(
-					'text' => bibliographie_icon_get('cross').' Sorry but you can not approve an entry if there are authors left that are not approved!',
-					'status' => 'error'
-				));
+
+		}elseif($_GET['subTask'] == 'approveEntry'){
+			$text = '<p class="error">An error occured!</p>';
+			$status = 'error';
+			if(is_numeric($_GET['entryID'])){
+				$_GET['entryID'] = (int) $_GET['entryID'];
+				if(count($_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_author']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['entryID']]['author'])
+					and count($_SESSION['publication_prefetchedData_checked'][$_GET['entryID']]['checked_editor']) == count($_SESSION['publication_prefetchedData_unchecked'][$_GET['entryID']]['editor'])){
+
+					$_SESSION['publication_prefetchedData_checked'][$_GET['entryID']] = array_merge($_SESSION['publication_prefetchedData_checked'][$_GET['entryID']], $_SESSION['publication_prefetchedData_unchecked'][$_GET['entryID']]);
+
+					$text = bibliographie_icon_get('tick').' Parsed entry has been approved and added to queue!';
+					$status = 'success';
+				}else
+					$text = bibliographie_icon_get('cross').' Sorry but you cannot approve an entry if there are authors left that are not approved!';
+			}
+
+			echo json_encode(array(
+				'text' => $text,
+				'status' => $status
+			));
 		}
 	break;
 

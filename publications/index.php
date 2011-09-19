@@ -67,36 +67,56 @@ switch($_GET['task']){
 	break;
 
 	case 'checkData':
+		/**
+		 * Unset yet checked prefetched data.
+		 */
 		unset($_SESSION['publication_prefetchedData_checked']);
 ?>
 
 <h3>Check fetched data</h3>
+<p class="notice">Please precheck all of the parsed authors now before moving to creating them in the publication editor!</p>
 <?php
 		if(is_array($_SESSION['publication_prefetchedData_unchecked'])){
 			$searchPersons = array();
-			foreach($_SESSION['publication_prefetchedData_unchecked'] as $outerID => $entry){
+
+			/**
+			 * Loop for entries...
+			 */
+			foreach($_SESSION['publication_prefetchedData_unchecked'] as $entryID => $entry){
 ?>
 
-<div id="checkData_entry_<?php echo $outerID?>" style="background: #eee; border: 1px solid #aaa; color: #000; margin-top: 20px; padding: 5px;">
-	<em style="float: right;"><?php echo $entry['pub_type']?></em>
+<div id="bibliographie_checkData_entry_<?php echo $entryID?>" class="bibliographie_checkData_entry">
+	<em class="bibliographie_checkData_pubType"><?php echo $entry['pub_type']?></em>
 	<strong><?php echo $entry['title']?></strong>
 
-	<div id="checkData_entryResult_<?php echo $outerID?>"></div>
-	<div class="innerData">
+	<div id="bibliographie_checkData_approvalResult_<?php echo $entryID?>"></div>
+
+	<div class="bibliographie_checkData_persons">
 		<span style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $outerID?>)"><?php echo bibliographie_icon_get('tick')?> Approve entry</a><br />
-			<a href="javascript:;" onclick="$('#checkData_entry_<?php echo $outerID?>').remove()"><?php echo bibliographie_icon_get('cross')?> Remove entry</a>
+			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, false)">Approve entry <?php echo bibliographie_icon_get('tick')?> </a><br />
+			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, true)">Approve all persons and entry <?php echo bibliographie_icon_get('tick')?></a><br /><br />
+			<a href="javascript:;" onclick="$('bibliographie_checkData_entry_<?php echo $entryID?>').remove()">Remove entry <?php echo bibliographie_icon_get('cross')?></a>
 		</span>
 <?php
+				/**
+				 * Loop for persons... Authors and editors...
+				 */
 				$persons = false;
 				foreach(array('author', 'editor') as $role){
 					if(count($entry[$role]) > 0){
 						$persons = true;
-						foreach($entry[$role] as $innerID => $person){
-							$searchPersons[$role][] = array (
-								'id' => $outerID.'_'.$innerID,
-								'outerID' => $outerID,
-								'innerID' => $innerID,
+
+						foreach($entry[$role] as $personID => $person){
+							/**
+							 * Put the person in the array that is needed for js functionality...
+							 */
+							$searchPersons[$entryID][$role][$personID] = array (
+								'htmlID' => $entryID.'_'.$role.'_'.$personID,
+
+								'role' => $role,
+								'entryID' => $entryID,
+								'personID' => $personID,
+
 								'name' => $person['first'].' '.$person['von'].' '.$person['last'].' '.$person['jr'],
 
 								'first' => $person['first'],
@@ -109,17 +129,21 @@ switch($_GET['task']){
 								$person['jr'] = ' '.$person['jr'];
 ?>
 
-		<div id="checkData_<?php echo $role.'_'.$outerID.'_'.$innerID?>" style="margin-top: 10px;">
-			<?php echo $role?> #<?php echo ($innerID + 1)?>: <?php echo $person['von'].' <strong>'.$person['last'].'</strong>'.$person['jr'].', '.$person['first']?>
-			<div id="checkData_<?php echo $role.'Result_'.$outerID.'_'.$innerID?>"><img src="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/resources/images/loading.gif" alt="pending" /></div>
+		<div id="bibliographie_checkData_person_<?php echo $entryID.'_'.$role.'_'.$personID?>" style="margin-top: 10px;">
+			<?php echo $role?> #<?php echo ((string) $personID + 1)?>:
+			<?php echo $person['von'].' <strong>'.$person['last'].'</strong>'.$person['jr'].', '.$person['first']?>
+			<div id="bibliographie_checkData_personResult_<?php echo $entryID.'_'.$role.'_'.$personID?>"><img src="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/resources/images/loading.gif" alt="pending" /></div>
 		</div>
 <?php
 						}
 					}
 				}
 
+				/**
+				 * Tell if no persons were parsed...
+				 */
 				if(!$persons)
-					echo '<p class="error">No persons were found for this entry!</p>';
+					echo '<p class="error">No persons could be parsed for this entry!</p>';
 ?>
 
 	</div>
@@ -128,36 +152,18 @@ switch($_GET['task']){
 			}
 ?>
 
-<p>If you are finished pre checking your fetched data you can move to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;useFetchedData=1">creating them</a> as publications!</p>
+<div class="submit"><button onclick="window.location = bibliographie_web_root+'/publications/?task=publicationEditor&amp;useFetchedData=1';">Go to publication editor</button></div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-var persons = <?php echo json_encode($searchPersons)?>;
+var bibliographie_checkData_searchPersons = <?php echo json_encode($searchPersons)?>;
 
 $(function () {
-	$.each(persons, function (role, persons) {
-		$.each(persons, function (key, person) {
-			$.ajax({
-				url: '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/ajax.php',
-				data: {
-					'task': 'searchAuthors',
-					'q': person.name
-				},
-				dataType: 'json',
-				success: function (json) {
-					if(json.length > 0){
-						$('#checkData_'+role+'Result_'+person.id)
-							.html('<select id="checkData_'+role+'Select_'+person.id+'" style="width: 45%;"></select>')
-							.append(' <a href="javascript:;" onclick="bibliographie_publications_check_data_approve_person(\''+role+'\', '+person.outerID+', '+person.innerID+')"><span class="silk-icon silk-icon-tick"></span> Approve '+role)
-							.append(' <a href="javascript:;" onclick="bibliographie_publications_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
-
-						$.each(json, function (key, personResult) {
-							$('#checkData_'+role+'Select_'+person.id).append('<option value="'+personResult.id+'">'+personResult.name+'</option>');
-						});
-					}else
-						$('#checkData_'+role+'Result_'+person.id).html('<strong>No author was found.</strong> <a href="javascript:;" onclick="bibliographie_publications_check_data_create_person(\''+role+'\', '+person.outerID+', '+person.innerID+', \''+person.first+'\', \''+person.von+'\', \''+person.last+'\', \''+person.jr+'\')"><span class="silk-icon silk-icon-user-add"></span> Create person');
-				}
-			});
+	$.each(bibliographie_checkData_searchPersons, function (entryID, entries) {
+		$.each(entries, function (role, persons) {
+			$.each(persons, function (personID, person){
+				bibliographie_publications_search_author_for_approval(role, person);
+			})
 		});
 	});
 });

@@ -79,7 +79,7 @@ switch($_GET['task']){
 		<label for="firstname" class="block"><span class="silk-icon silk-icon-asterisk-yellow"></span> First name(s)</label>
 		<input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($_POST['firstname'])?>" style="width: 35%" tabindex="1" />
 
-		<div id="similarNameContainer" class="bibliographie_similarity_container"></div>
+		<div id="similarNameContainer" class="bibliographie_similarity_container" style="max-height: 200px; overflow-y: scroll; width: 40%"></div>
 		<br style="clear: both;" />
 	</div>
 

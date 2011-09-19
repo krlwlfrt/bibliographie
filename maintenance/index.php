@@ -69,10 +69,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 
 <h4>Import</h4>
 <ul>
-	<li>Autoren-approval rückgängig machen... Und neu approven...</li>
-	<li>Alle Autoren einer Publikation approven</li>
 	<li>Quellen: Amazon und PubMED</li>
-	<li>Möglichst buttons statt links</li>
 </ul>
 
 <h4>Parsing</h4>

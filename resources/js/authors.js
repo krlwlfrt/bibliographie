@@ -12,22 +12,22 @@ function bibliographie_authors_check_name (firstname, surname, author_id) {
 			var cutter = 2 * Math.ceil(Math.log(json.length));
 			if(cutter < 10)
 				cutter = 10;
-			if(results > 0){
-				$('#similarNameContainer').html('<div style="margin-bottom: 10px;">Showing <strong>'+cutter+' most similar names</strong> ('+results+' search results)</div>').show('fast');
-				var i = 0;
 
+			if(results > 0){
+				$('#similarNameContainer').html('<div style="margin-bottom: 10px;">Showing <strong>'+results+' similar names</strong>.</div>').show('fast');
 				$.each(json, function (dummy, value) {
-					var str = '<div';
-					if(++i > cutter)
-						str = str + ' style="display: none;"';
-					str = str + '>';
-					str = str + value.name;
-					str = str + '</div>';
+					var str = '';
+					str += '<div>';
+					str += '<a href="'+bibliographie_web_root+'/authors/?task=authorEditor&amp;author_id='+value.id+'" style="float: right;"><span class="silk-icon silk-icon-pencil"></span></a>';
+					str += '<a href="'+bibliographie_web_root+'/authors/?task=showAuthor&amp;author_id='+value.id+'"><span class="silk-icon silk-icon-user"></span> '+value.name+'</a>';
+					str += '</div>'
 
 					$('#similarNameContainer').append(str);
-				})
+				});
+
 			}else
 				$('#similarNameContainer').html('No results!');
+
 			$('#bibliographie_charmap').hide();
 		}
 	})
