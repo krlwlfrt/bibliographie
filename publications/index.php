@@ -95,7 +95,7 @@ switch($_GET['task']){
 		<span style="float: right; text-align: right;">
 			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, false)">Approve entry <?php echo bibliographie_icon_get('tick')?> </a><br />
 			<a href="javascript:;" onclick="bibliographie_publications_check_data_approve_entry(<?php echo $entryID?>, true)">Approve all persons and entry <?php echo bibliographie_icon_get('tick')?></a><br /><br />
-			<a href="javascript:;" onclick="$('bibliographie_checkData_entry_<?php echo $entryID?>').remove()">Remove entry <?php echo bibliographie_icon_get('cross')?></a>
+			<a href="javascript:;" onclick="$('#bibliographie_checkData_entry_<?php echo $entryID?>').remove()">Remove entry <?php echo bibliographie_icon_get('cross')?></a>
 		</span>
 <?php
 				/**
