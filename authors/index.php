@@ -56,12 +56,12 @@ switch($_GET['task']){
 				$_POST = $author;
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=createAuthor&amp;author_id='.((int) $_POST['author_id'])?>" method="post">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $_POST['author_id'])?>" method="post">
 <?php
 			}else{
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=createAuthor'?>" method="post">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor'?>" method="post">
 <?php
 			}
 ?>
@@ -134,17 +134,9 @@ $(function () {
 			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 0)));
 			$tagsArray = array();
 			if(count($publications) > 0){
-				$where_clause = (string) "";
-				foreach($publications as $publication){
-					if(!empty($where_clause))
-						$where_clause .= " OR ";
-
-					$where_clause .= "`pub_id` = ".((int) $publication);
-				}
-
 				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
 	SELECT * FROM `a2tags`
-) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
+) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
 
 				if(mysql_num_rows($tags))
 					while($tag = mysql_fetch_object($tags))

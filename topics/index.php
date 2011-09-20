@@ -150,17 +150,9 @@ $(function () {
 			$publications = bibliographie_topics_get_publications($topic->topic_id, true);
 			$tagsArray = array();
 			if(count($publications) > 0){
-				$where_clause = (string) "";
-				foreach($publications as $publication){
-					if(!empty($where_clause))
-						$where_clause .= " OR ";
-
-					$where_clause .= "`pub_id` = ".((int) $publication);
-				}
-
 				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
 	SELECT * FROM `a2tags`
-) AS data ON link.`tag_id` = data.`tag_id` WHERE ".$where_clause." GROUP BY data.`tag_id`");
+) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
 
 				if(mysql_num_rows($tags))
 					while($tag = mysql_fetch_object($tags))

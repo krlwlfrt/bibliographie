@@ -60,6 +60,9 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 
 function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surname, $jr, $email, $url, $institute) {
 	$dataBefore = bibliographie_authors_get_data($author_id);
+
+	print_r($dataBefore);
+	print_r(func_get_args());
 }
 
 function bibliographie_authors_get_data ($author_id, $type = 'object') {

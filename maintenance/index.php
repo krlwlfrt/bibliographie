@@ -222,18 +222,19 @@ $(function () {
 				$actionIcons = array (
 					'createTopic' => 'folder-add',
 					'createTopicRelation' => 'table-relationship',
+					'editTopic' => 'folder-edit',
 					'lockTopic' => 'lock',
 					'unlockTopic' => 'lock-open'
 				);
-				foreach($logContent as $logRow){
 
-					$logRow = json_decode($logRow);
+				foreach($logContent as $logRow){
+					$logRow = json_decode($logRow, true);
 					echo '<tr>';
-					echo '<td>logged action <strong>#'.$logRow->id.'</strong><br />';
-					echo '<em>'.$logRow->time.'</em></td>';
-					echo '<td><strong>'.bibliographie_icon_get($categoryIcons[$logRow->category]).' '.$logRow->category.'</strong><br />';
-					echo ''.bibliographie_icon_get($actionIcons[$logRow->action]).' '.$logRow->action.'</td>';
-					echo '<td><pre>'.print_r(json_decode($logRow->data), true).'</pre></td>';
+					echo '<td>logged action <strong>#'.$logRow['id'].'</strong><br />';
+					echo '<em>'.$logRow['time'].'</em></td>';
+					echo '<td><strong>'.bibliographie_icon_get($categoryIcons[$logRow['category']]).' '.$logRow['category'].'</strong><br />';
+					echo ''.bibliographie_icon_get($actionIcons[$logRow['action']]).' '.$logRow['action'].'</td>';
+					echo '<td><pre>'.print_r(json_decode($logRow['data'], true), true).'</pre></td>';
 					echo '</tr>';
 				}
 ?>
