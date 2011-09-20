@@ -11,7 +11,13 @@
  * @return mixed False or array of data on success.
  */
 function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute, $author_id = null) {
+	if($author_id === null)
+		$author_id = 'NULL';
+	else
+		$author_id = (int) $topic_id;
+
 	$return = _mysql_query("INSERT INTO `a2author` (
+	`author_id`,
 	`firstname`,
 	`von`,
 	`surname`,
@@ -20,6 +26,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	`url`,
 	`institute`
 ) VALUES (
+	".$author_id.",
 	'".mysql_real_escape_string(stripslashes($firstname))."',
 	'".mysql_real_escape_string(stripslashes($von))."',
 	'".mysql_real_escape_string(stripslashes($surname))."',
@@ -29,8 +36,11 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	'".mysql_real_escape_string(stripslashes($institute))."'
 )");
 
+	if($author_id == 'NULL')
+		$author_id = mysql_insert_id();
+
 	$data = array(
-		'author_id' => mysql_insert_id(),
+		'author_id' => $author_id,
 		'firstname' => $firstname,
 		'von' => $von,
 		'surname' => $surname,
@@ -46,6 +56,10 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	}
 
 	return $return;
+}
+
+function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surname, $jr, $email, $url, $institute) {
+	$dataBefore = bibliographie_authors_get_data($author_id);
 }
 
 function bibliographie_authors_get_data ($author_id, $type = 'object') {
