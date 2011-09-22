@@ -18,8 +18,7 @@ require dirname(__FILE__).'/config.php';
  */
 $bibliographie_database_queries = array();
 
-if(!isset($bibliographie_history_path_identifier) or empty($bibliographie_history_path_identifier))
-	$bibliographie_history_path_identifier = sha1('');
+$bibliographie_history_path_identifier = '';
 
 /**
  * Check mysql connection.

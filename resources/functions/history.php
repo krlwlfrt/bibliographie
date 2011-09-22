@@ -1,16 +1,20 @@
 <?php
 $bibliographie_history_icons = array (
 	'topics' => 'folder',
-	'authors' => 'user'
+	'authors' => 'user',
+	'generic' => 'error'
 );
 
 function bibliographie_history_parse () {
 	global $bibliographie_history_path_identifier, $bibliographie_history_icons;
 
 	$parent = $bibliographie_history_path_identifier;
+	if(empty($parent))
+		$parent = $_GET['from'];
 	$step = null;
 
 	echo '<div id="bibliographie_history">';
+	echo '<em>Click to toggle!</em>';
 	echo '<strong>Navigation history</strong>';
 	echo '<div class="history_steps">';
 
@@ -19,7 +23,7 @@ function bibliographie_history_parse () {
 		$step = $_SESSION['bibliographie_history_path'][$parent];
 		$parent = $step['parent'];
 
-		if($i != 1 and !empty($step['parent']))
+		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic')
 			$step['description'] = '<a href="'.$step['url'].'">'.$step['description'].'</a>';
 
 		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' '.$step['description'].' ('.$step['method'].')</div>';
@@ -63,6 +67,9 @@ function bibliographie_history_append_step ($category, $description) {
 
 function bibliographie_history_rewrite_links ($matches) {
 	global $bibliographie_history_path_identifier;
+
+	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from'])
+		bibliographie_history_append_step('generic', 'Action not named...');
 
 	if($matches[4] != 'javascript:;'){
 		$connector = '&amp;';

@@ -113,11 +113,15 @@ jQuery.ajaxSetup({
 	cache: false
 });
 
-$('#bibliographie_history').hover(function (event) {
+/*$('#bibliographie_history').hover(function (event) {
 	$('#bibliographie_history .history_steps').show('fast');
 }, function (event) {
 	$('#bibliographie_history .history_steps').hide('fast');
-});
+});*/
+
+$('#bibliographie_history').bind('click', function () {
+	$('#bibliographie_history .history_steps').toggle();
+})
 
 /**
  * Enable expected behaviour by sending the placeholder content if no input was provided...
