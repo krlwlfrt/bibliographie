@@ -14,7 +14,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	if($author_id === null)
 		$author_id = 'NULL';
 	else
-		$author_id = (int) $topic_id;
+		$author_id = (int) $author_id;
 
 	$return = _mysql_query("INSERT INTO `a2author` (
 	`author_id`,
@@ -50,19 +50,57 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		'institute' => $institute
 	);
 
-	if($return){
-		bibliographie_log('authors', 'create', json_encode($data));
-		return $data;
-	}
+	if($return)
+		bibliographie_log('authors', 'createAuthor', json_encode($data));
 
-	return $return;
+	return $data;
 }
 
 function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surname, $jr, $email, $url, $institute) {
-	$dataBefore = bibliographie_authors_get_data($author_id);
+	$dataBefore = bibliographie_authors_get_data($author_id, 'assoc');
+	if(is_array($dataBefore)){
+		if($firstname != $dataBefore['firstname']
+			or $von != $dataBefore['von']
+			or $surname != $dataBefore['surname']
+			or $jr != $dataBefore['jr']
+			or $email != $dataBefore['email']
+			or $url != $dataBefore['url']
+			or $institute != $dataBefore['institute']){
 
-	print_r($dataBefore);
-	print_r(func_get_args());
+			_mysql_query("UPDATE `a2author` SET
+	`firstname` = '".mysql_real_escape_string(stripslashes($firstname))."',
+	`von` = '".mysql_real_escape_string(stripslashes($von))."',
+	`surname` = '".mysql_real_escape_string(stripslashes($surname))."',
+	`jr` = '".mysql_real_escape_string(stripslashes($jr))."',
+	`email` = '".mysql_real_escape_string(stripslashes($email))."',
+	`url` = '".mysql_real_escape_string(stripslashes($url))."',
+	`institute` = '".mysql_real_escape_string(stripslashes($institute))."'
+WHERE
+	`author_id` = ".((int) $dataBefore['author_id'])."
+LIMIT 1");
+		}
+
+		$data = array(
+			'dataBefore' => $dataBefore,
+			'dataAfter' => array(
+				'author_id' => $dataBefore['author_id'],
+				'firstname' => $firstname,
+				'von' => $von,
+				'surname' => $surname,
+				'jr' => $jr,
+				'email' => $email,
+				'url' => $url,
+				'institute' => $institute
+			)
+		);
+
+		if($data['dataBefore'] != $data['dataAfter']){
+			bibliographie_log('authors', 'editAuthor', json_encode($data));
+			bibliographie_purge_cache('author_'.((int) $dataBefore['author_id']));
+		}
+
+		return $data;
+	}
 }
 
 /**

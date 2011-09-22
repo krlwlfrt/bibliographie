@@ -28,7 +28,7 @@ switch($_GET['task']){
 
 			if(count($errors) == 0){
 				if(is_array($author)){
-					if(bibliographie_authors_edit_author($_GET['author_id'], $_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
+					if(bibliographie_authors_edit_author($author['author_id'], $_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
 						echo '<p class="success">Author has been edited!</p>';
 						$done = true;
 					}else
