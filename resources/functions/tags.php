@@ -128,7 +128,7 @@ ORDER BY
 }
 
 function bibliographie_tags_print_cloud ($tags, $options = array()) {
-	if(count($tags) > 0){
+	if(is_array($tags) and count($tags) > 0){
 		$query = (string) '';
 		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id']))
 			$query = '&amp;author_id='.((int) $options['author_id']);

@@ -133,18 +133,10 @@ $(function () {
 		if(is_object($author)){
 			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 0)));
 			$tagsArray = array();
-			if(count($publications) > 0){
-				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
-	SELECT * FROM `a2tags`
-) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
-
-				if(mysql_num_rows($tags))
-					while($tag = mysql_fetch_object($tags))
-						$tagsArray[] = $tag;
-			}
+			$topicsArray = array();
 ?>
 
-<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author_id=<?php echo ((int) $author->author_id)?>">Edit author</a></em>
+<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author_id=<?php echo ((int) $author->author_id)?>"><?php echo bibliographie_icon_get('user-edit')?> Edit author</a></em>
 <h3><?php echo bibliographie_authors_parse_data($author)?></h3>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=0">Show publications as author (<?php echo count(bibliographie_authors_get_publications($author->author_id, 0))?>)</a></li>
@@ -152,12 +144,13 @@ $(function () {
 </ul>
 
 <?php
-			if(count($tagsArray) > 0){
+			$tagsArray = bibliographie_authors_get_tags($author->author_id);
+			if(is_array($tagsArray) and count($tagsArray) > 0){
 ?>
 
-<h4>Publications have the following tags</h4>
+<h4>Tags of publications</h4>
 <?php
-				bibliographie_tags_print_cloud($tagsArray, array('author_id' => $author->author_id));
+				bibliographie_tags_print_cloud(bibliographie_authors_get_tags($author->author_id), array('author_id' => $author->author_id));
 			}
 		}
 	break;

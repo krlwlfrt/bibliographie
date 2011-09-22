@@ -65,6 +65,12 @@ function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surna
 	print_r(func_get_args());
 }
 
+/**
+ *
+ * @param type $author_id
+ * @param type $type
+ * @return type
+ */
 function bibliographie_authors_get_data ($author_id, $type = 'object') {
 	if(is_numeric($author_id)){
 		$assoc = false;
@@ -94,6 +100,12 @@ function bibliographie_authors_get_data ($author_id, $type = 'object') {
 	return false;
 }
 
+/**
+ *
+ * @param type $author
+ * @param type $options
+ * @return string
+ */
 function bibliographie_authors_parse_data ($author, $options = array()) {
 	if(is_numeric($author))
 		$author = bibliographie_authors_get_data($author);
@@ -132,10 +144,12 @@ function bibliographie_authors_parse_data ($author, $options = array()) {
 	return false;
 }
 
-function bibliographie_authors_get_list () {
-
-}
-
+/**
+ *
+ * @param type $author_id
+ * @param type $editor
+ * @return type
+ */
 function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 	if(is_numeric($author_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_'.((int) $editor).'_publications.json'))
@@ -172,6 +186,11 @@ function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 	return false;
 }
 
+/**
+ *
+ * @param type $string
+ * @return type
+ */
 function bibliographie_authors_populate_input ($string) {
 	if(!empty($string) and is_csv($string, 'int')){
 		$authors = explode(',', $string);
@@ -188,4 +207,42 @@ function bibliographie_authors_populate_input ($string) {
 	}
 
 	return array();
+}
+
+/**
+ *
+ * @param type $author_id
+ * @return type
+ */
+function bibliographie_authors_get_tags ($author_id) {
+	$return = array();
+
+	if(is_numeric($author_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_tags.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_tags.json'));
+
+		$author = bibliographie_authors_get_data($author_id);
+
+		if(is_object($author)){
+			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 1)));
+
+			if(count($publications) > 0){
+				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+			SELECT * FROM `a2tags`
+		) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id` ORDER BY data.`tag`");
+
+				if(mysql_num_rows($tags))
+					while($tag = mysql_fetch_object($tags))
+						$return[] = $tag;
+
+				if(BIBLIOGRAPHIE_CACHING){
+					$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.$author->author_id.'_tags.json', 'w+');
+					fwrite($cacheFile, json_encode($return));
+					fclose($cacheFile);
+				}
+			}
+		}
+	}
+
+	return $return;
 }

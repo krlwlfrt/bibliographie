@@ -148,16 +148,6 @@ $(function () {
 				echo '<p class="notice">This or at least one of the parent topics is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
 
 			$publications = bibliographie_topics_get_publications($topic->topic_id, true);
-			$tagsArray = array();
-			if(count($publications) > 0){
-				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
-	SELECT * FROM `a2tags`
-) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
-
-				if(mysql_num_rows($tags))
-					while($tag = mysql_fetch_object($tags))
-						$tagsArray[] = $tag;
-			}
 
 			echo '<h3><em>'.htmlspecialchars($topic->name).'</em></h3>';
 			if(!empty($topic->description))
@@ -190,12 +180,12 @@ $(function () {
 				echo '</div>';
 			}
 
-			if(count($tagsArray) > 0){
+			if(count(bibliographie_topics_get_tags($topic->topic_id)) > 0){
 ?>
 
 <h4>Publications have the following tags</h4>
 <?php
-				bibliographie_tags_print_cloud($tagsArray, array('topic_id' => $topic->topic_id));
+				bibliographie_tags_print_cloud(bibliographie_topics_get_tags($topic->topic_id), array('topic_id' => $topic->topic_id));
 			}
 		}
 	break;

@@ -401,6 +401,39 @@ ORDER BY
 	return false;
 }
 
+function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
+	$return = array();
+
+	if(is_numeric($topic_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json'));
+
+		$topic = bibliographie_topics_get_data($topic_id);
+
+		if(is_object($topic)){
+			$publications = bibliographie_topics_get_publications($topic->topic_id, $includeSubtopics);
+
+			if(count($publications) > 0){
+				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+	SELECT * FROM `a2tags`
+	) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
+
+				if(mysql_num_rows($tags))
+					while($tag = mysql_fetch_object($tags))
+						$return[] = $tag;
+
+				if(BIBLIOGRAPHIE_CACHING){
+					$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json', 'w+');
+					fwrite($cacheFile, json_encode($return));
+					fclose($cacheFile);
+				}
+			}
+		}
+	}
+
+	return $return;
+}
+
 /**
  * Get a list of locked topics.
  * @return array Gives an array of locked topics.

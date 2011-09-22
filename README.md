@@ -39,6 +39,12 @@ define('BIBLIOGRAPHIE_CACHING', true);
 You need a server side directory authentication, e.g. via apaches .htaccess. And the appropriate authentication names in the database table `a2users` with the names in the `login` field.
 If you have the user 'foobar' in your .htaccess file, you'll need a row in the `a2users` table with the login field having the value 'foobar'.
 
+## 2.1 Step ##
+
+You might have to give the webserver access to the installation directory. (e.g. under Ubuntu: chown www-data /var/www/bibliographie)
+You might also have to give the files write rights. (e.g. chmod 0775 for all files)
+Those to steps depend on your environment...
+
 ## 3. Step ##
 
 Access the app via a browser at the path you set in the config file. Follow the instructions to convert/create the database.
