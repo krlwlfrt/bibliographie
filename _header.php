@@ -114,9 +114,9 @@ jQuery.ajaxSetup({
 });
 
 $('#bibliographie_history').hover(function (event) {
-	$('#bibliographie_history .history_steps').show('slow');
+	$('#bibliographie_history .history_steps').show('fast');
 }, function (event) {
-	$('#bibliographie_history .history_steps').hide();
+	$('#bibliographie_history .history_steps').hide('fast');
 });
 
 /**

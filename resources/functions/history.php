@@ -1,7 +1,11 @@
 <?php
+$bibliographie_history_icons = array (
+	'topics' => 'folder',
+	'authors' => 'user'
+);
+
 function bibliographie_history_parse () {
-	global $bibliographie_history_path_identifier;
-	//echo '<pre>'.print_r($_SESSION, true).'</pre>';
+	global $bibliographie_history_path_identifier, $bibliographie_history_icons;
 
 	$parent = $bibliographie_history_path_identifier;
 	$step = null;
@@ -18,7 +22,8 @@ function bibliographie_history_parse () {
 		if($i != 1 and !empty($step['parent']))
 			$step['description'] = '<a href="'.$step['url'].'">'.$step['description'].'</a>';
 
-		echo '<div>'.$i++.': '.$step['description'].'</div>';
+		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' '.$step['description'].' ('.$step['method'].')</div>';
+		$i++;
 	} while(!empty($step['parent']) and $i < 100);
 
 	echo '</div></div>';
@@ -32,7 +37,8 @@ function bibliographie_history_append_step ($category, $description) {
 		'description' => $description,
 		'task' => $_GET['task'],
 		'url' => $_SERVER['REQUEST_URI'],
-		'parent' => $_GET['from']
+		'parent' => $_GET['from'],
+		'method' => $_SERVER['REQUEST_METHOD']
 	);
 
 	$history = (string) '';

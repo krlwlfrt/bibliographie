@@ -10,7 +10,12 @@ if(BIBLIOGRAPHIE_OUTPUT_BODY){
 
 	$document = ob_get_clean();
 
-	$document = preg_replace_callback('~\<(a)(\s)(href)\=\"([^"]*)\"~', 'bibliographie_history_rewrite_links', $document);
+	$replacements = array (
+		'~\<(a)(\s)(href)\=\"([^"]*)\"~',
+		'~\<(form)(\s)(action)\=\"([^"]*)\"~'
+	);
+
+	$document = preg_replace_callback($replacements, 'bibliographie_history_rewrite_links', $document);
 
 	echo $document;
 }else

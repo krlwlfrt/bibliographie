@@ -14,6 +14,11 @@ switch($_GET['task']){
 
 		$author = bibliographie_authors_get_data($_GET['author_id'], 'assoc');
 
+		if(is_array($author))
+			bibliographie_history_append_step('authors', 'Editing author '.bibliographie_authors_parse_data($author['author_id']));
+		else
+			bibliographie_history_append_step('authors', 'Author editor');
+
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$errors = array();
 
@@ -131,6 +136,8 @@ $(function () {
 		$author = bibliographie_authors_get_data($_GET['author_id']);
 
 		if(is_object($author)){
+			bibliographie_history_append_step('authors', 'Showing author '.bibliographie_authors_parse_data($author->author_id));
+
 			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 0)));
 			$tagsArray = array();
 			$topicsArray = array();
@@ -156,9 +163,9 @@ $(function () {
 	break;
 
 	case 'showPublications':
-		$author = _mysql_query("SELECT * FROM `a2author` WHERE `author_id` = ".((int) $_GET['author_id']));
-		if(mysql_num_rows($author) == 1){
-			$author = mysql_fetch_object($author);
+		$author = bibliographie_authors_get_data($_GET['author_id']);
+		if(is_object($author)){
+			bibliographie_history_append_step('authors', 'Show publications of author '.bibliographie_authors_parse_data($author->author_id).' (page '.((int) $_GET['page']).')');
 ?>
 
 <h3>Publications of <?php echo bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true))?></h3>
@@ -207,6 +214,8 @@ $(function () {
 </p>
 <?php
 		}
+
+		bibliographie_history_append_step('authors', 'Showing list of authors (selection '.$_GET['intial'].')');
 ?>
 
 <h3>List of authors</h3>

@@ -19,6 +19,12 @@ switch($_GET['task']){
 		if(!empty($_GET['topic_id']) and !in_array($_GET['topic_id'], bibliographie_topics_get_locked_topics()))
 			$topic = bibliographie_topics_get_data($_GET['topic_id'], 'assoc');
 
+		if(is_array($topic))
+			bibliographie_history_append_step('topics', 'Editing topic '.$topic['name']);
+		else
+			bibliographie_history_append_step('topics', 'Topic editor');
+
+
 		if($_SERVER['REQUEST_METHOD'] == 'GET'){
 			if(is_array($topic)){
 				$_POST = $topic;
@@ -82,13 +88,11 @@ switch($_GET['task']){
 <p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
 <?php
 			if(is_array($topic)){
-				bibliographie_history_append_step('topics', 'Editing topic '.$topic['name']);
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic['topic_id']?>" method="post">
 <?php
 			}else{
-				bibliographie_history_append_step('topics', 'Topic editor');
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor'?>" method="post">
@@ -197,7 +201,7 @@ $(function () {
 	case 'showPublications':
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if($topic){
-			bibliographie_history_append_step('topics', 'Showing publications of topic '.$topic->name);
+			bibliographie_history_append_step('topics', 'Showing publications of topic '.$topic->name.' (page '.((int) $_GET['page']).')');
 
 			$includeSubtopics = '';
 			$title = '';
