@@ -52,7 +52,36 @@
 				<div id="mouse_movement"></div>
 			</div>
 
-			<script type="text/javascript">
+			<div id="menu">
+				<h3>Browse</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph"><?php echo bibliographie_icon_get('sitemap')?> Topic graph</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=showList"><?php echo bibliographie_icon_get('group')?> Authors</a>
+				<br />
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('star')?> Bookmarks</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/tags/?task=showCloud"><?php echo bibliographie_icon_get('tag-blue')?> Tags</a>
+
+
+				<h3>Add data</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Publication</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-get')?> Use source</a>
+				<br />
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=topicEditor"><?php echo bibliographie_icon_get('folder-add')?> Topic</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=authorEditor"><?php echo bibliographie_icon_get('user-add')?> Author</a>
+
+
+				<h3>Maintenance</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=ToDo"><?php echo bibliographie_icon_get('page-white-text')?> ToDo</a>
+			</div>
+
+			<div id="content">
+<?php
+bibliographie_history_parse();
+?>
+
+				<script type="text/javascript">
 				/* <![CDATA[ */
 var jQueryLoading = 0;
 
@@ -84,6 +113,12 @@ jQuery.ajaxSetup({
 	cache: false
 });
 
+$('#bibliographie_history').hover(function (event) {
+	$('#bibliographie_history .history_steps').show('slow');
+}, function (event) {
+	$('#bibliographie_history .history_steps').hide();
+});
+
 /**
  * Enable expected behaviour by sending the placeholder content if no input was provided...
  */
@@ -93,29 +128,3 @@ $('#search').bind('submit', function (event) {
 });
 				/* ]]> */
 			</script>
-
-			<div id="menu">
-				<h3>Browse</h3>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=showGraph"><?php echo bibliographie_icon_get('sitemap')?> Topic graph</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=showList"><?php echo bibliographie_icon_get('group')?> Authors</a>
-				<br />
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('star')?> Bookmarks</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/tags/?task=showCloud"><?php echo bibliographie_icon_get('tag-blue')?> Tags</a>
-
-
-				<h3>Add data</h3>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Publication</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-get')?> Use source</a>
-				<br />
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/topics/?task=topicEditor"><?php echo bibliographie_icon_get('folder-add')?> Topic</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/authors/?task=authorEditor"><?php echo bibliographie_icon_get('user-add')?> Author</a>
-
-
-				<h3>Maintenance</h3>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=ToDo"><?php echo bibliographie_icon_get('page-white-text')?> ToDo</a>
-			</div>
-
-			<div id="content">

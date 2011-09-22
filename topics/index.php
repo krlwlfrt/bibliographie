@@ -82,11 +82,13 @@ switch($_GET['task']){
 <p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
 <?php
 			if(is_array($topic)){
+				bibliographie_history_append_step('topics', 'Editing topic '.$topic['name']);
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic['topic_id']?>" method="post">
 <?php
 			}else{
+				bibliographie_history_append_step('topics', 'Topic editor');
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor'?>" method="post">
@@ -139,6 +141,8 @@ $(function () {
 	case 'showTopic':
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if($topic){
+			bibliographie_history_append_step('topics', 'Showing topic '.$topic->name);
+
 			$title = 'Topic: '.htmlspecialchars($topic->name);
 
 			$family = array_merge(array($topic->topic_id), bibliographie_topics_get_parent_topics($topic->topic_id, true));
@@ -193,6 +197,8 @@ $(function () {
 	case 'showPublications':
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if($topic){
+			bibliographie_history_append_step('topics', 'Showing publications of topic '.$topic->name);
+
 			$includeSubtopics = '';
 			$title = '';
 			if($_GET['includeSubtopics'] == 1){
@@ -207,8 +213,10 @@ $(function () {
 		}
 	break;
 
-	case 'showGraph':
 	default:
+	case 'showGraph':
+		bibliographie_history_append_step('topics', 'Showing topic graph');
+
 		$bibliographie_topics_graph_depth = (int) 1;
 
 		$top = (int) 1;

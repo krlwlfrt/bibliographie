@@ -42,7 +42,7 @@ If you have the user 'foobar' in your .htaccess file, you'll need a row in the `
 ## 2.1 Step ##
 
 You might have to give the webserver access to the installation directory. (e.g. under Ubuntu: chown www-data /var/www/bibliographie)
-You might also have to give the files write rights. (e.g. chmod 0775 for all files)
+You might also have to give the files write permissions. (e.g. chmod 0775 for all files)
 Those to steps depend on your environment...
 
 ## 3. Step ##

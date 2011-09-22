@@ -25,6 +25,7 @@
 	}
 
 	h2 {
+		clear: both;
 		padding-left: 20px;
 	}
 
@@ -358,6 +359,21 @@
 
 	.bibliographie_checkData_persons {
 		clear: both;
+	}
+
+	#bibliographie_history {
+		background: #fafafa;
+		color: #000;
+		font-size: 0.8em;
+		margin-right: -10px;
+
+		padding: 5px;
+	}
+
+	#bibliographie_history .history_steps {
+		display: none;
+		max-height: 400px;
+		overflow-y: scroll;
 	}
 }
 
