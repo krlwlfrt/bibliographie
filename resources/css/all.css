@@ -363,6 +363,8 @@
 
 	#bibliographie_history {
 		background: #fafafa;
+		border-bottom: 1px solid #aaa;
+		border-left: 1px solid #aaa;
 		color: #000;
 		font-size: 0.8em;
 		margin-right: -10px;

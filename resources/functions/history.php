@@ -8,18 +8,19 @@ $bibliographie_history_icons = array (
 function bibliographie_history_parse () {
 	global $bibliographie_history_path_identifier, $bibliographie_history_icons;
 
-	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from'])
-		bibliographie_history_append_step('generic', 'Action not named...');
-
-	$parent = $bibliographie_history_path_identifier;
-	if(empty($parent))
-		$parent = $_GET['from'];
-	$step = null;
-
 	echo '<div id="bibliographie_history">';
 	echo '<em>Click to toggle!</em>';
 	echo '<strong>Navigation history</strong>';
+
+	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from']){
+		bibliographie_history_append_step('generic', 'Action not named...');
+		echo ' '.bibliographie_icon_get('error').' <span class="error">The current action is not yet named!</span>';
+	}
+
 	echo '<div class="history_steps">';
+
+	$parent = $bibliographie_history_path_identifier;
+	$step = null;
 
 	$i = (int) 1;
 	do {
@@ -31,6 +32,9 @@ function bibliographie_history_parse () {
 
 		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' '.$step['description'].' ('.$step['method'].')</div>';
 		$i++;
+
+		if($i == 100)
+			echo '<p class="notice">The history goes further, but the parsing stops here!</p>';
 	} while(!empty($step['parent']) and $i < 100);
 
 	echo '</div></div>';

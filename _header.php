@@ -120,7 +120,7 @@ jQuery.ajaxSetup({
 });*/
 
 $('#bibliographie_history').bind('click', function () {
-	$('#bibliographie_history .history_steps').toggle();
+	$('#bibliographie_history .history_steps').toggle('fast');
 })
 
 /**
