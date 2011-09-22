@@ -8,6 +8,9 @@ $bibliographie_history_icons = array (
 function bibliographie_history_parse () {
 	global $bibliographie_history_path_identifier, $bibliographie_history_icons;
 
+	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from'])
+		bibliographie_history_append_step('generic', 'Action not named...');
+
 	$parent = $bibliographie_history_path_identifier;
 	if(empty($parent))
 		$parent = $_GET['from'];
@@ -67,9 +70,6 @@ function bibliographie_history_append_step ($category, $description) {
 
 function bibliographie_history_rewrite_links ($matches) {
 	global $bibliographie_history_path_identifier;
-
-	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from'])
-		bibliographie_history_append_step('generic', 'Action not named...');
 
 	if($matches[4] != 'javascript:;'){
 		$connector = '&amp;';
