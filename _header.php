@@ -110,7 +110,10 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 });
 
 jQuery.ajaxSetup({
-	cache: false
+	cache: false,
+	data: {
+		'from': '<?php echo $bibliographie_history_path_identifier?>'
+	}
 });
 
 /*$('#bibliographie_history').hover(function (event) {

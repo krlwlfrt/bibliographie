@@ -13,7 +13,7 @@ function bibliographie_history_parse () {
 	echo '<strong>Navigation history</strong>';
 
 	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from']){
-		bibliographie_history_append_step('generic', 'Action not named...');
+		bibliographie_history_append_step('generic', 'Generic task');
 		echo ' '.bibliographie_icon_get('error').' <span class="error">The current action is not yet named!</span>';
 	}
 
@@ -74,6 +74,9 @@ function bibliographie_history_append_step ($category, $description) {
 
 function bibliographie_history_rewrite_links ($matches) {
 	global $bibliographie_history_path_identifier;
+
+	if(empty($bibliographie_history_path_identifier))
+		bibliographie_history_append_step('generic', 'Generic AJAX task');
 
 	if($matches[4] != 'javascript:;'){
 		$connector = '&amp;';

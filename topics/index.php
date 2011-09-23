@@ -11,7 +11,7 @@ switch($_GET['task']){
 		$title = 'Topic editor';
 ?>
 
-<h3>Create topic</h3>
+<h3>Topic editor</h3>
 <?php
 		$done = false;
 		$topic = null;
@@ -85,7 +85,7 @@ switch($_GET['task']){
 			}
 ?>
 
-<p class="notice">On this page you can create a topic. Just fill at least the field for the title and hit save!</p>
+<p class="notice">On this page you can create and edit topics. Just fill at least the field for the name and hit save!</p>
 <?php
 			if(is_array($topic)){
 ?>
@@ -106,7 +106,7 @@ switch($_GET['task']){
 			<input type="text" id="url" name="url" value="<?php echo htmlspecialchars($_POST['url'])?>" style="width: 100%" />
 		</div>
 
-		<label for="name" class="block">Name*</label>
+		<label for="name" class="block"><?php echo bibliographie_icon_get('asterisk-yellow')?> Name</label>
 		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 45%" />
 	</div>
 
