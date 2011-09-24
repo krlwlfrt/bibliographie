@@ -163,7 +163,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_publications_topic_input_tokenized('topics', 'topicsContainer', []);
+	bibliographie_topics_input_tokenized('topics', 'topicsContainer', []);
 });
 	/* ]]> */
 </script>
