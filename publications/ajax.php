@@ -388,7 +388,19 @@ switch($_GET['task']){
 			if(is_numeric($_GET['pub_id']))
 				$pub_id = (int) $_GET['pub_id'];
 
-			$similarTitles = $db->prepare("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST (:title IN NATURAL LANGUAGE MODE)) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `pub_id` != :pub_id AND `relevancy` > 0 ORDER BY `relevancy` DESC LIMIT 100");
+			$similarTitles = $db->prepare("SELECT * FROM (
+	SELECT `pub_id`, `title`, (`searchRelevancy` * 10 - (ABS(LENGTH(`title`) - LENGTH(:title) / 2))) AS `relevancy`  FROM (
+		SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST (:title IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
+		FROM `a2publication`
+		WHERE `pub_id` != :pub_id
+	) fullTextSearch
+) calculatedRelevancy
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC
+LIMIT
+	100");
 
 			$similarTitles->bindParam('title', $expandedTitle);
 			$similarTitles->bindParam('pub_id', $pub_id);
