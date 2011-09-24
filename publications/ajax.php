@@ -1,4 +1,5 @@
 <?php
+/* @var $db PDO */
 
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
@@ -32,7 +33,7 @@ switch($_GET['task']){
 				bibliographie_publications_parse_list($publications, $_GET['target']);
 			}else{
 				$result = _mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') ORDER BY `title`");
-				
+
 				if(mysql_num_rows($result) > 0){
 					if(in_array($_GET['target'], array('bibTex', 'rtf'))){
 						$bibtex = new Structures_BibTex(array(
@@ -377,20 +378,28 @@ switch($_GET['task']){
 			'status' => 'error'
 		);
 
-		if(mb_strlen($_GET['title']) >= 3){
+		if(mb_strlen($_GET['title']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			$result['status'] = 'success';
 
-			$searchResults = _mysql_query("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST ('".mysql_real_escape_string(stripslashes($_GET['title']))."' IN NATURAL LANGUAGE MODE)) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `pub_id` != ".((int) $_GET['pub_id'])." AND `relevancy` > 0 ORDER BY `relevancy` DESC");
+			//$expandedTitle = bibliographie_search_expand_query($_GET['title'], array('suffixes' => false, 'plurals' => true, 'umlauts' => true));
+			$expandedTitle = $_GET['title'];
+
+			$pub_id = 0;
+			if(is_numeric($_GET['pub_id']))
+				$pub_id = (int) $_GET['pub_id'];
+
+			$similarTitles = $db->prepare("SELECT * FROM (SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST (:title IN NATURAL LANGUAGE MODE)) AS `relevancy` FROM `a2publication`) fullTextSearch WHERE `pub_id` != :pub_id AND `relevancy` > 0 ORDER BY `relevancy` DESC LIMIT 100");
+
+			$similarTitles->bindParam('title', $expandedTitle);
+			$similarTitles->bindParam('pub_id', $pub_id);
+			$similarTitles->execute();
 
 			$results = array();
-			if(mysql_num_rows($searchResults) > 0){
-				$result['count'] = mysql_num_rows($searchResults);
-				while($publication = mysql_fetch_object($searchResults) and count($results) < ceil(log(mysql_num_rows($searchResults), 2) + 1) * 2){
-					if(mb_strtolower($publication->title) == mb_strtolower($_GET['title']))
-						$publication->title = '<strong>'.$publication->title.'</strong>';
-					$results[] = $publication;
-				}
-				$result['results'] = $results;
+			$result['count'] = $similarTitles->rowCount();
+
+			if($result['count'] > 0){
+				$similarTitles->setFetchMode(PDO::FETCH_OBJ);
+				$result['results'] = $similarTitles->fetchAll();
 			}
 		}
 

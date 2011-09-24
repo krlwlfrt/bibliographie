@@ -27,6 +27,13 @@ if(@mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAP
 	if(@mysql_select_db(BIBLIOGRAPHIE_MYSQL_DATABASE))
 		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
 
+try {
+	$db = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD);
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database! '.$e->getMessage());
+}
+
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!');
 

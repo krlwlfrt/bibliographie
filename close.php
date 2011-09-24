@@ -19,3 +19,4 @@ if(BIBLIOGRAPHIE_OUTPUT_BODY){
 echo preg_replace_callback($replacements, 'bibliographie_history_rewrite_links', $document);
 
 mysql_close();
+$db = null;

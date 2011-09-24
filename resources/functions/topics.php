@@ -161,11 +161,17 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 
 /**
  * Get the data of a topic.
+ * @global PDO $db
  * @param int $topic_id The id of a topic.
  * @param string $type
  * @return mixed Object on success or false otherwise.
  */
 function bibliographie_topics_get_data ($topic_id, $type = 'object') {
+	global $db;
+	static $topic = null;
+
+	$return = false;
+
 	if(is_numeric($topic_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json')){
 			$assoc = false;
@@ -175,24 +181,28 @@ function bibliographie_topics_get_data ($topic_id, $type = 'object') {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json'), $assoc);
 		}
 
-		$topic = _mysql_query("SELECT `topic_id`, `name`, `description`, `url` FROM `a2topics` WHERE `topic_id` = ".((int) $topic_id));
-		if(mysql_num_rows($topic) == 1){
+		if($topic === null)
+			$topic = $db->prepare("SELECT `topic_id`, `name`, `description`, `url` FROM `a2topics` WHERE `topic_id` = :topic_id");
+		$topic->bindParam(':topic_id', $topic_id);
+		$topic->execute();
+
+		if($topic->rowCount() > 0){
 			if($type == 'object')
-				$topic = mysql_fetch_object($topic);
+				$topic->setFetchMode(PDO::FETCH_OBJ);
 			else
-				$topic = mysql_fetch_assoc($topic);
+				$topic->setFetchMode(PDO::FETCH_ASSOC);
+
+			$return = $topic->fetch();
 
 			if(BIBLIOGRAPHIE_CACHING){
 				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_data.json', 'w+');
-				fwrite($cacheFile, json_encode($topic));
+				fwrite($cacheFile, json_encode($return));
 				fclose($cacheFile);
 			}
-
-			return $topic;
 		}
 	}
 
-	return false;
+	return $return;
 }
 
 /**
@@ -309,15 +319,22 @@ function bibliographie_topics_get_subtopics ($topic_id, $recursive = false, $ini
 
 /**
  * Parses the children of a topic and their data.
+ * @global PDO $db
  * @param int $topic_id The id of a topic.
  * @return mixed An array on success or false otherwise.
  */
 function bibliographie_topics_parse_subtopics ($topic_id) {
-	if(is_numeric($topic_id)){
+	global $db;
+	static $subtopics = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+
+	if(is_object($topic)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json'));
 
-		$topics = _mysql_query("SELECT `topic_id`, `name`, `amount_of_subtopics` FROM
+		if($subtopics === null)
+			$subtopics = $db->prepare("SELECT `topic_id`, `name`, `amount_of_subtopics` FROM
 	`a2topictopiclink` relations,
 	`a2topics` topics
 LEFT JOIN (
@@ -325,32 +342,26 @@ LEFT JOIN (
 ) AS subtopics ON topics.`topic_id` = subtopics.`target_topic_id`
 WHERE
 	relations.`source_topic_id` = topics.`topic_id` AND
-	relations.`target_topic_id` = ".((int) $topic_id)."
+	relations.`target_topic_id` = :topic_id
 ORDER BY
 	topics.`name`");
-		$cache = array();
 
-		if(mysql_num_rows($topics) > 0){
-			$i = (int) 0;
-			while($topic = mysql_fetch_object($topics)){
-				if($topic->amount_of_subtopics === null)
-					$topic->amount_of_subtopics = 0;
+		$subtopics->bindParam(':topic_id', $topic_id);
+		$subtopics->execute();
 
-				$cache[$i] = new stdClass();
-				$cache[$i]->topic_id = $topic->topic_id;
-				$cache[$i]->name = $topic->name;
-				$cache[$i]->amount_of_subtopics = $topic->amount_of_subtopics;
-				$i++;
-			}
+		$subtopicsArray = array();
+		if($subtopics->rowCount() > 0){
+			$subtopics->setFetchMode(PDO::FETCH_OBJ);
+			$subtopicsArray = $subtopics->fetchAll();
 		}
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_subtopics_data.json', 'w+');
-			fwrite($cacheFile, json_encode($cache));
+			fwrite($cacheFile, json_encode($subtopicsArray));
 			fclose($cacheFile);
 		}
 
-		return $cache;
+		return $subtopicsArray;
 	}
 
 	return false;

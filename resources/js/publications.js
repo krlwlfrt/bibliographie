@@ -136,16 +136,23 @@ function bibliographie_publications_check_title (title, pub_id) {
 		dataType: 'json',
 		success: function (json) {
 			if(json.results.length > 0){
-				$('#similarTitleContainer').html('<div style="margin-bottom: 10px;">Showing <strong>'+json.results.length+' most similar titles</strong> ('+json.count+' search results)</div>');
-				$.each(json.results, function (key, value) {
-					$('#similarTitleContainer')
-						.append('<div style="margin-top: 5px;">')
-						.append('<a href="'+bibliographie_web_root+'/publications/?task=showPublication&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-text"></a>')
-						.append(' <a href="'+bibliographie_web_root+'/publications/?task=publicationEditor&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-edit"></a>')
-						.append(' '+value.title+'</div>');
-				});
+				$('#bibliographie_charmap').hide();
 				if($('#similarTitleContainer').is(':visible') == false)
-					$('#similarTitleContainer').show('slow');
+					$('#similarTitleContainer').show();
+
+				var str = 'Showing <strong>'+json.results.length+'</strong> similar titles, sorted by similarity...';
+				str += '<div class="bibliographie_similarity_list_container">';
+
+				$.each(json.results, function (key, value) {
+					str += '<div>';
+					str += '<a href="'+bibliographie_web_root+'/publications/?task=showPublication&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-text"></a>';
+					str += ' <a href="'+bibliographie_web_root+'/publications/?task=publicationEditor&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-edit"></a>';
+					str += ' '+value.title+'</div>';
+				});
+
+				str += '</div>';
+
+				$('#similarTitleContainer').html(str);
 			}else
 				$('#similarTitleContainer').hide();
 		}
