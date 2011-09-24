@@ -140,7 +140,10 @@ function bibliographie_publications_check_title (title, pub_id) {
 				if($('#similarTitleContainer').is(':visible') == false)
 					$('#similarTitleContainer').show();
 
-				var str = 'Showing <strong>'+json.results.length+'</strong> similar titles, sorted by similarity...';
+				var str = '';
+
+				str += '<em style="float: right"><a href="javascript:;" onclick="$(\'#similarTitleContainer .bibliographie_similarity_list_container\').toggle(\'fast\');">Click to toggle!</a></em>';
+				str += '<span class="silk-icon silk-icon-exclamation"></span> Found at least <strong>'+json.results.length+'</strong> similar titles';
 				str += '<div class="bibliographie_similarity_list_container">';
 
 				$.each(json.results, function (key, value) {

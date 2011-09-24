@@ -414,7 +414,6 @@ $(function () {
 		<input type="text" id="title" name="title" style="width: 100%" value="<?php echo htmlspecialchars($_POST['title'])?>" class="bibtex" tabindex="4" />
 
 		<div id="similarTitleContainer" class="bibliographie_similarity_container"></div>
-		<br style="clear: both;" />
 
 		<div style="float: right; width: 50%">
 			<label for="month" class="block">Month</label>
@@ -545,7 +544,7 @@ $(function() {
 		delayRequest('bibliographie_publications_show_fields', Array(event.target.value));
 	});
 
-	$('#title').bind('change keyup', function (event) {
+	$('#title').bind('mouseup keyup', function (event) {
 		delayRequest('bibliographie_publications_check_title', Array(event.target.value, pub_id));
 	});
 
