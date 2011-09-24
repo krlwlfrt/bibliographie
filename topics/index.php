@@ -46,6 +46,8 @@ switch($_GET['task']){
 				$errors[] = 'The URL you filled is not valid.';
 
 			$topics = explode(',', $_POST['topics']);
+			if(count($topics) == 1 and empty($topics[0]))
+				$topics = array();
 
 			if(count($errors) == 0){
 				if(is_array($topic)){

@@ -17,6 +17,7 @@
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-ui.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-plugins.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jrumble.js"></script>
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.blockUI.js"></script>
 
 		<!-- bibliographie stuff -->
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/all.css" />
@@ -73,7 +74,6 @@
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
-				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/maintenance/?task=ToDo"><?php echo bibliographie_icon_get('page-white-text')?> ToDo</a>
 			</div>
 
 			<div id="content">
@@ -88,14 +88,21 @@ var jQueryLoading = 0;
 var bibliographie_web_root = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>';
 var bibliographie_search_min_chars = <?php echo BIBLIOGRAPHIE_SEARCH_MIN_CHARS?>;
 var bibliographie_request_delay = 500;
+var bibliographie_ajax_timeout = null;
+
+function bibliographie_ajax_block_ui () {
+	$.blockUI({'message': '<img src="'+bibliographie_web_root+'/resources/images/loading.gif" /> <strong>Server seems to be busy.</strong><br /><em>Please give it a moment and wait for the request to finish!</em>'});
+}
 
 $.jGrowl.defaults.position = 'bottom-right';
 $.jGrowl.defaults.life = 10000;
 
 $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 	$('body').css('cursor', 'wait');
-	if(jQueryLoading == 0)
+	if(jQueryLoading == 0){
 		$(this).show();
+		bibliographie_ajax_timeout = setTimeout('bibliographie_ajax_block_ui();', 5000);
+	}
 	jQueryLoading++;
 	$('#jQueryLoadingAmount').html('('+jQueryLoading+')');
 }).bind('ajaxComplete', function(){
@@ -103,8 +110,11 @@ $('#jQueryLoading').bind('ajaxSend', function(event, jqXHR, ajaxOptions) {
 	jQueryLoading--;
 	$('#jQueryLoadingAmount').html('('+jQueryLoading+')');
 
-	if(jQueryLoading == 0)
+	if(jQueryLoading == 0){
 		$(this).hide('fade');
+		clearTimeout(bibliographie_ajax_timeout);
+		$.unblockUI();
+	}
 }).bind('ajaxError', function (event, jqXHR, ajaxSettings, thrownError) {
 	alert('Request to '+ajaxSettings.url+' failed!\n\n'+jqXHR.responseText);
 });

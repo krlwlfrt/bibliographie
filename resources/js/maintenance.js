@@ -2,7 +2,7 @@ var bibliographie_maintenance_yet_run_checks = Array();
 
 function bibliographie_maintenance_run_all_checks () {
 	$.each(bibliographie_maintenance_consistency_checks, function (category, checks){
-		$.each(checks, function (dummy, checkID) {
+		$.each(checks, function (checkID, checkTitle) {
 			bibliographie_maintenance_run_consistency_check(category+'_'+checkID);
 		});
 	});
