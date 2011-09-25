@@ -958,3 +958,7 @@ function bibliographie_publications_cache_list (array $publications) {
 
 	return md5($publicationsJSON);
 }
+
+function bibliographie_publications_sort (array $publications, $orderBy) {
+	return $publications;
+}

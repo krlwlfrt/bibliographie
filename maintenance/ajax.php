@@ -21,7 +21,7 @@ ORDER BY
 				$authors->setFetchMode(PDO::FETCH_OBJ);
 
 				if($authors->rowCount() > 0){
-					echo '<p class="error">Found '.$authors->rowCount().' authors with charset artifacts!</p>';
+					echo '<strong class="error">Found '.$authors->rowCount().' authors with charset artifacts!</strong>';
 
 					echo '<table class="dataContainer">';
 					echo '<tr><th> </th><th>Name</th></tr>';
@@ -65,6 +65,8 @@ ORDER BY
 					$publications = array();
 					while($publication = mysql_fetch_object($result))
 						$publications[] = $publication->pub_id;
+
+					bibliographie_publications_sort($publications, 'year');
 
 					bibliographie_publications_print_list($publications, '', null, false);
 				}
