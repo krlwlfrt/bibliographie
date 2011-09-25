@@ -1,5 +1,20 @@
 <?php
 /**
+ * Convert a CSV-string into an array.
+ * @param string $csv
+ * @return array
+ */
+function csv2array ($csv) {
+	$return = array();
+
+	if(is_csv($csv)){
+		$return = explode(',', $csv);
+	}
+
+	return $return;
+}
+
+/**
  * Check if a string is an url.
  * @param string $url String that shall be checked.
  * @return bool Wether the string was an URL or not.
@@ -27,8 +42,12 @@ function is_mail ($mail) {
  * @return bool
  */
 function is_csv ($csv, $type = 'null') {
-	if($type == 'int')
-		return preg_match('~^[0-9]+(,[0-9]+)*$~', $csv);
+	if(is_string($csv)){
+		if($type == 'int')
+			return preg_match('~^[0-9]+(,[0-9]+)*$~', $csv);
+	}
+
+	return false;
 }
 
 /**
