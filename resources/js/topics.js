@@ -62,3 +62,43 @@ function bibliographie_topics_input_tokenized (field, container, prePopulate) {
 		}
 	});
 }
+
+function bibliographie_topics_check_name (name, topic_id) {
+	$.ajax({
+		url: bibliographie_web_root+'/topics/ajax.php',
+		data: {
+			'task': 'checkName',
+			'name': name,
+			'topic_id': topic_id
+		},
+		dataType: 'json',
+		success: function (json) {
+			if(json.results.length > 0){
+				$('#bibliographie_charmap').hide();
+				if($('#similarNameContainer').is(':visible') == false)
+					$('#similarNameContainer').show();
+
+				var str = '';
+
+				str += '<em style="float: right"><a href="javascript:;" onclick="$(\'#similarNameContainer .bibliographie_similarity_list_container\').toggle(\'fast\');">Click to toggle!</a></em>';
+				str += '<span class="silk-icon silk-icon-exclamation"></span> Found at least <strong>'+json.results.length+'</strong> similar names';
+				str += '<div class="bibliographie_similarity_list_container">';
+
+				$.each(json.results, function (key, value) {
+					str += '<div>';
+					str += '<a href="'+bibliographie_web_root+'/topics/?task=showTopic&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder"></a>';
+					str += ' <a href="'+bibliographie_web_root+'/topics/?task=topicEditor&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder-edit"></a>';
+					str += ' <strong>'+value.name+'</strong>';
+					if(value.description != '' && value.description != null)
+						str += ' <em>'+value.description+'</em>';
+					str += '</div>';
+				});
+
+				str += '</div>';
+
+				$('#similarNameContainer').html(str);
+			}else
+				$('#similarNameContainer').hide();
+		}
+	})
+}

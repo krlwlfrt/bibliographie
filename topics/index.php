@@ -110,6 +110,8 @@ switch($_GET['task']){
 
 		<label for="name" class="block"><?php echo bibliographie_icon_get('asterisk-yellow')?> Name</label>
 		<input type="text" id="name" name="name" value="<?php echo htmlspecialchars($_POST['name'])?>" style="width: 45%" />
+
+		<div id="similarNameContainer" class="bibliographie_similarity_container"></div>
 	</div>
 
 	<div class="unit">
@@ -131,8 +133,19 @@ switch($_GET['task']){
 
 <script type="text/javascript">
 	/* <![CDATA[ */
+var topic_id = <?php
+if(is_array($topic))
+	echo $topic['topic_id'];
+else
+	echo 0;
+?>;
+
 $(function () {
 	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+
+	$('#name').bind('mouseup keyup', function () {
+		delayRequest('bibliographie_topics_check_name', Array($('#name').val(), topic_id));
+	});
 
 	$('input, textarea').charmap();
 	$('#bibliographie_charmap').dodge();

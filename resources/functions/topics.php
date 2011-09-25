@@ -412,6 +412,12 @@ ORDER BY
 	return false;
 }
 
+/**
+ *
+ * @param type $topic_id
+ * @param type $includeSubtopics
+ * @return type 
+ */
 function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
 	$return = array();
 

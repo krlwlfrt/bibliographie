@@ -40,6 +40,52 @@ switch($_GET['task']){
 
 		echo json_encode($result);
 	break;
+
+	case 'checkName':
+		$result = array(
+			'count' => 0,
+			'results' => array(),
+			'status' => 'error'
+		);
+
+		if(mb_strlen($_GET['name']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
+			$result['status'] = 'success';
+
+			$expandedName = $_GET['name'];
+
+			$topic_id = 0;
+			if(is_numeric($_GET['topic_id']))
+				$topic_id = (int) $_GET['topic_id'];
+
+			$similarTitles = $db->prepare("SELECT * FROM (
+	SELECT `topic_id`, `name`, `description`, (`searchRelevancy` * 10 - (ABS(LENGTH(`name`) - LENGTH(:name) / 2))) AS `relevancy`  FROM (
+		SELECT `topic_id`, `name`, `description`, (MATCH(`name`, `description`) AGAINST (:name IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
+		FROM `a2topics`
+		WHERE `topic_id` != :topic_id
+	) fullTextSearch
+) calculatedRelevancy
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC
+LIMIT
+	100");
+
+			$similarTitles->bindParam('name', $expandedName);
+			$similarTitles->bindParam('topic_id', $topic_id);
+			$similarTitles->execute();
+
+			$results = array();
+			$result['count'] = $similarTitles->rowCount();
+
+			if($result['count'] > 0){
+				$similarTitles->setFetchMode(PDO::FETCH_OBJ);
+				$result['results'] = $similarTitles->fetchAll();
+			}
+		}
+
+		echo json_encode($result);
+	break;
 }
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/close.php';

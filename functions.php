@@ -68,20 +68,16 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 			echo '<p><a href="?makeScheme=1">Do it now!</a></p>';
 		}elseif($_GET['makeScheme'] == 1){
 			// DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`;
-			mysql_query("ALTER TABLE `a2keywords` RENAME TO `a2tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;
-ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;
-
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);
-ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);
-ALTER TABLE `a2publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;
-
-ALTER TABLE `a2topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);
-
-ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);
-
-ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
+			mysql_query("ALTER TABLE `a2keywords` RENAME TO `a2tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;");
+			mysql_query("ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;");
+			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);");
+			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);");
+			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);");
+			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);");
+			mysql_query("ALTER TABLE `a2publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;");
+			mysql_query("ALTER TABLE `a2topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
+			mysql_query("ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
+			mysql_query("ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
 
 			mysql_query("CREATE TABLE `bibliographie_log` (
 	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -100,7 +96,7 @@ ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
 	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
 ) COLLATE='utf8_general_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT;");
 
-			echo '<p>Scheme was created!!!</p>';
+			echo '<p>Scheme has been modified!!!</p>';
 		}
 	}else{
 		/**
@@ -321,7 +317,7 @@ ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
 
 		mysql_query("INSERT INTO `a2users` (`login`) VALUES ('".mysql_real_escape_string(stripslashes($_SERVER['PHP_AUTH_USER']))."');");
-		echo '<p>Scheme was created!!!</p>';
+		echo '<p>Scheme has been created!!!</p>';
 	}
 	echo '</body></html>';
 	exit();
