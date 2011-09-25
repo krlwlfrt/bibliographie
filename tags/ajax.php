@@ -3,7 +3,7 @@
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
+require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 
 $text = (string) 'An error occured!';
 $status = (string) 'error';

@@ -2,7 +2,7 @@
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
+require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 
 switch($_GET['task']){
 	case 'setBookmark':

@@ -1,7 +1,7 @@
 <?php
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/functions.php';
+require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 ?>
 
 <h2>Publications</h2>
