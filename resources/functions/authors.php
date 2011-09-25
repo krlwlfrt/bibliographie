@@ -230,8 +230,8 @@ function bibliographie_authors_get_publications ($author_id, $editor = 0) {
  * @return type
  */
 function bibliographie_authors_populate_input ($string) {
-	if(!empty($string) and is_csv($string, 'int')){
-		$authors = explode(',', $string);
+	if(is_csv($string, 'int')){
+		$authors = csv2array($string, 'int');
 		if(count($authors) > 0){
 			$populate = array();
 			foreach($authors as $author)

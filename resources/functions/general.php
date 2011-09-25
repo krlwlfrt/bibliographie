@@ -4,11 +4,15 @@
  * @param string $csv
  * @return array
  */
-function csv2array ($csv) {
+function csv2array ($csv, $type = null) {
 	$return = array();
 
-	if(is_csv($csv)){
+	if(is_csv($csv, $type)){
 		$return = explode(',', $csv);
+
+		if($type == 'int')
+			for($i = 0; $i < count($return); $i++)
+				$return[$i] = (int) $return[$i];
 	}
 
 	return $return;
@@ -41,10 +45,13 @@ function is_mail ($mail) {
  * @param string $type The type of the cs values. (int, etc.)
  * @return bool
  */
-function is_csv ($csv, $type = 'null') {
+function is_csv ($csv, $type = null) {
 	if(is_string($csv)){
 		if($type == 'int')
-			return preg_match('~^[0-9]+(,[0-9]+)*$~', $csv);
+			return preg_match('~^[0-9]+(\,[0-9]+)*$~', $csv);
+
+		if($type == null)
+			return preg_match('~^[^\,]+(\,[^\,]+)*$~', $csv);
 	}
 
 	return false;

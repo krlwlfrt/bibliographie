@@ -62,7 +62,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			echo '<ul>';
-			foreach(explode(',', $_POST['topics']) as $topic){
+			foreach(csv2array(',', $_POST['topics']) as $topic){
 				$topic = bibliographie_topics_get_data($topic);
 				if(is_object($topic)){
 					if(in_array($topic->topic_id, $lockedTopics))

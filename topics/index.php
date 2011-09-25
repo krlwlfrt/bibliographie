@@ -45,10 +45,7 @@ switch($_GET['task']){
 			if(!empty($_POST['url']) and !is_url($_POST['url']))
 				$errors[] = 'The URL you filled is not valid.';
 
-			$topics = explode(',', $_POST['topics']);
-			if(count($topics) == 1 and empty($topics[0]))
-				$topics = array();
-
+			$topics = csv2array($_POST['topics']);
 			if(count($errors) == 0){
 				if(is_array($topic)){
 					if(bibliographie_topics_edit_topic($topic['topic_id'], $_POST['name'], $_POST['description'], $_POST['url'], $topics)){
@@ -76,7 +73,7 @@ switch($_GET['task']){
 			 */
 			if(!empty($_POST['topics'])){
 				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
-					$topics = explode(',', $_POST['topics']);
+					$topics = csv2array($_POST['topics'], 'int');
 					foreach($topics as $parentTopic){
 						$prePopulateTopics[] = array (
 							'id' => $parentTopic,
