@@ -71,11 +71,13 @@ ORDER BY
 			break;
 
 			case 'topics_loosenedSubgraphs':
-				$result = _mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` AS `topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1");
+				$result = _mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` AS `topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1 ORDER BY `name`");
 
 				if(mysql_num_rows($result) > 0){
+					echo '<strong>Found '.mysql_num_rows($result).' topics without parent topic!</strong><ol>';
 					while($topic = mysql_fetch_object($result))
-						echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.htmlspecialchars($topic->name).'<br />';
+						echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.htmlspecialchars($topic->name).'</li>';
+					echo '</ol>';
 				}else
 					echo '<p class="success">No loosened graphs!</p>';
 			break;

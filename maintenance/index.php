@@ -27,19 +27,16 @@ switch($_GET['task']){
 	case 'consistencyChecks':
 ?>
 
-<a href="javascript:;" onclick="bibliographie_maintenance_run_all_checks()">Run all checks...</a>
+<a href="javascript:;" onclick="bibliographie_maintenance_run_all_checks()" style="float: right;"><?php echo bibliographie_icon_get('tick')?> Run all checks...</a>
+<h3>Consistency checks</h3>
 <?php
 		foreach($bibliographie_consistency_checks as $category => $categoryChecks){
-?>
-
-<h3><?php echo $category?></h3>
-<?php
 			foreach($categoryChecks as $checkID => $checkTitle){
 ?>
 
 <h4><?php echo $checkTitle?></h4>
-<div id="<?php echo $category.'_'.$checkID?>">
-	<a href="javascript:;" onclick="bibliographie_maintenance_run_consistency_check('<?php echo $category.'_'.$checkID?>')">Run this check!</a>
+<div id="<?php echo $category.'_'.$checkID?>" style="border: 1px solid #aaa; max-height: 300px; min-height: 50px; overflow-y: scroll;">
+	<a href="javascript:;" onclick="bibliographie_maintenance_run_consistency_check('<?php echo $category.'_'.$checkID?>')"><?php echo bibliographie_icon_get('tick')?> Run this check!</a>
 </div>
 <?php
 			}
