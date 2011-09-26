@@ -17,7 +17,7 @@ function bibliographie_tags_create_tag ($tag) {
 	);
 
 	if($return){
-		bibliographie_log('tags', 'create', json_encode($data));
+		bibliographie_log('tags', 'createTag', json_encode($data));
 		return $data;
 	}
 

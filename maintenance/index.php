@@ -172,32 +172,46 @@ $(function () {
 
 <table class="dataContainer">
 	<tr>
-		<th style="width: 35%">Classification</th>
-		<th style="width: 25%">Action</th>
-		<th style="width: 40%">Data</th>
+		<th style="width: 40%">Meta</th>
+		<th style="width: 60%">Data</th>
 	</tr>
 <?php
 				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
+
 				$categoryIcons = array (
 					'topics' => 'folder',
-					'authors' => 'user'
+					'authors' => 'user',
+					'publications' => 'page-white-text',
+					'tags' => 'tag-blue'
 				);
+
 				$actionIcons = array (
 					'createTopic' => 'folder-add',
 					'createTopicRelation' => 'table-relationship',
 					'editTopic' => 'folder-edit',
+					'editAuthor' => 'user-edit',
+					'createAuthor' => 'user-create',
 					'lockTopic' => 'lock',
-					'unlockTopic' => 'lock-open'
+					'unlockTopic' => 'lock-open',
+					'editPublication' => 'page-white-edit',
+					'createPublication' => 'page-white-create',
+					'createTag' => 'tag-blue-add'
 				);
 
 				foreach($logContent as $logRow){
 					$logRow = json_decode($logRow, true);
 					echo '<tr>';
-					echo '<td>logged action <strong>#'.$logRow['id'].'</strong><br />';
-					echo '<em>'.$logRow['time'].'</em></td>';
-					echo '<td><strong>'.bibliographie_icon_get($categoryIcons[$logRow['category']]).' '.$logRow['category'].'</strong><br />';
-					echo ''.bibliographie_icon_get($actionIcons[$logRow['action']]).' '.$logRow['action'].'</td>';
-					echo '<td><pre>'.print_r(json_decode($logRow['data'], true), true).'</pre></td>';
+
+					echo '<td>';
+					echo 'logged action <strong>#', $logRow['id'], '</strong><br /><br />';
+					echo '<strong>', bibliographie_icon_get($categoryIcons[$logRow['category']]), ' ', $logRow['category'], '</strong><br />';
+					echo '<em>', bibliographie_icon_get($actionIcons[$logRow['action']]), ' ', $logRow['action'].'</em><br /><br />';
+					echo 'by <strong>', bibliographie_user_get_name($logRow['user']).'</strong><br />';
+					echo 'at <em>', $logRow['time'], '</em>';
+					echo '</td>';
+
+					echo '<td style="font-size: 0.7em; overflow: scroll;"><pre>', print_r(json_decode($logRow['data'], true), true), '</pre></td>';
+
 					echo '</tr>';
 				}
 ?>
