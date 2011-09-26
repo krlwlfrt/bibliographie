@@ -275,11 +275,17 @@ $bibliographie_publication_data = array (
 
 /**
  * Get the data of a publication.
+ * @global PDO $db
  * @param int $publication_id
  * @param string $type
  * @return mixed
  */
 function bibliographie_publications_get_data ($publication_id, $type = 'object') {
+	global $db;
+	static $publication = null;
+
+	$return = false;
+
 	if(is_numeric($publication_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json')){
 			$assoc = false;
@@ -289,24 +295,29 @@ function bibliographie_publications_get_data ($publication_id, $type = 'object')
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json'), $assoc);
 		}
 
-		$publication = _mysql_query("SELECT * FROM `a2publication` WHERE `pub_id` = ".((int) $publication_id));
-		if(mysql_num_rows($publication) == 1){
+		if($publication == null)
+			$publication = $db->prepare("SELECT * FROM `a2publication` WHERE `pub_id` = :pub_id");
+
+		$publication->bindParam('pub_id', $publication_id);
+		$publication->execute();
+
+		if($publication->rowCount() == 1){
 			if($type == 'object')
-				$publication = mysql_fetch_object($publication);
+				$publication->setFetchMode(PDO::FETCH_OBJ);
 			else
-				$publication = mysql_fetch_assoc($publication);
+				$publication->setFetchMode(PDO::FETCH_ASSOC);
+
+			$return = $publication->fetch();
 
 			if(BIBLIOGRAPHIE_CACHING){
 				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json', 'w+');
-				fwrite($cacheFile, json_encode($publication));
+				fwrite($cacheFile, json_encode($return));
 				fclose($cacheFile);
 			}
-
-			return $publication;
 		}
 	}
 
-	return false;
+	return $return;
 }
 
 /**

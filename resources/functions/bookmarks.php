@@ -174,13 +174,9 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $list) {
  */
 function bibliographie_bookmarks_unset_bookmarks_for_list (array $list) {
 	if(count($list)){
-		$mysqlString = "";
-
 		$list = array_intersect($list, bibliographie_bookmarks_get_bookmarks());
-		if(count($list) > 0)
-
 		$return = 0;
-		if(!empty($mysqlString)){
+		if(count($list) > 0){
 			_mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id())." AND FIND_IN_SET(`pub_id`, '".implode(',', $list)."')");
 			$return = mysql_affected_rows();
 		}
