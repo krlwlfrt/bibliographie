@@ -7,49 +7,59 @@
 
 /**
  * Create a new topic.
+ * @global PDO $db
  * @param string $name The name of the topic	.
  * @param string $description The description of the topic.
  * @param string $url The URL of the topic.
  * @return boolean True on success or false otherwise.
  */
-function bibliographie_topics_create_topic ($name, $description, $url, $topics, $topic_id = null) {
-	if($topic_id === null)
-		$topic_id = 'NULL';
-	else
-		$topic_id = (int) $topic_id;
+function bibliographie_topics_create_topic ($name, $description, $url, array $topics, $topic_id = null) {
+	global $db;
+	static $topic = null, $createRelations = null;
+	$return = false;
 
-	$return = _mysql_query("INSERT INTO `a2topics` (
-	`topic_id`,
-	`name`,
-	`description`,
-	`url`
+	if($topic === null)
+		$topic = $db->prepare('INSERT INTO `a2topics` (
+	`topic_id`, `name`, `description`, `url`
 ) VALUES (
-	".$topic_id.",
-	'".mysql_real_escape_string(stripslashes($name))."',
-	'".mysql_real_escape_string(stripslashes($description))."',
-	'".mysql_real_escape_string(stripslashes($url))."'
-)");
+	:topic_id, :name, :description, :url
+)');
 
-	if($topic_id == 'NULL')
-		$topic_id = mysql_insert_id();
+	$topic->bindParam('topic_id', $topic_id);
+	$topic->bindParam('name', $name);
+	$topic->bindParam('description', $description);
+	$topic->bindParam('url', $url);
 
-	if(count($topics) > 0){
-		foreach($topics as $parentTopic){
-			_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $parentTopic).")");
-			bibliographie_purge_cache('topic_'.((int) $parentTopic).'_');
+	$topic->execute();
+
+	if($topic_id === null)
+		$topic_id = $db->lastInsertId();
+
+	if(!empty($topic_id)){
+		if(count($topics) > 0){
+			if($createRelations == null)
+				$createRelations = $db->prepare('INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (:topic_id, :parent_topic)');
+
+			foreach($topics as $parentTopic){
+				$createRelations->bindParam('topic_id', $topic_id);
+				$createRelations->bindParam('parent_topic', $parentTopic);
+				$createRelations->execute();
+
+				bibliographie_purge_cache('topic_'.((int) $parentTopic).'_');
+			}
 		}
+
+		$return = array(
+			'topic_id' => (int) $topic_id,
+			'name' => $name,
+			'description' => $description,
+			'url' => $url,
+			'topics' => $topics
+		);
+
+		if(is_array($return))
+			bibliographie_log('topics', 'createTopic', json_encode($return));
 	}
-
-	$data = json_encode(array(
-		'topic_id' => (int) $topic_id,
-		'name' => $name,
-		'description' => $description,
-		'url' => $url,
-		'topics' => $topics
-	));
-
-	if($return)
-		bibliographie_log('topics', 'createTopic', $data);
 
 	return $return;
 }
@@ -183,6 +193,7 @@ function bibliographie_topics_get_data ($topic_id, $type = 'object') {
 
 		if($topic === null)
 			$topic = $db->prepare("SELECT `topic_id`, `name`, `description`, `url` FROM `a2topics` WHERE `topic_id` = :topic_id");
+
 		$topic->bindParam(':topic_id', $topic_id);
 		$topic->execute();
 
@@ -212,16 +223,15 @@ function bibliographie_topics_get_data ($topic_id, $type = 'object') {
  * @return mixed String on succcess or false otherwise.
  */
 function bibliographie_topics_parse_name ($topic_id, $options = array()) {
-	if(is_numeric($topic_id)){
-		$topic = bibliographie_topics_get_data($topic_id);
+	$topic = bibliographie_topics_get_data($topic_id);
 
-		if(is_object($topic)){
-			$topic->name = htmlspecialchars($topic->name);
-			if($options['linkProfile'] == true and $topic->topic_id != 1)
-				$topic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.$topic->name.'</a>';
+	if(is_object($topic_id)){
+		$topic->name = htmlspecialchars($topic->name);
 
-			return $topic->name;
-		}
+		if($options['linkProfile'] == true and $topic->topic_id != 1)
+			$topic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.$topic->name.'</a>';
+
+		return $topic->name;
 	}
 
 	return false;
@@ -233,88 +243,103 @@ function bibliographie_topics_parse_name ($topic_id, $options = array()) {
  * @return mixed Array on success of false otherwise.
  */
 function bibliographie_topics_get_parent_topics ($topic_id, $recursive = false) {
-	if(is_numeric($topic_id)){
+	global $db;
+	static $parentTopics = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+	$return = false;
+
+	if(is_object($topic)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json'));
 
-		$topic = bibliographie_topics_get_data($topic_id);
+		$return = array();
 
-		if(is_object($topic)){
-			$return = array();
+		if($parentTopics == null){
+			$parentTopics = $db->prepare('SELECT `target_topic_id` FROM
+	`a2topictopiclink` relations,
+	`a2topics` topics
+WHERE
+	relations.`source_topic_id` = :topic_id AND
+	relations.`target_topic_id` = topics.`topic_id`
+ORDER BY topics.`name`');
+			$parentTopics->setFetchMode(PDO::FETCH_OBJ);
+		}
 
-			$parentTopics = _mysql_query("SELECT `target_topic_id` FROM
-		`a2topictopiclink` relations,
-		`a2topics` topics
-	WHERE
-		relations.`source_topic_id` = ".((int) $topic->topic_id)." AND
-		relations.`target_topic_id` = topics.`topic_id`
-	ORDER BY topics.`name`");
+		$parentTopics->bindParam('topic_id', $topic->topic_id);
+		$parentTopics->execute();
 
-			if(mysql_num_rows($parentTopics) > 0){
-				while($parentTopic = mysql_fetch_object($parentTopics)){
-					$return[] = $parentTopic->target_topic_id;
+		if($parentTopics->rowCount() > 0){
+			$return = $parentTopics->fetchAll(PDO::FETCH_COLUMN, 0);
 
-					if($recursive == true)
-						$return = array_merge($return, bibliographie_topics_get_parent_topics($parentTopic->target_topic_id, true));
-				}
-			}
+			if($recursive == true)
+				foreach($return as $parentTopic)
+					$return = array_merge($return, bibliographie_topics_get_parent_topics($parentTopic, true));
+		}
 
-			if(BIBLIOGRAPHIE_CACHING){
-				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json', 'w+');
-				fwrite($cacheFile, json_encode($return));
-				fclose($cacheFile);
-			}
+		/**
+		 * Guarantee that we have no topic twice...
+		 */
+		$return = array_unique($return);
+		sort($return);
 
-			return array_unique($return);
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
 		}
 	}
 
-	return false;
+	return $return;
 }
 
 /**
  * Get a list of subtopics recursively with their own subtopics and so on.
+ * @global PDO $db
  * @param int $topic_id The id of a topic.
  * @param bool $recursive Wether or not to fetch all subtopics recursively or just the direct children.
  * @return mixed An array on success or error otherwise.
  */
-function bibliographie_topics_get_subtopics ($topic_id, $recursive = false, $initial = null) {
-	if(is_numeric($topic_id)){
-		if(empty($initial))
-			$initial = $topic_id;
+function bibliographie_topics_get_subtopics ($topic_id, $recursive = false) {
+	global $db;
+	static $subtopics = null;
 
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'_subtopics.json')){
-			$subtopicsArray = json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'_subtopics.json'));
-			if(in_array($initial, $subtopicsArray)){
-				bibliographie_exit('Topic circle detected', 'The topic '.$subtopic->source_topic_id.' '.bibliographie_topics_parse_name ($subtopic->source_topic_id), array('linkProfile' => true).' has its parent topic '.$initial.' '.bibliographie_topics_parse_name ($initial), array('linkProfile' => true).' as subtopic!');
-			}
+	$topic = bibliographie_topics_get_data($topic_id);
+	$return = false;
 
-			return $subtopicsArray;
+	if(is_object($topic)){
+		$return = array();
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'_subtopics.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'_subtopics.json'));
+
+		if($subtopics === null){
+			$subtopics = $db->prepare('SELECT `source_topic_id` FROM `a2topictopiclink` WHERE `target_topic_id` = :topic_id');
+			$subtopics->setFetchMode(PDO::FETCH_OBJ);
 		}
 
-		$subtopics = _mysql_query("SELECT `source_topic_id` FROM `a2topictopiclink` WHERE `target_topic_id` = ".((int) $topic_id));
-		$subtopicsArray = array();
+		$subtopics->bindParam('topic_id', $topic->topic_id);
+		$subtopics->execute();
 
-		while($subtopic = mysql_fetch_object($subtopics)){
-			$subtopicsArray[] = $subtopic->source_topic_id;
-
-			if(in_array($initial, $subtopicsArray))
-				bibliographie_exit('Topic circle detected', 'The topic '.$subtopic->source_topic_id.' '.bibliographie_topics_parse_name ($subtopic->source_topic_id, array('linkProfile' => true)).' has its parent topic '.$initial.' '.bibliographie_topics_parse_name($initial, array('linkProfile' => true)).' as subtopic!');
+		if($subtopics->rowCount() > 0){
+			$return = $subtopics->fetchAll(PDO::FETCH_COLUMN, 0);
 
 			if($recursive)
-				$subtopicsArray = array_merge($subtopicsArray, bibliographie_topics_get_subtopics($subtopic->source_topic_id, true, $initial));
-		};
+				foreach($return as $subtopic)
+					$return = array_merge($return, bibliographie_topics_get_subtopics($subtopic, true));
+		}
+
+		$return = array_unique($return);
+		sort($return);
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $recursive).'_subtopics.json', 'w+');
-			fwrite($cacheFile, json_encode($subtopicsArray));
+			fwrite($cacheFile, json_encode($return));
 			fclose($cacheFile);
 		}
-
-		return $subtopicsArray;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
@@ -373,77 +398,102 @@ ORDER BY
  * @param mixed $includeSubtopics
  * @return mixed
  */
-function bibliographie_topics_get_publications ($topic_id, $includeSubtopics) {
-	if(is_numeric($topic_id)){
+function bibliographie_topics_get_publications ($topic_id, $includeSubtopics = false) {
+	global $db;
+	static $publications = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+	$return = false;
+
+	if(is_object($topic)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json'));
 
-		$mysqlString = '';
-		if($includeSubtopics){
-			$subtopicsArray = bibliographie_topics_get_subtopics($topic_id, true);
+		$return = array();
 
-			if(count($subtopicsArray) > 0)
-				foreach($subtopicsArray as $subtopic)
-					$mysqlString .= " OR relations.`topic_id` = ".((int) $subtopic);
-		}
-
-		$publicationsResult = _mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
+		if($publications === null){
+			$publications = $db->prepare('SELECT publications.`pub_id`, publications.`year` FROM
 	`a2topicpublicationlink` relations,
 	`a2publication` publications
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
-	(relations.`topic_id` = ".((int) $topic_id).$mysqlString.")
+	FIND_IN_SET(relations.`topic_id`, :set)
+GROUP BY
+	publications.`pub_id`
 ORDER BY
-	publications.`year` DESC");
-		$publicationsArray = array();
-		while($publication = mysql_fetch_object($publicationsResult))
-			if(!in_array($publication->pub_id, $publicationsArray))
-				$publicationsArray[] = $publication->pub_id;
+	publications.`year` DESC');
+			$publications->setFetchMode(PDO::FETCH_OBJ);
+		}
+
+		$topics = array($topic->topic_id);
+		if($includeSubtopics === true)
+			$topics = array_merge($topics, bibliographie_topics_get_subtopics($topic->topic_id));
+
+		$publications->bindParam('set', implode(',', $topics));
+		$publications->execute();
+
+		if($publications->rowCount() > 0)
+			$return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_publications.json', 'w+');
-			fwrite($cacheFile, json_encode($publicationsArray));
+			fwrite($cacheFile, json_encode($return));
 			fclose($cacheFile);
 		}
-
-		return $publicationsArray;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
  *
  * @param type $topic_id
  * @param type $includeSubtopics
- * @return type 
+ * @return type
  */
 function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
-	$return = array();
+	global $db;
+	static $tags = null;
 
-	if(is_numeric($topic_id)){
+	$return = false;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+
+	if(is_object($topic)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json'));
 
-		$topic = bibliographie_topics_get_data($topic_id);
+		$publications = bibliographie_topics_get_publications($topic->topic_id, $includeSubtopics);
 
-		if(is_object($topic)){
-			$publications = bibliographie_topics_get_publications($topic->topic_id, $includeSubtopics);
+		if(count($publications) > 0){
+			if($tags === null){
+				$tags = $db->prepare("SELECT
+	data.`tag_id`,
+	data.`tag`,
+	COUNT(*) AS `count`
+FROM
+	`a2publicationtaglink` link,
+	`a2tags` data
+WHERE
+	link.`tag_id` = data.`tag_id` AND
+	FIND_IN_SET(link.`pub_id`, :set)
+GROUP BY
+	data.`tag_id`
+ORDER BY
+	data.`tag`");
+				$tags->setFetchMode(PDO::FETCH_OBJ);
+			}
 
-			if(count($publications) > 0){
-				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
-	SELECT * FROM `a2tags`
-	) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id`");
+			$tags->bindParam('set', implode(',', $publications));
+			$tags->execute();
 
-				if(mysql_num_rows($tags))
-					while($tag = mysql_fetch_object($tags))
-						$return[] = $tag;
+			if($tags->rowCount() > 0)
+				$return = $tags->fetchAll();
 
-				if(BIBLIOGRAPHIE_CACHING){
-					$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json', 'w+');
-					fwrite($cacheFile, json_encode($return));
-					fclose($cacheFile);
-				}
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topic_'.((int) $topic_id).'_'.((int) $includeSubtopics).'_tags.json', 'w+');
+				fwrite($cacheFile, json_encode($return));
+				fclose($cacheFile);
 			}
 		}
 	}
@@ -456,23 +506,30 @@ function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
  * @return array Gives an array of locked topics.
  */
 function bibliographie_topics_get_locked_topics () {
+	global $db;
+	static $topics = null;
+
+	$return = array();
+
 	if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'))
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'));
 
-	$topicsArray = array();
-	$topics = _mysql_query("SELECT `topic_id` FROM `lockedtopics` ORDER BY `topic_id`");
-	if(mysql_num_rows($topics)){
-		while($topic = mysql_fetch_object($topics))
-			$topicsArray[] = $topic->topic_id;
+	if($topics === null){
+		$topics = $db->prepare("SELECT `topic_id` FROM `lockedtopics` ORDER BY `topic_id`");
+		$topics->setFetchMode(PDO::FETCH_OBJ);
 	}
+
+	$topics->execute();
+
+	$return = $topics->fetchAll(PDO::FETCH_COLUMN, 0);;
 
 	if(BIBLIOGRAPHIE_CACHING){
 		$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json', 'w+');
-		fwrite($cacheFile, json_encode($topicsArray));
+		fwrite($cacheFile, json_encode($return));
 		fclose($cacheFile);
 	}
 
-	return $topicsArray;
+	return $return;
 }
 
 /**

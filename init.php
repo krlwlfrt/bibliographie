@@ -28,7 +28,7 @@ if(@mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAP
 		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
 
 try {
-	$db = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD);
+	$db = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
 	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database! '.$e->getMessage());
@@ -43,6 +43,7 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
  */
 mysql_query("SET NAMES 'utf8'");
 mysql_query("SET CHARACTER SET 'utf8'");
+
 header('Content-Type: text/html; charset=UTF-8');
 mb_internal_encoding('UTF-8');
 
