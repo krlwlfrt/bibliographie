@@ -88,6 +88,7 @@ function bibliographie_log ($category, $action, $data) {
 
 	$addFile = json_encode(array(
 		'id' => mysql_insert_id(),
+		'user' => bibliographie_user_get_id(),
 		'time' => $time,
 		'category' => $category,
 		'action' => $action,
