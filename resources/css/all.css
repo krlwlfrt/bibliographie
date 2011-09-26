@@ -293,8 +293,10 @@
 	}
 
 	.bibliographie_publication .bibliographie_bookmark_container {
-		border-bottom: 1px solid #000;
-		border-left: 1px solid #000;
+		background: #fafafa;
+		border-bottom: 1px solid #aaa;
+		border-left: 1px solid #aaa;
+		color: #000;
 		display: inline;
 		float: right;
 		font-size: 0.8em;
