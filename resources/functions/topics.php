@@ -421,7 +421,8 @@ WHERE
 GROUP BY
 	publications.`pub_id`
 ORDER BY
-	publications.`year` DESC');
+	publications.`year` DESC,
+	publications.`pub_id` DESC');
 			$publications->setFetchMode(PDO::FETCH_OBJ);
 		}
 

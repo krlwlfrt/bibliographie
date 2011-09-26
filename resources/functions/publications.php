@@ -327,8 +327,15 @@ function bibliographie_publications_get_data ($publication_id, $type = 'object')
  * @param bool $textOnly
  * @return string
  */
-function bibliographie_publications_parse_data ($publication_id, $style = 'standard', array $options = array()) {
-	if(is_numeric($publication_id) and strpos($style, '..') === false and strpos($style, '/') === false){
+function bibliographie_publications_parse_data ($publication_id, $style = 'standard', array $options = array()){
+	global $db;
+	static $authors = null;
+
+	$publication = (array) bibliographie_publications_get_data($publication_id);
+
+	$return = false;
+
+	if(is_array($publication) and strpos($style, '..') === false and strpos($style, '/') === false){
 		$fileExtension = 'html';
 		if($options['plainText'] == true)
 			$fileExtension = 'txt';
@@ -346,7 +353,6 @@ function bibliographie_publications_parse_data ($publication_id, $style = 'stand
 		/**
 		 * Get data of publication.
 		 */
-		$publication = bibliographie_publications_get_data($publication_id, 'assoc');
 		if(is_array($publication)){
 			if(!file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/standard/'.$publication['pub_type'].'.txt'))
 				return '<p class="error">Parser file for publication type <em>'.htmlspecialchars($publication['pub_type']).'</em> for style <em>'.htmlspecialchars($style).'</em> is missing!</p>';
@@ -358,42 +364,50 @@ function bibliographie_publications_parse_data ($publication_id, $style = 'stand
 				$settings = parse_ini_file(BIBLIOGRAPHIE_ROOT_PATH.'/resources/styles/'.$style.'/settings.ini', true);
 			}
 
-			$authors = _mysql_query("SELECT * FROM
+			if($authors === null){
+				$authors = $db->prepare("SELECT * FROM
 	`a2publicationauthorlink` relations,
 	`a2author` authors
 WHERE
-	relations.`pub_id` = ".((int) $publication['pub_id'])." AND
+	relations.`pub_id` = :pub_id AND
 	relations.`author_id` = authors.`author_id` AND
 	relations.`is_editor` = 'N'
 ORDER BY authors.`surname`, authors.`firstname`");
+				$authors->setFetchMode(PDO::FETCH_OBJ);
+			}
+
+			$authors->bindParam('pub_id', $publication['pub_id']);
+			$authors->execute();
 
 			$parsedAuthors = (string) '';
-			$i = (int) 0;
-			while($author = mysql_fetch_object($authors)){
-				if(!empty($parsedAuthors))
-					if(mysql_num_rows($authors) == 2 or ($i + 1) == mysql_num_rows($authors))
-						$parsedAuthors .= $settings['authors']['authorDividerLast'];
+			if($authors->rowCount() > 0){
+				$authorsArray = $authors->fetchAll();
+
+				foreach($authorsArray as $i => $author){
+					if(!empty($parsedAuthors))
+						if(count($authorsArray) == 2 or ($i + 1) == count($authorsArray))
+							$parsedAuthors .= $settings['authors']['authorDividerLast'];
+						else
+							$parsedAuthors .= $settings['authors']['authorDivider'];
+
+					if(!empty($author->von))
+						$author->surname = $author->von.' '.$author->surname;
+					if(!empty($author->jr))
+						$author->surname = $author->surname.' '.$author->jr;
+
+					$parsedAuthor = (string) '';
+					if($settings['authors']['nameOrder'] == 'surnamesFirst')
+						$parsedAuthor = $author->surname.$settings['authors']['nameDivider'].$author->firstname;
 					else
-						$parsedAuthors .= $settings['authors']['authorDivider'];
+						$parsedAuthor = $author->firstname.' '.$author->surname;
 
-				if(!empty($author->von))
-					$author->surname = $author->von.' '.$author->surname;
-				if(!empty($author->jr))
-					$author->surname = $author->surname.' '.$author->jr;
+					if($options['noLinks'] != true)
+						$parsedAuthor = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
 
-				$parsedAuthor = (string) '';
-				if($settings['authors']['nameOrder'] == 'surnamesFirst')
-					$parsedAuthor = $author->surname.$settings['authors']['nameDivider'].$author->firstname;
-				else
-					$parsedAuthor = $author->firstname.' '.$author->surname;
-
-				if($options['noLinks'] != true)
-					$parsedAuthor = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&author_id='.$author->author_id.'">'.$parsedAuthor.'</a>';
-
-				$parsedAuthors .= $parsedAuthor;
-
-				$i++;
-			}
+					$parsedAuthors .= $parsedAuthor;
+				}
+			}else
+				$parsedAuthors = '<span style="font-size: 0.8em;" class="error">!authors missing!</span>';
 
 			$parsedPublication = str_replace('[authors]', $parsedAuthors, $parsedPublication);
 
@@ -428,11 +442,11 @@ ORDER BY authors.`surname`, authors.`firstname`");
 				fclose($cacheFile);
 			}
 
-			return $parsedPublication;
+			$return = $parsedPublication;
 		}
 	}
 
-	return false;
+	return $return;
 }
 
 function bibliographie_publications_parse_list (array $publications, $type = 'html') {
