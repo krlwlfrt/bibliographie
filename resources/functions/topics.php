@@ -452,6 +452,9 @@ ORDER BY
  * @return type
  */
 function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
+	/**
+	 * TODO: Gets very slow for many publications, needs optimization!
+	 */
 	global $db;
 	static $tags = null;
 
@@ -468,19 +471,14 @@ function bibliographie_topics_get_tags ($topic_id, $includeSubtopics = true) {
 		if(count($publications) > 0){
 			if($tags === null){
 				$tags = $db->prepare("SELECT
-	data.`tag_id`,
-	data.`tag`,
+	`tag_id`,
 	COUNT(*) AS `count`
 FROM
-	`a2publicationtaglink` link,
-	`a2tags` data
+	`a2publicationtaglink` link
 WHERE
-	link.`tag_id` = data.`tag_id` AND
 	FIND_IN_SET(link.`pub_id`, :set)
 GROUP BY
-	data.`tag_id`
-ORDER BY
-	data.`tag`");
+	`tag_id`");
 				$tags->setFetchMode(PDO::FETCH_OBJ);
 			}
 
