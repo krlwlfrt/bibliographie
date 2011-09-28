@@ -77,54 +77,147 @@ function bibliographie_tags_get_data ($tag_id, $type = 'object') {
 
 /**
  * Get the publications that are assigned to a tag.
+ * @global PDO $db
  * @param int $tag_id
  * @return mixed Array on success, false on error.
  */
-function bibliographie_tags_get_publications ($tag_id, $options = array()) {
-	if(is_numeric($tag_id)){
+function bibliographie_tags_get_publications ($tag_id) {
+	global $db;
+	static $publications = null;
 
-		/*if(BIBLIOGRAPHIE_CACHING){
-			if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id']) and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_author_'.((int) $options['author_id']).'_publications.json'))
-				return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_author_'.((int) $options['author_id']).'_publications.json'));
+	$tag = bibliographie_tags_get_data($tag_id);
 
-			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'))
-				return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json'));
-		}*/
+	$return = false;
 
-		$where_clause = (string) "";
-		$add_table = (string) "";
-		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id'])){
-			$add_table .= ", `a2publicationauthorlink` authors ";
-			$where_clause = " AND publications.`pub_id` = authors.`pub_id` AND authors.`author_id` = ".((int) $options['author_id'])." ";
-		}elseif(is_numeric($options['topic_id']) and bibliographie_topics_get_data($options['topic_id'])){
-			$add_table .= ", `a2topicpublicationlink` topics ";
-			$where_clause = " AND publications.`pub_id` = topics.`pub_id` AND topics.`topic_id` = ".((int) $options['topic_id'])." ";
-		}
+	if(is_object($tag)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_publications.json'));
 
-		$publicationsResult = mysql_query("SELECT publications.`pub_id`, publications.`year` FROM
+		$return = array();
+
+		if($publications === null){
+			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
-	`a2publication` publications".$add_table."
+	`a2publication` publications
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
-	relations.`tag_id` = ".((int) $tag_id).$where_clause."
+	relations.`tag_id` = :tag_id
 ORDER BY
-	publications.`year` DESC");
-
-		$publicationsArray = array();
-		while($publication = mysql_fetch_object($publicationsResult))
-			if(!in_array($publication->pub_id, $publicationsArray))
-				$publicationsArray[] = $publication->pub_id;
-
-		if(BIBLIOGRAPHIE_CACHING){
-			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_publications.json', 'w+');
-			fwrite($cacheFile, json_encode($publicationsArray));
-			fclose($cacheFile);
+	publications.`year` DESC,
+	publications.`pub_id` DESC");
+			$publications->setFetchMode(PDO::FETCH_OBJ);
 		}
 
-		return $publicationsArray;
+		$publications->bindParam('tag_id', $tag->tag_id);
+		$publications->execute();
+
+		if($publications->rowCount() > 0)
+			$return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_publications.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
 	}
 
-	return false;
+	return $return;
+}
+
+function bibliographie_tags_get_publications_with_author ($tag_id, $author_id) {
+	global $db;
+	static $publications = null;
+
+	$tag = bibliographie_tags_get_data($tag_id);
+	$author = bibliographie_authors_get_data($author_id);
+
+	$return = false;
+
+	if(is_object($tag) and is_object($author)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$author->author_id.'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$author->author_id.'_publications.json'));
+
+		$return = array();
+
+		if($publications === null){
+			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
+	`a2publicationtaglink` relations,
+	`a2publication` publications,
+	`a2publicationauthorlink` authors
+WHERE
+	publications.`pub_id` = relations.`pub_id` AND
+	relations.`tag_id` = :tag_id AND
+	publications.`pub_id` = authors.`pub_id` AND
+	authors.`author_id` = :author_id
+ORDER BY
+	publications.`year` DESC,
+	publications.`pub_id` DESC");
+			$publications->setFetchMode(PDO::FETCH_OBJ);
+		}
+
+		$publications->bindParam('tag_id', $tag->tag_id);
+		$publications->bindParam('author_id', $author->author_id);
+		$publications->execute();
+
+		if($publications->rowCount() > 0)
+			$return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$author->author_id.'_publications.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_tags_get_publications_with_topic ($tag_id, $topic_id) {
+	global $db;
+	static $publications = null;
+
+	$tag = bibliographie_tags_get_data($tag_id);
+	$topic = bibliographie_topics_get_data($topic_id);
+
+	$return = false;
+
+	if(is_object($tag) and is_object($topic)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$topic->topic_id.'_publications.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$topic->topic_id.'_publications.json'));
+
+		$return = array();
+
+		if($publications === null){
+			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
+	`a2publicationtaglink` relations,
+	`a2publication` publications,
+	`a2topicpublicationlink` topics
+WHERE
+	publications.`pub_id` = relations.`pub_id` AND
+	relations.`tag_id` = :tag_id AND
+	publications.`pub_id` = topics.`pub_id` AND
+	FIND_IN_SET(topics.`topic_id`, :topic_set)
+ORDER BY
+	publications.`year` DESC,
+	publications.`pub_id` DESC");
+			$publications->setFetchMode(PDO::FETCH_OBJ);
+		}
+
+		$publications->bindParam('tag_id', $tag->tag_id);
+		$publications->bindParam('topic_set', implode(',', array_merge(array($topic->topic_id), bibliographie_topics_get_subtopics($topic->topic_id, true))));
+		$publications->execute();
+
+		if($publications->rowCount() > 0)
+			$return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.$tag->tag_id.'_author_'.$topic->topic_id.'_publications.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
 }
 
 function bibliographie_tags_print_cloud ($tags, $options = array()) {
@@ -173,3 +266,16 @@ function bibliographie_tags_parse_tag ($tag_id, $options = array()) {
 
 	return false;
 }
+
+/*
+ *
+ * $where_clause = (string) "";
+		$add_table = (string) "";
+		if(is_numeric($options['author_id']) and bibliographie_authors_get_data($options['author_id'])){
+			$add_table .= "";
+			$where_clause = " ." ";
+		}elseif(is_numeric($options['topic_id']) and bibliographie_topics_get_data($options['topic_id'])){
+			$add_table .= ", `a2topicpublicationlink` topics ";
+			$where_clause = " AND publications.`pub_id` = topics.`pub_id` AND topics.`topic_id` = ".((int) $options['topic_id'])." ";
+		}
+ */
