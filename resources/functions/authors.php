@@ -16,7 +16,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	else
 		$author_id = (int) $author_id;
 
-	$return = _mysql_query("INSERT INTO `a2author` (
+	$return = mysql_query("INSERT INTO `a2author` (
 	`author_id`,
 	`firstname`,
 	`von`,
@@ -67,7 +67,7 @@ function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surna
 			or $url != $dataBefore['url']
 			or $institute != $dataBefore['institute']){
 
-			_mysql_query("UPDATE `a2author` SET
+			mysql_query("UPDATE `a2author` SET
 	`firstname` = '".mysql_real_escape_string(stripslashes($firstname))."',
 	`von` = '".mysql_real_escape_string(stripslashes($von))."',
 	`surname` = '".mysql_real_escape_string(stripslashes($surname))."',
@@ -118,7 +118,7 @@ function bibliographie_authors_get_data ($author_id, $type = 'object') {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'), $assoc);
 
-		$author = _mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
+		$author = mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
 		if(mysql_num_rows($author) == 1){
 			if($assoc)
 				$author = mysql_fetch_assoc($author);
@@ -198,7 +198,7 @@ function bibliographie_authors_get_publications ($author_id, $editor = 0) {
 		else
 			$mysql_editor = 'Y';
 
-		$publicationsResult = _mysql_query("SELECT publications.`pub_id` FROM
+		$publicationsResult = mysql_query("SELECT publications.`pub_id` FROM
 		`a2publicationauthorlink` relations,
 		`a2publication` publications
 	WHERE
@@ -265,7 +265,7 @@ function bibliographie_authors_get_tags ($author_id) {
 			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 1)));
 
 			if(count($publications) > 0){
-				$tags = _mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
+				$tags = mysql_query("SELECT *, COUNT(*) AS `count` FROM `a2publicationtaglink` link LEFT JOIN (
 			SELECT * FROM `a2tags`
 		) AS data ON link.`tag_id` = data.`tag_id` WHERE FIND_IN_SET(link.`pub_id`, '".implode(',', $publications)."') GROUP BY data.`tag_id` ORDER BY data.`tag`");
 

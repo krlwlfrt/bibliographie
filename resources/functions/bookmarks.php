@@ -8,7 +8,7 @@ function bibliographie_bookmarks_get_bookmarks () {
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json'));
 
 	$bookmarks = array();
-	$bookmarksResult = _mysql_query("SELECT publications.`pub_id` FROM
+	$bookmarksResult = mysql_query("SELECT publications.`pub_id` FROM
 		`a2userbookmarklists` bookmarks,
 		`a2publication` publications
 	WHERE
@@ -54,7 +54,7 @@ function bibliographie_bookmarks_unset_bookmark ($pub_id) {
  */
 function bibliographie_bookmarks_clear_bookmarks () {
 	if(count(bibliographie_bookmarks_get_bookmarks()) > 0){
-		_mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id()));
+		mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id()));
 		$return = mysql_affected_rows();
 
 		if($return){
@@ -155,7 +155,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $list) {
 
 		$return = 0;
 		if(!empty($mysqlString)){
-			_mysql_query("INSERT INTO `a2userbookmarklists` (`user_id`,`pub_id`) VALUES ".$mysqlString.";");
+			mysql_query("INSERT INTO `a2userbookmarklists` (`user_id`,`pub_id`) VALUES ".$mysqlString.";");
 			$return = mysql_affected_rows();
 		}
 
@@ -177,7 +177,7 @@ function bibliographie_bookmarks_unset_bookmarks_for_list (array $list) {
 		$list = array_intersect($list, bibliographie_bookmarks_get_bookmarks());
 		$return = 0;
 		if(count($list) > 0){
-			_mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id())." AND FIND_IN_SET(`pub_id`, '".implode(',', $list)."')");
+			mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id())." AND FIND_IN_SET(`pub_id`, '".implode(',', $list)."')");
 			$return = mysql_affected_rows();
 		}
 

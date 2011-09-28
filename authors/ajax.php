@@ -53,7 +53,7 @@ switch($_GET['task']){
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			$expandedQuery = bibliographie_search_expand_query($_GET['q'], array('suffixes' => false, 'plurals' => false, 'umlauts' => true));
 
-			$authors = _mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$authors = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 
 			if(mysql_num_rows($authors)){
 				while($author = mysql_fetch_object($authors)){

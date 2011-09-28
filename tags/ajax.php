@@ -35,7 +35,7 @@ switch($_GET['task']){
 	case 'searchTags':
 		$result = array();
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
-			$tags = _mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['q'])))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$tags = mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['q'])))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
 			
 			if(mysql_num_rows($tags))
 				while($tag = mysql_fetch_object($tags)){

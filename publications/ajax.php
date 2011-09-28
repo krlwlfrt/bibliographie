@@ -32,7 +32,7 @@ switch($_GET['task']){
 			if(in_array($_GET['target'], array('html', 'text'))){
 				bibliographie_publications_parse_list($publications, $_GET['target']);
 			}else{
-				$result = _mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') ORDER BY `title`");
+				$result = mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') ORDER BY `title`");
 
 				if(mysql_num_rows($result) > 0){
 					if(in_array($_GET['target'], array('bibTex', 'rtf'))){

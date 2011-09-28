@@ -563,7 +563,7 @@ function bibliographie_publications_get_persons ($publication_id, $type = 'autho
 		elseif($type == 'editors')
 			$_type = 'Y';
 
-		$persons = _mysql_query("SELECT * FROM
+		$persons = mysql_query("SELECT * FROM
 		`a2publicationauthorlink` link,
 		`a2author` data
 	WHERE
@@ -603,7 +603,7 @@ function bibliographie_publications_get_tags ($publication_id) {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_tags.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_tags.json'));
 
-		$tags = _mysql_query("SELECT * FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $publication_id));
+		$tags = mysql_query("SELECT * FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $publication_id));
 
 		$return = array();
 		if(mysql_num_rows($tags))
@@ -625,7 +625,7 @@ function bibliographie_publications_get_topics ($publication_id) {
 	if(is_numeric($publication_id)){
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_topics.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_topics.json'));
-		$topics = _mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $publication_id));
+		$topics = mysql_query("SELECT * FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $publication_id));
 
 		$return = array();
 		if(mysql_num_rows($topics))
@@ -681,7 +681,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	if($user_id == null)
 		$user_id = bibliographie_user_get_id ();
 
-	$return = _mysql_query("INSERT INTO `a2publication` (
+	$return = mysql_query("INSERT INTO `a2publication` (
 	`pub_type`,
 	`user_id`,
 	`title`,
@@ -746,22 +746,22 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	if(count($author) > 0 and !empty($author[0])){
 		$rank = (int) 1;
 		foreach($author as $author_id)
-			_mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
 	}
 
 	if(count($editor) > 0 and !empty($editor[0])){
 		$rank = (int) 1;
 		foreach($editor as $editor_id)
-			_mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
 	}
 
 	if(count($topics) > 0 and !empty($topics[0]))
 		foreach($topics as $topic_id)
-			_mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
+			mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
 
 	if(count($tags) > 0 and !empty($tags[0]))
 		foreach($tags as $tag_id)
-			_mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
+			mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
 
 	$data = array(
 		'pub_id' => (int) $pub_id,
@@ -848,11 +848,11 @@ function bibliographie_publications_create_publication ($pub_type, array $author
  */
 function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags) {
 
-	_mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
-	_mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
-	_mysql_query("DELETE FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
+	mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
+	mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
+	mysql_query("DELETE FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
 
-	$return = _mysql_query("UPDATE `a2publication` SET
+	$return = mysql_query("UPDATE `a2publication` SET
 	`pub_type` = '".mysql_real_escape_string(stripslashes($pub_type))."',
 	`title` = '".mysql_real_escape_string(stripslashes($title))."',
 	`month` = '".mysql_real_escape_string(stripslashes($month))."',
@@ -887,22 +887,22 @@ LIMIT 1");
 	if(count($author) > 0 and !empty($author[0])){
 		$rank = (int) 1;
 		foreach($author as $author_id)
-			_mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
 	}
 
 	if(count($editor) > 0 and !empty($editor[0])){
 		$rank = (int) 1;
 		foreach($editor as $editor_id)
-			_mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
+			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
 	}
 
 	if(count($topics) > 0 and !empty($topics[0]))
 		foreach($topics as $topic_id)
-			_mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
+			mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
 
 	if(count($tags) > 0 and !empty($tags[0]))
 		foreach($tags as $tag_id)
-			_mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
+			mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
 
 	$data = json_encode(array(
 		'pub_id' => (int) $pub_id,

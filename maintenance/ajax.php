@@ -59,7 +59,7 @@ ORDER BY
 			break;
 
 			case 'publications_withoutTag':
-				$result = _mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)");
+				$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)");
 
 				if(mysql_num_rows($result) > 0){
 					$publications = array();
@@ -73,7 +73,7 @@ ORDER BY
 			break;
 
 			case 'topics_loosenedSubgraphs':
-				$result = _mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` AS `topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1 ORDER BY `name`");
+				$result = mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` AS `topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1 ORDER BY `name`");
 
 				if(mysql_num_rows($result) > 0){
 					echo '<strong>Found '.mysql_num_rows($result).' topics without parent topic!</strong><ol>';

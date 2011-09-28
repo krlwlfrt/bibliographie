@@ -19,7 +19,7 @@ switch($_GET['task']){
 					'number'
 				);
 
-			$result = _mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
+			$result = mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
 
 			if(mysql_num_rows($result) > 0){
 				echo '<h3>Chronology of '.htmlspecialchars($_GET['container']).'</h3>';
@@ -50,7 +50,7 @@ switch($_GET['task']){
 					'number'
 				);
 
-			$result = _mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
+			$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
 
 			if(mysql_num_rows($result) > 0){
 	?>

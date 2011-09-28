@@ -176,9 +176,9 @@ $(function () {
 	break;
 
 	case 'showList':
-		$initialsResult = _mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
+		$initialsResult = mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
 
-		$miscResult = mysql_num_rows(_mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
+		$miscResult = mysql_num_rows(mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
 
 		$whereClause = "";
 		if(empty($_GET['initial'])){
@@ -220,7 +220,7 @@ $(function () {
 
 <h3>List of authors</h3>
 <?php
-		$authorsResult = _mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
+		$authorsResult = mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
 
 		if(mysql_num_rows($authorsResult) > 0){
 ?>

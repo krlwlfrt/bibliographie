@@ -111,7 +111,7 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 		if(count($deleteTopicLinks) > 0){
 			foreach($deleteTopicLinks as $deleteTopicLink){
 				bibliographie_purge_cache('topic_'.$deleteTopicLink.'_');
-				_mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." AND `target_topic_id` = ".((int) $deleteTopicLink));
+				mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." AND `target_topic_id` = ".((int) $deleteTopicLink));
 			}
 		}
 
@@ -119,7 +119,7 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 		 * Update the topic data itself if any change was made.
 		 */
 		if($name != $dataBefore['name'] or $description != $dataBefore['description'] or $url != $dataBefore['url']){
-			$return = _mysql_query("UPDATE `a2topics` SET
+			$return = mysql_query("UPDATE `a2topics` SET
 		`name`= '".mysql_real_escape_string(stripslashes($name))."',
 		`description` = '".mysql_real_escape_string(stripslashes($description))."',
 		`url` = '".mysql_real_escape_string(stripslashes($url))."'
@@ -135,7 +135,7 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 		if(count($addTopicLinks) > 0){
 			foreach($safeTopics as $addTopic){
 				if(!in_array($addTopic, $dataBefore['topics'])){
-					_mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $addTopic).")");
+					mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $addTopic).")");
 					bibliographie_purge_cache('topic_'.((int) $addTopic).'_');
 				}
 			}
