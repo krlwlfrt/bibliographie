@@ -520,7 +520,8 @@ function bibliographie_topics_get_locked_topics () {
 
 	$topics->execute();
 
-	$return = $topics->fetchAll(PDO::FETCH_COLUMN, 0);;
+	if($topics->rowCount() > 0)
+		$return = $topics->fetchAll(PDO::FETCH_COLUMN, 0);;
 
 	if(BIBLIOGRAPHIE_CACHING){
 		$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json', 'w+');

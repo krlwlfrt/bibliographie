@@ -162,7 +162,8 @@ $(function () {
 			$title = 'Topic: '.htmlspecialchars($topic->name);
 
 			$family = array_merge(array($topic->topic_id), bibliographie_topics_get_parent_topics($topic->topic_id, true));
-			if(count(array_intersect($family, bibliographie_topics_get_locked_topics())) == 0)
+			$lockedTopics = bibliographie_topics_get_locked_topics();
+			if(is_array($lockedTopics) and count(array_intersect($family, $lockedTopics)) == 0)
 				echo '<em style="float: right"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic->topic_id.'">'.bibliographie_icon_get('folder-edit').' Edit topic</a></em>';
 			else
 				echo '<p class="notice">This or at least one of the parent topics is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
