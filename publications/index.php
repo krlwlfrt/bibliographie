@@ -538,7 +538,6 @@ $(function () {
 				echo 0;
 			echo ';';
 ?>
-
 $(function() {
 	$('#pub_type').bind('mouseup keyup', function (event) {
 		delayRequest('bibliographie_publications_show_fields', Array(event.target.value));

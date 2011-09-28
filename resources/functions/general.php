@@ -279,6 +279,19 @@ function bibliographie_exit ($title, $message) {
 	exit();
 }
 
+function bibliographie_error_handler ($errno, $errstr, $file, $line) {
+	if($errno != E_STRICT and $errno != E_NOTICE){
+		ob_end_clean();
+		bibliographie_exit('PHP error', $errstr);
+	}
+}
+
+function bibliographie_exception_handler ($exception) {
+	ob_end_clean();
+
+	bibliographie_exit('Uncaught exception', $exception->getMessage());
+}
+
 /**
  * Include all needed functions...
  */

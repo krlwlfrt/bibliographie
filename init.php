@@ -87,7 +87,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 	PRIMARY KEY (`log_id`)
 ) COLLATE='utf8_general_ci' ENGINE=MyISAM;");
 
-			mysql_query("CREATE TABLE `lockedtables` (
+			mysql_query("CREATE TABLE `lockedtopics` (
 	`topic_id` INT(10) UNSIGNED NOT NULL
 ) COLLATE='utf8_general_ci' ENGINE=MyISAM;");
 
@@ -364,3 +364,6 @@ if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
  * Set standard title for header.
  */
 $title = 'bibliographie';
+
+set_exception_handler('bibliographie_exception_handler');
+set_error_handler('bibliographie_error_handler');

@@ -88,8 +88,9 @@ function bibliographie_publications_create_person (firstname, von, surname, jr, 
 		dataType: 'json',
 		success: function (json) {
 			$.jGrowl(json.text);
+			
 			if(json.status == 'success')
-				$('#'+role).tokenInput('add', {id: json.autor_id, name: json.name});
+				$('#'+role).tokenInput('add', {'id': json.author_id, 'name': json.name});
 		}
 	})
 }
