@@ -225,7 +225,7 @@ function bibliographie_topics_get_data ($topic_id, $type = 'object') {
 function bibliographie_topics_parse_name ($topic_id, $options = array()) {
 	$topic = bibliographie_topics_get_data($topic_id);
 
-	if(is_object($topic_id)){
+	if(is_object($topic)){
 		$topic->name = htmlspecialchars($topic->name);
 
 		if($options['linkProfile'] == true and $topic->topic_id != 1)
