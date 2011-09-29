@@ -248,7 +248,7 @@ function bibliographie_exit ($title, $message) {
 function bibliographie_error_handler ($errno, $errstr, $file, $line) {
 	if($errno != E_STRICT and $errno != E_NOTICE){
 		ob_end_clean();
-		bibliographie_exit('PHP error', $errstr);
+		bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.$file.':'.$line.'</em>');
 	}
 }
 

@@ -69,11 +69,9 @@ function bibliographie_search_get_plurals () {
 			fwrite($cacheFile, json_encode($return));
 			fclose($cacheFile);
 		}
-
-		return $return;
 	}
 
-	$return = array();
+	return $return;
 }
 
 /**
@@ -145,7 +143,7 @@ function bibliographie_search_expand_query ($q, $_options = array(), $iteration 
 			 * If we find an irregular plural of a singular add the singular or if we find the singular add the irregular plural.
 			 * Irregular plural means that its not (only) generated via suffixes.
 			 */
-			if($options['plurals']){
+			if($options['plurals'] and count(bibliographie_search_get_plurals()) > 0){
 				foreach(bibliographie_search_get_plurals() as $singular => $plural){
 					if(mb_strtolower($word) == mb_strtolower($singular))
 						$expandedQuery .= ' '.$plural;
