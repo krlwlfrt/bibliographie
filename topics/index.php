@@ -208,7 +208,7 @@ $(function () {
 <ul>
 <?php
 				foreach($parentTopics as $parentTopic)
-					echo '<li>'.bibliographie_topics_parse_name($parentTopic->topic_id, array('linkProfile' => true)).'</li>';
+					echo '<li>'.bibliographie_topics_parse_name($parentTopic, array('linkProfile' => true)).'</li>';
 ?>
 
 </ul>
