@@ -40,7 +40,7 @@ mysql_query("SET NAMES 'utf8'");
 mysql_query("SET CHARACTER SET 'utf8'");
 
 date_default_timezone_set('Europe/Berlin');
-setlocale(LC_ALL, array('en_EN.UTF-8', 'en_EN', 'en'));
+setlocale(LC_ALL, array('en_US.UTF-8', 'en_US', 'en'));
 
 header('Content-Type: text/html; charset=UTF-8');
 mb_internal_encoding('UTF-8');
