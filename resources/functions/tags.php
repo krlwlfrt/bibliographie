@@ -232,7 +232,14 @@ function bibliographie_tags_print_cloud ($tags, $options = array()) {
 	<div id="bibliographie_tag_cloud" style="border: 1px solid #aaa; border-radius: 20px; font-size: 0.8em; text-align: center; padding: 20px;">
 <?php
 		foreach($tags as $tag){
+			$count = 0;
+			if(!empty($tag->count))
+				$count = $tag->count;
+
 			$tag = bibliographie_tags_get_data($tag->tag_id);
+
+			if($count != 0)
+				$tag->count = $count;
 			/**
 			 * Converges against BIBLIOGRAPHIE_TAG_SIZE_FACTOR.
 			 */
