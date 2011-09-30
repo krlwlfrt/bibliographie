@@ -191,7 +191,7 @@ $(function () {
 ?>
 
 	<br />
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&amp;topic_id=<?php echo (int) $topic->topic_id?>.'&amp;includeSubtopics=1">
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&amp;topic_id=<?php echo (int) $topic->topic_id?>&amp;includeSubtopics=1">
 		<?php echo bibliographie_icon_get('page-white-stack')?> Show publications including all subtopics
 	</a> (<?php echo count(bibliographie_topics_get_publications($topic->topic_id, true))?>)
 <?php
