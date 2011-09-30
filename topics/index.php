@@ -156,49 +156,76 @@ $(function () {
 
 	case 'showTopic':
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
-		if($topic){
+		if(is_object($topic)){
+			/**
+			 * Set meta data for bibliographie output.
+			 */
 			bibliographie_history_append_step('topics', 'Showing topic '.$topic->name);
-
 			$title = 'Topic: '.htmlspecialchars($topic->name);
 
+			/**
+			 * Check locked topics.
+			 */
 			$family = array_merge(array($topic->topic_id), bibliographie_topics_get_parent_topics($topic->topic_id, true));
 			$lockedTopics = bibliographie_topics_get_locked_topics();
 			if(is_array($lockedTopics) and count(array_intersect($family, $lockedTopics)) == 0)
 				echo '<em style="float: right"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic->topic_id.'">'.bibliographie_icon_get('folder-edit').' Edit topic</a></em>';
 			else
 				echo '<p class="notice">This or at least one of the parent topics is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
+?>
 
-			$publications = bibliographie_topics_get_publications($topic->topic_id, true);
+<h3><?php echo bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true))?></h3>
 
-			echo '<h3><em>'.htmlspecialchars($topic->name).'</em></h3>';
+<?php
 			if(!empty($topic->description))
 				echo '<p>'.htmlspecialchars($topic->description).'</p>';
+?>
 
-			echo '<p><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('page-white-stack').' Show publications</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], false)).')';
+<p>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&amp;topic_id=<?php echo (int) $topic->topic_id?>">
+		<?php echo bibliographie_icon_get('page-white-stack')?> Show publications
+	</a>
+	(<?php echo count(bibliographie_topics_get_publications($topic->topic_id, false))?>)
+<?php
+			if(count(bibliographie_topics_get_subtopics($topic->topic_id, true)) > 0){
+?>
+
+	<br />
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showPublications&amp;topic_id=<?php echo (int) $topic->topic_id?>.'&amp;includeSubtopics=1">
+		<?php echo bibliographie_icon_get('page-white-stack')?> Show publications including all subtopics
+	</a> (<?php echo count(bibliographie_topics_get_publications($topic->topic_id, true))?>)
+<?php
+			}
+?>
+
+</p>
+<?php
+			$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
+			if(count($parentTopics) > 0){
+?>
+
+<h4>Parent topics</h4>
+<ul>
+<?php
+				foreach($parentTopics as $parentTopic)
+					echo '<li>'.bibliographie_topics_parse_name($parentTopic->topic_id, array('linkProfile' => true)).'</li>';
+?>
+
+</ul>
+<?php
+			}
 
 			if(count(bibliographie_topics_get_subtopics($topic->topic_id, true)) > 0){
-				echo '<br /><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&amp;topic_id='.((int) $topic->topic_id).'&amp;includeSubtopics=1">';
-				echo bibliographie_icon_get('page-white-stack').' Show publications including all subtopics</a> ('.count(bibliographie_topics_get_publications($_GET['topic_id'], true)).')';
-			}
-			echo '</p>';
+?>
 
-			if(count(bibliographie_topics_get_parent_topics($topic->topic_id)) > 0){
-				echo '<h4>Parent topics</h4><ul>';
-				foreach(bibliographie_topics_get_parent_topics($topic->topic_id) as $parentTopic){
-					$parentTopic = bibliographie_topics_get_data($parentTopic);
-					if($parentTopic->topic_id != 1)
-						$parentTopic->name = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $parentTopic->topic_id).'">'.htmlspecialchars($parentTopic->name).'</a>';
-					echo '<li>'.$parentTopic->name.'</li>';
-				}
-				echo '</ul>';
-			}
-
-			if(count(bibliographie_topics_get_subtopics($topic->topic_id, true)) > 0){
-				echo '<h4>Subordinated topics</h4>';
-				echo '<span style="float: right"><a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a> <a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a> all subtopics</span>';
-				echo '<div class="bibliographie_topics_topic_graph">';
-				bibliographie_topics_traverse($topic->topic_id);
-				echo '</div>';
+<span style="float: right">
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a>
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a>
+	all subtopics
+</span>
+<h4>Subordinated topics</h4>
+<div class="bibliographie_topics_topic_graph"><?php bibliographie_topics_traverse($topic->topic_id);?></div>
+<?php
 			}
 
 			if(count(bibliographie_topics_get_tags($topic->topic_id)) > 0){
