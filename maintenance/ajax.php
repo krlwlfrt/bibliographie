@@ -11,25 +11,23 @@ switch($_GET['task']){
 	case 'consistencyChecks':
 		switch($_GET['consistencyCheckID']){
 			case 'authors_charsetArtifacts':
-				$authors = $db->prepare("SELECT * FROM `a2author`
-WHERE
-	CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP '^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$'
-ORDER BY
-	`surname`,
-	`firstname`");
-				$authors->execute();
+				$authors = $db->prepare('SELECT `author_id` FROM `a2author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP "^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$" ORDER BY `surname`, `firstname`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);
+				$authors->execute();
 
 				if($authors->rowCount() > 0){
-					echo '<strong class="error">Found '.$authors->rowCount().' authors with charset artifacts!</strong>';
+					echo '<p class="error">Found '.$authors->rowCount().' authors with charset artifacts!</p>';
+					$authorIDs = $authors->fetchAll(PDO::FETCH_COLUMN, 0);
 
 					echo '<table class="dataContainer">';
 					echo '<tr><th> </th><th>Name</th></tr>';
 
-					while($person = $authors->fetch()){
+					foreach($authorIDs as $author_id){
+						$author = bibliographie_authors_get_data($author_id);
+						
 						echo '<tr>';
-						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $person->author_id).'">'.bibliographie_icon_get('user-edit').'</a></td>';
-						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $person->author_id).'">'.htmlspecialchars($person->von.' '.$person->surname.' '.$person->jr.', '.$person->firstname).'</a></td>';
+						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_icon_get('user-edit').'</a></td>';
+						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_authors_parse_name($author->author_id, array('linkProfile' => true)).'</a></td>';
 						echo '</tr>';
 					}
 
@@ -56,7 +54,7 @@ ORDER BY
 				if($relations->rowCount() > 0)
 					$relationIDs = $relations->fetchAll(PDO::FETCH_COLUMN, 0);
 				
-				$authorsWithoutPublications = array_diff($authorIDs, $relationIDs);
+				$authorsWithoutPublications = array_values(array_diff($authorIDs, $relationIDs));
 				
 				if(count($authorsWithoutPublications) == 0){
 					echo '<p class="failure">Found <strong>'.count($authorsWithoutPublications).' authors without publications.</strong>';
@@ -81,33 +79,33 @@ ORDER BY
 				$publicationLinksArray = array();
 
 				$publications = $db->prepare("SELECT `pub_id` FROM `a2publication` GROUP BY `pub_id`");
-				$publications->execute();
 				$publications->setFetchMode(PDO::FETCH_OBJ);
-				while($publication = $publications->fetch())
-					$publicationsArray[] = $publication->pub_id;
+				$publications->execute();
+				if($publications->rowCount() > 0)
+					$publicationsArray = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
 
 				$publicationLinks = $db->prepare("SELECT `pub_id` FROM `a2topicpublicationlink` GROUP BY `pub_id`");
-				$publicationLinks->execute();
 				$publicationLinks->setFetchMode(PDO::FETCH_OBJ);
-				while($publication = $publicationLinks->fetch())
-					$publicationLinksArray[] = $publication->pub_id;
-
+				$publicationLinks->execute();
+				if($publicationLinks->rowCount() > 0)
+					$publicationLinksArray = $publicationLinks->fetchAll(PDO::FETCH_COLUMN, 0);
+					
 				$publicationsList = array_values(array_diff($publicationsArray, $publicationLinksArray));
 				bibliographie_publications_print_list($publicationsList, '', null, false);
 			break;
 
 			case 'publications_withoutTag':
-				$result = mysql_query("SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)");
+				$publicationsArray = array();
+				
+				$publications = $db->prepare('SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)');
+				$publications->setFetchMode(PDO::FETCH_OBJ);
+				$publications->execute();
 
-				if(mysql_num_rows($result) > 0){
-					$publications = array();
-					while($publication = mysql_fetch_object($result))
-						$publications[] = $publication->pub_id;
-
-					bibliographie_publications_sort($publications, 'year');
-
-					bibliographie_publications_print_list($publications, '', null, false);
-				}
+				if($publications->rowCount() > 0){
+					$publicationsArray = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
+					bibliographie_publications_print_list($publicationsArray, '', null, false);
+				}else
+					echo '<p class="success">No publications without a tag assignment were found.';
 			break;
 
 			case 'topics_loosenedSubgraphs':
