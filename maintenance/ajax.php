@@ -37,6 +37,44 @@ ORDER BY
 				}else
 					echo '<p class="success">No authors with charset artifacts.</p>';
 			break;
+			
+			case 'authors_withoutPublications':
+				$authorIDs = array();
+				$relationIDs = array();
+				
+				$authors = $db->prepare('SELECT `author_id` FROM `a2authors`');
+				$authors->setFetchMode(PDO::FETCH_OBJ);
+				$authors->execute();
+				
+				if($authors->rowCount() > 0)
+					$authorIDs = $authors->fetchAll(PDO::FETCH_COLUMN, 0);
+					
+				$relations = $db->prepare("SELECT `author_id` FROM `a2publicationauthorlink` GROUP BY `author_id`");
+				$relations->setFetchMode(PDO::FETCH_OBJ);
+				$relations->execute();
+				
+				if($relations->rowCount() > 0)
+					$relationIDs = $relations->fetchAll(PDO::FETCH_COLUMN, 0);
+				
+				$authorsWithoutPublications = array_diff($authorIDs, $relationIDs);
+				
+				if(count($authorsWithoutPublications) == 0){
+					echo '<p class="failure">Found <strong>'.count($authorsWithoutPublications).' authors without publications.</strong>';
+					echo '<table class="dataContainer">';
+					echo '<tr>';
+					echo '<th style="width: 5%"></th>';
+					echo '<th style="width: 95%">Name</th>';
+					echo '</tr>';
+					foreach($authorsWithoutPublications as $author_id){
+						echo '<tr>';
+						echo '<td>'.bibliographie_icon_get('author_delete').'</td>';
+						echo '<td>'.bibliographie_authors_parse_name($author_id, array('linkProfile' => true).'</td>';
+						echo '</tr>';
+					}
+					echo '</table>';
+				}else
+					echo '<p class="success">No authors without publications were found.</p>';
+			break;
 
 			case 'publications_withoutTopic':
 				$publicationsArray = array();
