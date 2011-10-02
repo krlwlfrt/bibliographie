@@ -9,7 +9,8 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 
 $bibliographie_consistency_checks = array (
 	'authors' => array (
-		'charsetArtifacts' => 'Authors with charset artifacts'
+		'charsetArtifacts' => 'Authors with charset artifacts',
+		'withoutPublications' => 'Authors without publications'
 	),
 
 	'publications' => array (
