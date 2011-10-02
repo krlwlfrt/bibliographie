@@ -40,7 +40,7 @@ switch($_GET['task']){
 				$authorIDs = array();
 				$relationIDs = array();
 				
-				$authors = $db->prepare('SELECT `author_id` FROM `a2authors`');
+				$authors = $db->prepare('SELECT `author_id` FROM `a2author`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);
 				$authors->execute();
 				
