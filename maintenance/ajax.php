@@ -56,7 +56,7 @@ switch($_GET['task']){
 				
 				$authorsWithoutPublications = array_values(array_diff($authorIDs, $relationIDs));
 				
-				if(count($authorsWithoutPublications) == 0){
+				if(count($authorsWithoutPublications) > 0){
 					echo '<p class="failure">Found <strong>'.count($authorsWithoutPublications).' authors without publications.</strong>';
 					echo '<table class="dataContainer">';
 					echo '<tr>';
