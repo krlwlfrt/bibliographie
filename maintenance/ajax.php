@@ -66,7 +66,7 @@ switch($_GET['task']){
 					foreach($authorsWithoutPublications as $author_id){
 						echo '<tr>';
 						echo '<td>'.bibliographie_icon_get('author_delete').'</td>';
-						echo '<td>'.bibliographie_authors_parse_name($author_id, array('linkProfile' => true).'</td>';
+						echo '<td>'.bibliographie_authors_parse_name($author_id, array('linkProfile' => true)).'</td>';
 						echo '</tr>';
 					}
 					echo '</table>';
