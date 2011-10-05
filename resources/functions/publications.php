@@ -987,3 +987,17 @@ function bibliographie_publications_cache_list (array $publications) {
 function bibliographie_publications_sort (array $publications, $orderBy) {
 	return $publications;
 }
+
+function bibliographie_publications_parse_title ($pub_id, array $options = array()) {
+	$publication = bibliographie_publications_get_data($pub_id);
+	$return = false;
+
+	if(is_object($publication)){
+		$return = htmlspecialchars($publication->title);
+
+		if($options['linkProfile'] == true)
+			$return = '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&amp;pub_id='.((int) $publication->pub_id).'">'.$return.'</a>';
+	}
+
+	return $return;
+}

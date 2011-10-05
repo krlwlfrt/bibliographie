@@ -55,7 +55,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 	break;
 
 	case 'lockedTopics':
-		$title = 'Locked topics';
+		$bibliographie_title = 'Locked topics';
 		bibliographie_history_append_step('maintenance', 'Locked topics');
 ?>
 
@@ -142,7 +142,7 @@ $(function () {
 	case 'parseLog':
 	default:
 		bibliographie_history_append_step('maintenance', 'Parse log');
-		$title = 'Parse log';
+		$bibliographie_title = 'Parse log';
 ?>
 
 <h3>Parse logs</h3>

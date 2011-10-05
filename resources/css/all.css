@@ -288,6 +288,20 @@
 		padding: 5px;
 	}
 
+	.bibliographie_note {
+		border: 1px solid #aaa;
+		margin: 10px 0;
+		padding: 5px;
+	}
+
+	.bibliographie_note_publication_link {
+		border-top: 1px solid #aaa;
+		font-size: 0.7em;
+		margin-top: 5px;
+		padding-top: 5px;
+		text-align: right;
+	}
+
 	.bibliographie_publication_bookmarked {
 		background: #ffd;
 		color: #000;

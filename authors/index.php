@@ -7,7 +7,7 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 
 <h2>Authors</h2>
 <?php
-$title = 'Authors';
+$bibliographie_title = 'Authors';
 switch($_GET['task']){
 	case 'authorEditor':
 		$done = false;

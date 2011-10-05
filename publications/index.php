@@ -202,7 +202,7 @@ $(function () {
 	break;
 
 	case 'publicationEditor':
-		$title = 'Publication editor';
+		$bibliographie_title = 'Publication editor';
 		$done = false;
 
 		$publication = null;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 	<head>
-		<title><?php echo strip_tags($title)?> | bibliographie</title>
+		<title><?php echo strip_tags($bibliographie_title)?> | bibliographie</title>
 
 		<!-- 3rd party libs -->
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/silk-icons.css" />
@@ -60,6 +60,7 @@
 				<br />
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/bookmarks/?task=showBookmarks"><?php echo bibliographie_icon_get('star')?> Bookmarks</a>
 				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/tags/?task=showCloud"><?php echo bibliographie_icon_get('tag-blue')?> Tags</a>
+				<a href="<?php echo BIBLIOGRAPHIE_ROOT_PATH?>/notes/?task=showNotes"><?php echo bibliographie_icon_get('note')?> Notes</a>
 
 
 				<h3>Add data</h3>

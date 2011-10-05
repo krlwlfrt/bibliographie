@@ -365,7 +365,7 @@ if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
 /**
  * Set standard title for header.
  */
-$title = 'bibliographie';
+$bibliographie_title = 'bibliographie';
 
 /**
  * Set error/exception handling

@@ -8,7 +8,7 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <?php
 switch($_GET['task']){
 	case 'topicEditor':
-		$title = 'Topic editor';
+		$bibliographie_title = 'Topic editor';
 ?>
 
 <h3>Topic editor</h3>
@@ -161,7 +161,7 @@ $(function () {
 			 * Set meta data for bibliographie output.
 			 */
 			bibliographie_history_append_step('topics', 'Showing topic '.$topic->name);
-			$title = 'Topic: '.htmlspecialchars($topic->name);
+			$bibliographie_title = 'Topic: '.htmlspecialchars($topic->name);
 
 			/**
 			 * Check locked topics.
@@ -251,7 +251,7 @@ $(function () {
 			}
 ?>
 
-<h3>Publications assigned to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></a><?php echo $title?></h3>
+<h3>Publications assigned to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></a><?php echo $bibliographie_title?></h3>
 <?php
 			bibliographie_publications_print_list(bibliographie_topics_get_publications($topic->topic_id, ((bool) $_GET['includeSubtopics'])), BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics, $_GET['bookmarkBatch']);
 		}
@@ -264,11 +264,11 @@ $(function () {
 		$bibliographie_topics_graph_depth = (int) 1;
 
 		$top = (int) 1;
-		$title = 'Topic graph';
+		$bibliographie_title = 'Topic graph';
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if(is_object($topic)){
 			$top = (int) $topic->topic_id;
-			$title = 'Topic subgraph for <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$topic->topic_id.'">'.htmlspecialchars($topic->name).'</a></em>';
+			$bibliographie_title = 'Topic subgraph for <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.$topic->topic_id.'">'.htmlspecialchars($topic->name).'</a></em>';
 		}
 
 ?>
@@ -279,7 +279,7 @@ $(function () {
 	all subtopics
 </span>
 
-<h3><?php echo $title?></h3>
+<h3><?php echo $bibliographie_title?></h3>
 
 <div class="bibliographie_topics_topic_graph"><?php echo bibliographie_topics_traverse($top)?></div>
 <p class="notice">Depth of graph: <?php echo $bibliographie_topics_graph_depth?></p>

@@ -15,7 +15,7 @@ $bibliographie_search_categories = array(
 
 <h2>Search</h2>
 <?php
-$title = 'Search';
+$bibliographie_title = 'Search';
 switch($_GET['task']){
 	case 'authorSets':
 ?>
@@ -105,10 +105,10 @@ $(function () {
 			$highlightTerms = json_encode(array_values($searchTerms));
 
 			if(in_array($_GET['category'], $bibliographie_search_categories)){
-				$title = 'Simple search '.htmlspecialchars($_GET['category']);
+				$bibliographie_title = 'Simple search '.htmlspecialchars($_GET['category']);
 ?>
 
-<h3 id="bibliographie_search_<?php echo htmlspecialchars($_GET['category'])?>_title"><?php echo $title?></h3>
+<h3 id="bibliographie_search_<?php echo htmlspecialchars($_GET['category'])?>_title"><?php echo $bibliographie_title?></h3>
 <div id="bibliographie_search_<?php echo htmlspecialchars($_GET['category'])?>_container"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/images/loading.gif" alt="loading" /> searching...</div>
 
 <script type="text/javascript">
@@ -120,7 +120,7 @@ $(function () {
 </script>
 <?php
 			}else{
-				$title = 'Simple search';
+				$bibliographie_title = 'Simple search';
 
 				$text = (string) '';
 				echo '<ul style="display: none">'.PHP_EOL;
