@@ -24,10 +24,10 @@ switch($_GET['task']){
 
 					foreach($authorIDs as $author_id){
 						$author = bibliographie_authors_get_data($author_id);
-						
+
 						echo '<tr>';
 						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_icon_get('user-edit').'</a></td>';
-						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_authors_parse_name($author->author_id, array('linkProfile' => true)).'</a></td>';
+						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true)).'</a></td>';
 						echo '</tr>';
 					}
 
@@ -35,29 +35,29 @@ switch($_GET['task']){
 				}else
 					echo '<p class="success">No authors with charset artifacts.</p>';
 			break;
-			
+
 			case 'authors_withoutPublications':
 				$authorIDs = array();
 				$relationIDs = array();
-				
+
 				$authors = $db->prepare('SELECT `author_id` FROM `a2author`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);
 				$authors->execute();
-				
+
 				if($authors->rowCount() > 0)
 					$authorIDs = $authors->fetchAll(PDO::FETCH_COLUMN, 0);
-					
+
 				$relations = $db->prepare("SELECT `author_id` FROM `a2publicationauthorlink` GROUP BY `author_id`");
 				$relations->setFetchMode(PDO::FETCH_OBJ);
 				$relations->execute();
-				
+
 				if($relations->rowCount() > 0)
 					$relationIDs = $relations->fetchAll(PDO::FETCH_COLUMN, 0);
-				
+
 				$authorsWithoutPublications = array_values(array_diff($authorIDs, $relationIDs));
-				
+
 				if(count($authorsWithoutPublications) > 0){
-					echo '<p class="failure">Found <strong>'.count($authorsWithoutPublications).' authors without publications.</strong>';
+					echo '<p class="error">Found <strong>'.count($authorsWithoutPublications).' authors without publications.</strong>';
 					echo '<table class="dataContainer">';
 					echo '<tr>';
 					echo '<th style="width: 5%"></th>';
@@ -65,8 +65,8 @@ switch($_GET['task']){
 					echo '</tr>';
 					foreach($authorsWithoutPublications as $author_id){
 						echo '<tr>';
-						echo '<td>'.bibliographie_icon_get('author_delete').'</td>';
-						echo '<td>'.bibliographie_authors_parse_name($author_id, array('linkProfile' => true)).'</td>';
+						echo '<td>'.bibliographie_icon_get('user-delete').'</td>';
+						echo '<td>'.bibliographie_authors_parse_data($author_id, array('linkProfile' => true)).'</td>';
 						echo '</tr>';
 					}
 					echo '</table>';
@@ -89,14 +89,14 @@ switch($_GET['task']){
 				$publicationLinks->execute();
 				if($publicationLinks->rowCount() > 0)
 					$publicationLinksArray = $publicationLinks->fetchAll(PDO::FETCH_COLUMN, 0);
-					
+
 				$publicationsList = array_values(array_diff($publicationsArray, $publicationLinksArray));
 				bibliographie_publications_print_list($publicationsList, '', null, false);
 			break;
 
 			case 'publications_withoutTag':
 				$publicationsArray = array();
-				
+
 				$publications = $db->prepare('SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)');
 				$publications->setFetchMode(PDO::FETCH_OBJ);
 				$publications->execute();
@@ -109,36 +109,53 @@ switch($_GET['task']){
 			break;
 
 			case 'topics_loosenedSubgraphs':
-				$result = mysql_query("SELECT `topic_id`, `name` FROM `a2topics` WHERE `topic_id` NOT IN (SELECT `source_topic_id` AS `topic_id` FROM `a2topictopiclink`) AND `topic_id` != 1 ORDER BY `name`");
+				$topicsArray = array();
+				$topicLinksArray = array();
 
-				if(mysql_num_rows($result) > 0){
-					echo '<strong>Found '.mysql_num_rows($result).' topics without parent topic!</strong><ol>';
-					while($topic = mysql_fetch_object($result))
-						echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic->topic_id).'">'.htmlspecialchars($topic->name).'</li>';
-					echo '</ol>';
+				$topics = $db->prepare('SELECT `topic_id` FROM `a2topics` WHERE `topic_id` != 1');
+				$topics->execute();
+				if($topics->rowCount() > 0)
+					$topicsArray = $topics->fetchAll(PDO::FETCH_COLUMN, 0);
+
+				$topicLinks = $db->prepare('SELECT `source_topic_id` FROM `a2topictopiclink`');
+				$topicLinks->execute();
+				if($topicLinks->rowCount() > 0)
+					$topicLinksArray = $topicLinks->fetchAll(PDO::FETCH_COLUMN, 0);
+
+				$topics = array_diff($topicsArray, $topicLinksArray);
+
+				if(count($topics) > 0){
+					echo '<p class="error">Found '.count($topics).' topics without parent topic!</p>';
+					echo '<table class="dataContainer"><tr><th style="width: 5%"> </th><th>Name</th></tr>';
+
+					foreach($topics as $topic)
+						echo '<tr><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.((int) $topic).'">'.bibliographie_icon_get('folder-edit').'</td><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic).'">'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</td></tr>';
+					echo '</table>';
 				}else
-					echo '<p class="success">No loosened graphs!</p>';
+					echo '<p class="success">Did not find loosened graphs!</p>';
 			break;
 
 			case 'topics_doubledNames':
-				$doubledNames = $db->prepare("SELECT * FROM (
+				$doubledTopicNames = $db->prepare("SELECT * FROM (
 	SELECT *, COUNT(*) AS `count` FROM `a2topics` GROUP BY `name`
 ) counts
 WHERE
 	`count` > 1
 ORDER BY
 	`name`");
-				$doubledNames->execute();
+				$doubledTopicNames->execute();
 
-				if($doubledNames->rowCount() > 0){
-					$doubledNames->setFetchMode(PDO::FETCH_OBJ);
-					echo '<table class="dataContainer">';
-					echo '<tr><th>Topic name</th> <th>Count</th></tr>';
+				if($doubledTopicNames->rowCount() > 0){
+					$doubledTopicNames->setFetchMode(PDO::FETCH_OBJ);
+					$topics = $doubledTopicNames->fetchAll();
 
-					while($topic = $doubledNames->fetch())
+					echo '<p class="error">Found '.$doubledTopicNames->rowCount().' topics with doubled names.</p>';
+					echo '<table class="dataContainer"><tr><th>Topic name</th> <th>Count</th></tr>';
+					foreach($topics as $topic)
 						echo '<tr><td>'.$topic->name.'</td><td>'.$topic->count.'</td></tr>';
 					echo '</table>';
-				}
+				}else
+					echo '<p class="success">Found no doubled topic names.</p>';
 			break;
 		}
 	break;

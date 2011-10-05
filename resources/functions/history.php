@@ -2,7 +2,8 @@
 $bibliographie_history_icons = array (
 	'topics' => 'folder',
 	'authors' => 'user',
-	'generic' => 'error'
+	'generic' => 'error',
+	'maintenance' => 'wrench'
 );
 
 function bibliographie_history_parse () {
