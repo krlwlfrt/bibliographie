@@ -3,6 +3,12 @@ require dirname(__FILE__).'/resources/functions/general.php';
 
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
 
+/**
+ * If root path isnt defined by program file then define it now with the default value.
+ */
+if(!defined('BIBLIOGRAPHIE_ROOT_PATH'))
+	define('BIBLIOGRAPHIE_ROOT_PATH', dirname(__FILE__));
+
 ob_start();
 session_start();
 
@@ -333,12 +339,6 @@ if(!is_dir(dirname(__FILE__).'/cache'))
 	mkdir(dirname(__FILE__).'/cache', 0755);
 if(!is_dir(dirname(__FILE__).'/logs'))
 	mkdir(dirname(__FILE__).'/logs', 0755);
-
-/**
- * If requested set the caching to false.
- */
-if($_GET['ignoreCache'] == 1)
-	define('BIBLIOGRAPHIE_CACHING', false);
 
 /**
  * If requested purge the cache.

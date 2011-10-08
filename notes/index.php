@@ -1,11 +1,8 @@
 <?php
 /* @var $db PDO */
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
-
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
+require dirname(__FILE__).'/../init.php';
 
 $bibliographie_title = 'Notes';
-
 ?>
 
 <h2>Notes</h2>
@@ -15,6 +12,7 @@ switch($_GET['task']){
 ?>
 
 <h3>List of notes</h3>
+<p class="notice">This is a list of your notes sorted by currency.</p>
 <?php
 		bibliographie_history_append_step('notes', 'List of notes');
 		$bibliographie_title = 'List of notes';
@@ -41,4 +39,4 @@ switch($_GET['task']){
 	break;
 }
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/close.php';
+require dirname(__FILE__).'/../close.php';

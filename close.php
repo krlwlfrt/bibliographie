@@ -1,11 +1,12 @@
 <?php
+/**
+ * Get the document from output buffer.
+ */
 $document = ob_get_clean();
 
-$replacements = array (
-	'~\<(a)(\s)(href)\=\"([^"]*)\"~',
-	'~\<(form)(\s)(action)\=\"([^"]*)\"~'
-);
-
+/**
+ * If document shall be output with html body then do it.
+ */
 if(BIBLIOGRAPHIE_OUTPUT_BODY){
 	ob_start();
 
@@ -16,7 +17,20 @@ if(BIBLIOGRAPHIE_OUTPUT_BODY){
 	$document = ob_get_clean();
 }
 
-echo preg_replace_callback($replacements, 'bibliographie_history_rewrite_links', $document);
+/**
+ * Attach the from=history_identifier to every link in the document and output the document.
+ */
+echo preg_replace_callback(
+	array (
+		'~\<(a)(\s)(href)\=\"([^"]*)\"~',
+		'~\<(form)(\s)(action)\=\"([^"]*)\"~'
+	),
+	'bibliographie_history_rewrite_links',
+	$document
+);
 
+/**
+ * Close the mysql connection(s).
+ */
 mysql_close();
 $db = null;

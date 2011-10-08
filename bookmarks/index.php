@@ -1,14 +1,13 @@
 <?php
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
-
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
-
+require dirname(__FILE__).'/../init.php';
+$bibliographie_title = 'Bookmarks';
 ?>
 
 <h2>Bookmarks</h2>
 <?php
 switch($_GET['task']){
 	case 'clearBookmarks':
+		bibliographie_history_append_step('bookmarks', 'Clearing bookmarks');
 ?>
 
 <h3>Clearing bookmarks</h3>
@@ -22,6 +21,7 @@ switch($_GET['task']){
 
 	case 'showBookmarks':
 		$bibliographie_title = 'List of my bookmarks';
+		bibliographie_history_append_step('bookmarks', 'Showing bookmarks');
 ?>
 
 <span style="float: right"><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/bookmarks/?task=clearBookmarks">Clear</a> all bookmarks</span>
@@ -35,8 +35,8 @@ switch($_GET['task']){
 <?php
 			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/?task=showBookmarks', $_GET['bookmarkBatch'], false);
 		}else
-			echo '<p class="error">You have not set any bookmarks!</p>';
+			echo '<p class="notice">You have not set any bookmarks!</p>';
 	break;
 }
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/close.php';
+require dirname(__FILE__).'/../close.php';

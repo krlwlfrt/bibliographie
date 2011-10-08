@@ -1,10 +1,11 @@
 <?php
 $bibliographie_history_icons = array (
-	'topics' => 'folder',
 	'authors' => 'user',
+	'bookmarks' => 'star',
 	'generic' => 'error',
 	'maintenance' => 'wrench',
-	'notes' => 'note'
+	'notes' => 'note',
+	'topics' => 'folder'
 );
 
 function bibliographie_history_parse () {

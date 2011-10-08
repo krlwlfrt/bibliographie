@@ -27,7 +27,9 @@ $bibliographie_search_queries_suffixes = array (
 	'n',
 	'er',
 	'ic',
-	'ication'
+	'ication',
+	'al',
+	'in'
 );
 
 $bibliographie_search_queries_umlaut_substitutes = array (

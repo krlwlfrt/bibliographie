@@ -266,6 +266,7 @@ require dirname(__FILE__).'/bookmarks.php';
 require dirname(__FILE__).'/charmap.php';
 require dirname(__FILE__).'/history.php';
 require dirname(__FILE__).'/maintenance.php';
+require dirname(__FILE__).'/notes.php';
 require dirname(__FILE__).'/publications.php';
 require dirname(__FILE__).'/search.php';
 require dirname(__FILE__).'/tags.php';
