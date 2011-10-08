@@ -12,7 +12,7 @@ switch($_GET['task']){
 	case 'authorEditor':
 		$done = false;
 
-		$author = bibliographie_authors_get_data($_GET['author_id'], 'assoc');
+		$author = (array) bibliographie_authors_get_data($_GET['author_id']);
 
 		if(is_array($author))
 			bibliographie_history_append_step('authors', 'Editing author '.bibliographie_authors_parse_data($author['author_id']));

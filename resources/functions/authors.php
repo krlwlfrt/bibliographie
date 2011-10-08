@@ -57,7 +57,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 }
 
 function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surname, $jr, $email, $url, $institute) {
-	$dataBefore = bibliographie_authors_get_data($author_id, 'assoc');
+	$dataBefore = (array) bibliographie_authors_get_data($author_id);
 	if(is_array($dataBefore)){
 		if($firstname != $dataBefore['firstname']
 			or $von != $dataBefore['von']
@@ -105,37 +105,55 @@ LIMIT 1");
 
 /**
  *
+ * @global PDO $db
+ * @staticvar string $author
  * @param type $author_id
  * @param type $type
  * @return type
  */
-function bibliographie_authors_get_data ($author_id, $type = 'object') {
+function bibliographie_authors_get_data ($author_id) {
+	global $db;
+	static $author = null;
+
+	$return = false;
+
 	if(is_numeric($author_id)){
-		$assoc = false;
-		if($type == 'assoc')
-			$assoc = true;
+		$author_id = (int) $author_id;
 
-		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'))
-			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json'), $assoc);
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.$author_id.'_data.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.$author_id.'_data.json'));
 
-		$author = mysql_query("SELECT `author_id`, `firstname`, `von`, `surname`, `jr`, `email`, `url`, `institute` FROM `a2author` WHERE `author_id` = ".((int) $author_id));
-		if(mysql_num_rows($author) == 1){
-			if($assoc)
-				$author = mysql_fetch_assoc($author);
-			else
-				$author = mysql_fetch_object($author);
+		if($author === null){
+			$author = $db->prepare("SELECT
+	`author_id`,
+	`firstname`,
+	`von`,
+	`surname`,
+	`jr`,
+	`email`,
+	`url`,
+	`institute`
+FROM
+	`a2author`
+WHERE
+	`author_id` = :author_id");
+			$author->setFetchMode(PDO::FETCH_OBJ);
+		}
 
-			if(BIBLIOGRAPHIE_CACHING){
-				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.((int) $author_id).'_data.json', 'w+');
-				fwrite($cacheFile, json_encode($author));
-				fclose($cacheFile);
-			}
+		$author->bindParam('author_id', $author_id);
+		$author->execute();
 
-			return $author;
+		if($author->rowCount() == 1)
+			$return = $author->fetch();
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.$author_id.'_data.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
 		}
 	}
 
-	return false;
+	return $return;
 }
 
 /**
