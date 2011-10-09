@@ -37,21 +37,21 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 	:institute
 )');
 
-	$author->bindParam('author_id', $author_id);
-	$author->bindParam('firstname', $firstname);
-	$author->bindParam('von', $von);
-	$author->bindParam('surname', $surname);
-	$author->bindParam('jr', $jr);
-	$author->bindParam('email', $email);
-	$author->bindParam('url', $url);
-	$author->bindParam('institute', $institute);
-
-	$return = $author->execute();
+	$return = $author->execute(array(
+		'author_id' => $author->author_id,
+		'firstname' => $firstname,
+		'von' => $von,
+		'surname' => $surname,
+		'jr' => $jr,
+		'email' => $email,
+		'url' => $url,
+		'institute' => $institute
+	));
 
 	if($author_id === null)
 		$author_id = DB::getInstance()->lastInsertId();
 
-	if($return){
+	if($return and !empty($author_id)){
 		$return = array(
 			'author_id' => $author_id,
 			'firstname' => $firstname,
@@ -62,6 +62,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 			'url' => $url,
 			'institute' => $institute
 		);
+
 		bibliographie_log('authors', 'createAuthor', json_encode($return));
 	}
 
@@ -82,49 +83,62 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
  */
 function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surname, $jr, $email, $url, $institute) {
 	$dataBefore = (array) bibliographie_authors_get_data($author_id);
+	$return = false;
+
 	if(is_array($dataBefore)){
-		if($firstname != $dataBefore['firstname']
-			or $von != $dataBefore['von']
-			or $surname != $dataBefore['surname']
-			or $jr != $dataBefore['jr']
-			or $email != $dataBefore['email']
-			or $url != $dataBefore['url']
-			or $institute != $dataBefore['institute']){
+		$dataAfter = array (
+			'author_id' => $dataBefore['author_id'],
+			'firstname' => $firstname,
+			'von' => $von,
+			'surname' => $surname,
+			'jr' => $jr,
+			'email' => $email,
+			'url' => $url,
+			'institute' => $institute
+		);
 
-			mysql_query("UPDATE `a2author` SET
-	`firstname` = '".mysql_real_escape_string(stripslashes($firstname))."',
-	`von` = '".mysql_real_escape_string(stripslashes($von))."',
-	`surname` = '".mysql_real_escape_string(stripslashes($surname))."',
-	`jr` = '".mysql_real_escape_string(stripslashes($jr))."',
-	`email` = '".mysql_real_escape_string(stripslashes($email))."',
-	`url` = '".mysql_real_escape_string(stripslashes($url))."',
-	`institute` = '".mysql_real_escape_string(stripslashes($institute))."'
+		if($dataBefore != $dataAfter){
+			$updateAuthor = DB::getInstance()->prepare('UPDATE `a2author` SET
+	`firstname` = :firstname,
+	`von` = :von,
+	`surname` = :surname,
+	`jr` = :jr,
+	`email` = :email,
+	`url` = :url,
+	`institute` = :institute
 WHERE
-	`author_id` = ".((int) $dataBefore['author_id'])."
-LIMIT 1");
-		}
+	`author_id` = :author_id
+LIMIT 1');
 
-		$data = array(
-			'dataBefore' => $dataBefore,
-			'dataAfter' => array(
-				'author_id' => $dataBefore['author_id'],
+			$return = $updateAuthor->execute(array(
 				'firstname' => $firstname,
 				'von' => $von,
 				'surname' => $surname,
 				'jr' => $jr,
 				'email' => $email,
 				'url' => $url,
-				'institute' => $institute
-			)
-		);
+				'institute' => $institute,
+				'author_id' => (int) $dataBefore['author_id']
+			));
+		}else
+			$return = true;
 
-		if($data['dataBefore'] != $data['dataAfter']){
-			bibliographie_log('authors', 'editAuthor', json_encode($data));
-			bibliographie_purge_cache('author_'.((int) $dataBefore['author_id']));
+		if($return){
+			$data = array(
+				'dataBefore' => $dataBefore,
+				'dataAfter' => $dataAfter
+			);
+
+			if($data['dataBefore'] != $data['dataAfter']){
+				bibliographie_log('authors', 'editAuthor', json_encode($data));
+				bibliographie_purge_cache('author_'.((int) $dataBefore['author_id']));
+			}
+
+			$return = $data;
 		}
-
-		return $data;
 	}
+
+	return $return;
 }
 
 /**

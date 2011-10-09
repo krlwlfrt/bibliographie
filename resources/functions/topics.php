@@ -23,25 +23,26 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
 	:topic_id, :name, :description, :url
 )');
 
-	$topic->bindParam('topic_id', $topic_id);
-	$topic->bindParam('name', $name);
-	$topic->bindParam('description', $description);
-	$topic->bindParam('url', $url);
-
-	$topic->execute();
+	$return = $topic->execute(array(
+		'topic_id' => (int) $topic_id,
+		'name' => $name,
+		'description' => $description,
+		'url' => $url
+	));
 
 	if($topic_id === null)
 		$topic_id = DB::getInstance()->lastInsertId();
 
-	if(!empty($topic_id)){
+	if($return and !empty($topic_id)){
 		if(count($topics) > 0){
 			if($createRelations == null)
 				$createRelations = DB::getInstance()->prepare('INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (:topic_id, :parent_topic)');
 
 			foreach($topics as $parentTopic){
-				$createRelations->bindParam('topic_id', $topic_id);
-				$createRelations->bindParam('parent_topic', $parentTopic);
-				$createRelations->execute();
+				$createRelations->execute(array(
+					'topic_id' => (int) $topic_id,
+					'parent_topic' => (int) $parentTopic
+				));
 
 				bibliographie_purge_cache('topic_'.((int) $parentTopic).'_');
 			}
