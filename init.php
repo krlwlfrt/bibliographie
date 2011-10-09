@@ -28,11 +28,8 @@ if(@mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAP
 	if(@mysql_select_db(BIBLIOGRAPHIE_MYSQL_DATABASE))
 		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
 
-DB::getInstance();
-
 if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!');
-
 
 /**
  * Initialize UTF-8.
