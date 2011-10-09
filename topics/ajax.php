@@ -57,7 +57,7 @@ switch($_GET['task']){
 			if(is_numeric($_GET['topic_id']))
 				$topic_id = (int) $_GET['topic_id'];
 
-			$similarTitles = $db->prepare("SELECT * FROM (
+			$similarTitles = DB::getInstance()->prepare("SELECT * FROM (
 	SELECT `topic_id`, `name`, `description`, (`searchRelevancy` * 10 - (ABS(LENGTH(`name`) - LENGTH(:name) / 2))) AS `relevancy`  FROM (
 		SELECT `topic_id`, `name`, `description`, (MATCH(`name`, `description`) AGAINST (:name IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
 		FROM `a2topics`

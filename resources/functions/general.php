@@ -19,6 +19,30 @@ function csv2array ($csv, $type = null) {
 }
 
 /**
+ * Convert an array into a csv string.
+ * @param array $array
+ * @return string
+ */
+function array2csv (array $array) {
+	$return = (string) '';
+
+	if(count($array) > 0){
+		foreach($array as $value){
+			if(!empty($return))
+				$return .= ',';
+
+			if(!is_numeric($value) or mb_strpos($value, ',') !== false)
+				$return .= "'".str_replace("'", "\'", $value)."'";
+			else
+				$return .= $value;
+		}
+	}else
+		echo 'array is to short';
+
+	return $return;
+}
+
+/**
  * Check if a string is an url.
  * @param string $url String that shall be checked.
  * @return bool Wether the string was an URL or not.
@@ -273,3 +297,33 @@ require dirname(__FILE__).'/tags.php';
 require dirname(__FILE__).'/topics.php';
 
 require dirname(__FILE__).'/../lib/BibTex.php';
+
+class DB {
+	private
+		static $instance = null;
+
+	private function __construct () {}
+
+	/**
+	 *
+	 * @return PDO
+	 */
+	public static function getInstance () {
+		if(!self::$instance){
+			try {
+				self::$instance = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
+				self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			} catch (PDOException $e) {
+				bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database! '.$e->getMessage());
+			}
+		}
+
+		return self::$instance;
+	}
+
+	private function __clone () {}
+
+	public function close () {
+		self::$instance = null;
+	}
+}

@@ -33,4 +33,4 @@ echo preg_replace_callback(
  * Close the mysql connection(s).
  */
 mysql_close();
-$db = null;
+DB::close();

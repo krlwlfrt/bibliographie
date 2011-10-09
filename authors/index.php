@@ -12,10 +12,10 @@ switch($_GET['task']){
 	case 'authorEditor':
 		$done = false;
 
-		$author = (array) bibliographie_authors_get_data($_GET['author_id']);
+		$author = bibliographie_authors_get_data($_GET['author_id']);
 
-		if(is_array($author))
-			bibliographie_history_append_step('authors', 'Editing author '.bibliographie_authors_parse_data($author['author_id']));
+		if(is_object($author))
+			bibliographie_history_append_step('authors', 'Editing author '.bibliographie_authors_parse_data($author->author_id));
 		else
 			bibliographie_history_append_step('authors', 'Author editor');
 
@@ -32,19 +32,23 @@ switch($_GET['task']){
 				$errors[] = 'The mail address you filled is not valid.';
 
 			if(count($errors) == 0){
-				if(is_array($author)){
-					if(bibliographie_authors_edit_author($author['author_id'], $_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
+				if(is_object($author)){
+					$return = bibliographie_authors_edit_author($author->author_id, $_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute']);
+					if(is_array($return)){
 						echo '<p class="success">Author has been edited!</p>';
+						echo '<p>You can proceed by viewing the author\'s <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $return['dataAfter']['author_id']).'">profile</a> or going back to the <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor">editor</a>.</p>';
 						$done = true;
 					}else
-						echo '<p class="error">Author could not have been edited.</p>';
+						echo '<p class="error">Author could not be edited.</p>';
 
 				}else{
-					if(bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute'])){
+					$return = bibliographie_authors_create_author($_POST['firstname'], $_POST['von'], $_POST['surname'], $_POST['jr'], $_POST['email'], $_POST['url'], $_POST['institute']);
+					if(is_array($return)){
 						echo '<p class="success">Author has been created!</p>';
+						echo '<p>You can proceed by viewing the author\'s <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $return['author_id']).'">profile</a> or going back to the <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor">editor</a>.</p>';
 						$done = true;
 					}else
-						echo '<p class="error">Author could not have been created.</p>';
+						echo '<p class="error">Author could not be created.</p>';
 				}
 			}else
 				foreach($errors as $error)
@@ -57,8 +61,8 @@ switch($_GET['task']){
 <h3>Author editor</h3>
 <p class="notice">On this page you can create and edit authors! Just fill in the required fields and hit save!</p>
 <?php
-			if(is_array($author)){
-				$_POST = $author;
+			if(is_object($author)){
+				$_POST = (array) $author;
 ?>
 
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $_POST['author_id'])?>" method="post">
@@ -110,8 +114,8 @@ switch($_GET['task']){
 <script type="text/javascript">
 	/* <![CDATA[ */
 var author_id = <?php
-			if(is_array($author))
-				echo ((int) $author['author_id']);
+			if(is_object($author))
+				echo (int) $author->author_id;
 			else
 				echo 0;
 ?>;
@@ -139,6 +143,7 @@ $(function () {
 			bibliographie_history_append_step('authors', 'Showing author '.bibliographie_authors_parse_data($author->author_id));
 
 			$publications = array_unique(array_merge(bibliographie_authors_get_publications($author->author_id, 0), bibliographie_authors_get_publications($author->author_id, 0)));
+			bibliographie_authors_get_publications($author->author_id);
 			$tagsArray = array();
 			$topicsArray = array();
 ?>

@@ -1,9 +1,7 @@
 <?php
-/* @var $db PDO */
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
+require dirname(__FILE__).'/../init.php';
 
 $text = 'An error occurred!';
 $status = 'error';
@@ -11,7 +9,7 @@ switch($_GET['task']){
 	case 'consistencyChecks':
 		switch($_GET['consistencyCheckID']){
 			case 'authors_charsetArtifacts':
-				$authors = $db->prepare('SELECT `author_id` FROM `a2author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP "^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$" ORDER BY `surname`, `firstname`');
+				$authors = DB::getInstance()->prepare('SELECT `author_id` FROM `a2author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP "^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$" ORDER BY `surname`, `firstname`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);
 				$authors->execute();
 
@@ -40,14 +38,14 @@ switch($_GET['task']){
 				$authorIDs = array();
 				$relationIDs = array();
 
-				$authors = $db->prepare('SELECT `author_id` FROM `a2author`');
+				$authors = DB::getInstance()->prepare('SELECT `author_id` FROM `a2author`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);
 				$authors->execute();
 
 				if($authors->rowCount() > 0)
 					$authorIDs = $authors->fetchAll(PDO::FETCH_COLUMN, 0);
 
-				$relations = $db->prepare("SELECT `author_id` FROM `a2publicationauthorlink` GROUP BY `author_id`");
+				$relations = DB::getInstance()->prepare("SELECT `author_id` FROM `a2publicationauthorlink` GROUP BY `author_id`");
 				$relations->setFetchMode(PDO::FETCH_OBJ);
 				$relations->execute();
 
@@ -78,13 +76,13 @@ switch($_GET['task']){
 				$publicationsArray = array();
 				$publicationLinksArray = array();
 
-				$publications = $db->prepare("SELECT `pub_id` FROM `a2publication` GROUP BY `pub_id`");
+				$publications = DB::getInstance()->prepare("SELECT `pub_id` FROM `a2publication` GROUP BY `pub_id`");
 				$publications->setFetchMode(PDO::FETCH_OBJ);
 				$publications->execute();
 				if($publications->rowCount() > 0)
 					$publicationsArray = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
 
-				$publicationLinks = $db->prepare("SELECT `pub_id` FROM `a2topicpublicationlink` GROUP BY `pub_id`");
+				$publicationLinks = DB::getInstance()->prepare("SELECT `pub_id` FROM `a2topicpublicationlink` GROUP BY `pub_id`");
 				$publicationLinks->setFetchMode(PDO::FETCH_OBJ);
 				$publicationLinks->execute();
 				if($publicationLinks->rowCount() > 0)
@@ -97,7 +95,7 @@ switch($_GET['task']){
 			case 'publications_withoutTag':
 				$publicationsArray = array();
 
-				$publications = $db->prepare('SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)');
+				$publications = DB::getInstance()->prepare('SELECT `pub_id` FROM `a2publication` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `a2publicationtaglink`)');
 				$publications->setFetchMode(PDO::FETCH_OBJ);
 				$publications->execute();
 
@@ -112,12 +110,12 @@ switch($_GET['task']){
 				$topicsArray = array();
 				$topicLinksArray = array();
 
-				$topics = $db->prepare('SELECT `topic_id` FROM `a2topics` WHERE `topic_id` != 1');
+				$topics = DB::getInstance()->prepare('SELECT `topic_id` FROM `a2topics` WHERE `topic_id` != 1');
 				$topics->execute();
 				if($topics->rowCount() > 0)
 					$topicsArray = $topics->fetchAll(PDO::FETCH_COLUMN, 0);
 
-				$topicLinks = $db->prepare('SELECT `source_topic_id` FROM `a2topictopiclink`');
+				$topicLinks = DB::getInstance()->prepare('SELECT `source_topic_id` FROM `a2topictopiclink`');
 				$topicLinks->execute();
 				if($topicLinks->rowCount() > 0)
 					$topicLinksArray = $topicLinks->fetchAll(PDO::FETCH_COLUMN, 0);
@@ -136,7 +134,7 @@ switch($_GET['task']){
 			break;
 
 			case 'topics_doubledNames':
-				$doubledTopicNames = $db->prepare("SELECT * FROM (
+				$doubledTopicNames = DB::getInstance()->prepare("SELECT * FROM (
 	SELECT *, COUNT(*) AS `count` FROM `a2topics` GROUP BY `name`
 ) counts
 WHERE

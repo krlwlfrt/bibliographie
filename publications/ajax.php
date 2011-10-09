@@ -1,6 +1,4 @@
 <?php
-/* @var $db PDO */
-
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
@@ -388,7 +386,7 @@ switch($_GET['task']){
 			if(is_numeric($_GET['pub_id']))
 				$pub_id = (int) $_GET['pub_id'];
 
-			$similarTitles = $db->prepare("SELECT * FROM (
+			$similarTitles = DB::getInstance()->prepare("SELECT * FROM (
 	SELECT `pub_id`, `title`, (`searchRelevancy` * 10 - (ABS(LENGTH(`title`) - LENGTH(:title) / 2))) AS `relevancy`  FROM (
 		SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST (:title IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
 		FROM `a2publication`

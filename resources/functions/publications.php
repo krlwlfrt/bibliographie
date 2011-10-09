@@ -275,13 +275,11 @@ $bibliographie_publication_data = array (
 
 /**
  * Get the data of a publication.
- * @global PDO $db
  * @param int $publication_id
  * @param string $type
  * @return mixed
  */
 function bibliographie_publications_get_data ($publication_id, $type = 'object') {
-	global $db;
 	static $publication = null;
 
 	$return = false;
@@ -296,7 +294,7 @@ function bibliographie_publications_get_data ($publication_id, $type = 'object')
 		}
 
 		if($publication == null)
-			$publication = $db->prepare("SELECT * FROM `a2publication` WHERE `pub_id` = :pub_id");
+			$publication = DB::getInstance()->prepare("SELECT * FROM `a2publication` WHERE `pub_id` = :pub_id");
 
 		$publication->bindParam('pub_id', $publication_id);
 		$publication->execute();
@@ -328,7 +326,6 @@ function bibliographie_publications_get_data ($publication_id, $type = 'object')
  * @return string
  */
 function bibliographie_publications_parse_data ($publication_id, $style = 'standard', array $options = array()){
-	global $db;
 	static $parserFiles = array(), $parserSettings = array();
 
 	$publication = (array) bibliographie_publications_get_data($publication_id);
@@ -547,7 +544,6 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 
 /**
  *
- * @global PDO $db
  * @staticvar string $persons
  * @param type $publication_id
  * @param string $type
@@ -555,7 +551,6 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
  * @return type
  */
 function bibliographie_publications_get_persons ($publication_id, $is_editor = 'authors', $order = 'rank') {
-	global $db;
 	static $persons = null;
 
 	$publication = bibliographie_publications_get_data($publication_id);
@@ -593,7 +588,7 @@ function bibliographie_publications_get_persons ($publication_id, $is_editor = '
 			$_is_editor = 'Y';
 
 		if($persons === null)
-			$persons = $db->prepare("SELECT data.`author_id` FROM
+			$persons = DB::getInstance()->prepare("SELECT data.`author_id` FROM
 		`a2publicationauthorlink` link,
 		`a2author` data
 	WHERE
@@ -642,13 +637,11 @@ function bibliographie_publications_get_editors ($publication_id, $order = 'rank
 
 /**
  *
- * @global PDO $db
  * @staticvar string $tags
  * @param type $publication_id
  * @return type
  */
 function bibliographie_publications_get_tags ($publication_id) {
-	global $db;
 	static $tags = null;
 
 	$publication = bibliographie_publications_get_data($publication_id);
@@ -661,7 +654,7 @@ function bibliographie_publications_get_tags ($publication_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication->pub_id).'_tags.json'));
 
 		if($tags === null)
-			$tags = $db->prepare("SELECT `tag_id` FROM `a2publicationtaglink` WHERE `pub_id` = :pub_id");
+			$tags = DB::getInstance()->prepare("SELECT `tag_id` FROM `a2publicationtaglink` WHERE `pub_id` = :pub_id");
 
 		$tags->bindParam('pub_id', $publication->pub_id);
 		$tags->execute();
@@ -685,7 +678,6 @@ function bibliographie_publications_get_tags ($publication_id) {
  * @return type
  */
 function bibliographie_publications_get_topics ($publication_id) {
-	global $db;
 	static $topics = null;
 
 	$publication = bibliographie_publications_get_data($publication_id);
@@ -698,7 +690,7 @@ function bibliographie_publications_get_topics ($publication_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication->pub_id).'_topics.json'));
 
 		if($topics === null)
-			$topics = $db->prepare("SELECT `topic_id` FROM `a2topicpublicationlink` WHERE `pub_id` = :pub_id");
+			$topics = DB::getInstance()->prepare("SELECT `topic_id` FROM `a2topicpublicationlink` WHERE `pub_id` = :pub_id");
 		$topics->bindParam('pub_id', $publication->pub_id);
 		$topics->execute();
 

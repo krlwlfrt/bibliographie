@@ -77,12 +77,10 @@ function bibliographie_tags_get_data ($tag_id, $type = 'object') {
 
 /**
  * Get the publications that are assigned to a tag.
- * @global PDO $db
  * @param int $tag_id
  * @return mixed Array on success, false on error.
  */
 function bibliographie_tags_get_publications ($tag_id) {
-	global $db;
 	static $publications = null;
 
 	$tag = bibliographie_tags_get_data($tag_id);
@@ -96,7 +94,7 @@ function bibliographie_tags_get_publications ($tag_id) {
 		$return = array();
 
 		if($publications === null){
-			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
+			$publications = DB::getInstance()->prepare("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
 	`a2publication` publications
 WHERE
@@ -125,7 +123,6 @@ ORDER BY
 }
 
 function bibliographie_tags_get_publications_with_author ($tag_id, $author_id) {
-	global $db;
 	static $publications = null;
 
 	$tag = bibliographie_tags_get_data($tag_id);
@@ -140,7 +137,7 @@ function bibliographie_tags_get_publications_with_author ($tag_id, $author_id) {
 		$return = array();
 
 		if($publications === null){
-			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
+			$publications = DB::getInstance()->prepare("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
 	`a2publication` publications,
 	`a2publicationauthorlink` authors
@@ -173,7 +170,6 @@ ORDER BY
 }
 
 function bibliographie_tags_get_publications_with_topic ($tag_id, $topic_id) {
-	global $db;
 	static $publications = null;
 
 	$tag = bibliographie_tags_get_data($tag_id);
@@ -188,7 +184,7 @@ function bibliographie_tags_get_publications_with_topic ($tag_id, $topic_id) {
 		$return = array();
 
 		if($publications === null){
-			$publications = $db->prepare("SELECT publications.`pub_id`, publications.`year` FROM
+			$publications = DB::getInstance()->prepare("SELECT publications.`pub_id`, publications.`year` FROM
 	`a2publicationtaglink` relations,
 	`a2publication` publications,
 	`a2topicpublicationlink` topics
