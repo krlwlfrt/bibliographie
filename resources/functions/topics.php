@@ -71,91 +71,125 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
  * @param array $topics
  */
 function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, array $topics) {
-	$dataBefore = bibliographie_topics_get_data($topic_id, 'assoc');
+	$dataBefore = (array) bibliographie_topics_get_data($topic_id);
 
 	if(is_array($dataBefore)){
-		/**
-		 * Get subtopics recursively and direct parent topics.
-		 */
-		$subTopics = bibliographie_topics_get_subtopics($topic_id, true);
-		$subTopics[] = $topic_id;
+		try {
+			DB::getInstance()->beginTransaction();
+			/**
+			 * Get subtopics recursively and direct parent topics.
+			 */
+			$subTopics = bibliographie_topics_get_subtopics($dataBefore['topic_id'], true);
+			$subTopics[] = $dataBefore['topic_id'];
 
-		$dataBefore['topics'] = bibliographie_topics_get_parent_topics($topic_id);
+			$dataBefore['topics'] = bibliographie_topics_get_parent_topics($dataBefore['topic_id']);
 
-		/**
-		 * Sort the topics array to avoid redundant updating.
-		 */
-		natsort($topics);
-		natsort($dataBefore['topics']);
-		$topics = array_values($topics);
-		$dataBefore['topics'] = array_values($dataBefore['topics']);
+			/**
+			 * Sort the topics array to avoid redundant updating.
+			 */
+			natsort($topics);
+			natsort($dataBefore['topics']);
+			$topics = array_values($topics);
+			$dataBefore['topics'] = array_values($dataBefore['topics']);
 
-		/**
-		 * Check for potential circles... Exclude those topics that would produce a circle from the list of parent topics.
-		 */
-		$safeTopics = array_diff($topics, $subTopics);
-		if(count($safeTopics) != count($topics)){
-			echo '<p class="error">There was at least one parent topic that would have produced a circle. Those topics were left out!</p>';
-			echo '<strong>Those are the topics, that have been left out:</strong><ul>';
-			foreach(array_diff($topics, $safeTopics) as $topic)
-				echo '<li>'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</li>';
-			echo '</ul>';
-		}
-
-		/**
-		 * Delete the links to topics that are no longer in the list of parent topics.
-		 */
-		$deleteTopicLinks = array_diff($dataBefore['topics'], $safeTopics);
-		if(count($deleteTopicLinks) > 0){
-			foreach($deleteTopicLinks as $deleteTopicLink){
-				bibliographie_purge_cache('topic_'.$deleteTopicLink.'_');
-				mysql_query("DELETE FROM `a2topictopiclink` WHERE `source_topic_id` = ".((int) $topic_id)." AND `target_topic_id` = ".((int) $deleteTopicLink));
+			/**
+			 * Check for potential circles... Exclude those topics that would produce a circle from the list of parent topics.
+			 */
+			$safeTopics = array_diff($topics, $subTopics);
+			if(count($safeTopics) != count($topics)){
+				echo '<p class="error">There was at least one parent topic that would have produced a circle. Those topics were left out!</p>';
+				echo '<strong>Those are the topics, that have been left out:</strong><ul>';
+				foreach(array_diff($topics, $safeTopics) as $topic)
+					echo '<li>'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</li>';
+				echo '</ul>';
 			}
-		}
 
-		/**
-		 * Update the topic data itself if any change was made.
-		 */
-		if($name != $dataBefore['name'] or $description != $dataBefore['description'] or $url != $dataBefore['url']){
-			$return = mysql_query("UPDATE `a2topics` SET
-		`name`= '".mysql_real_escape_string(stripslashes($name))."',
-		`description` = '".mysql_real_escape_string(stripslashes($description))."',
-		`url` = '".mysql_real_escape_string(stripslashes($url))."'
-	WHERE
-		`topic_id` = ".((int) $topic_id)."
-	LIMIT 1");
-		}
+			/**
+			 * Delete the links to topics that are no longer in the list of parent topics.
+			 */
+			$deleteTopicLinks = array_diff($dataBefore['topics'], $safeTopics);
+			if(count($deleteTopicLinks) > 0){
+				$deleteLink = DB::getInstance()->prepare('DELETE FROM
+	`a2topictopiclink`
+WHERE
+	`source_topic_id` = :topic_id AND
+	`target_topic_id` = :deleteTopicLink
+LIMIT 1');
 
-		/**
-		 * Add links to topics that were not in the list of parent topics before.
-		 */
-		$addTopicLinks = array_diff($safeTopics, $dataBefore['topics']);
-		if(count($addTopicLinks) > 0){
-			foreach($safeTopics as $addTopic){
-				if(!in_array($addTopic, $dataBefore['topics'])){
-					mysql_query("INSERT INTO `a2topictopiclink` (`source_topic_id`, `target_topic_id`) VALUES (".((int) $topic_id).", ".((int) $addTopic).")");
-					bibliographie_purge_cache('topic_'.((int) $addTopic).'_');
+				foreach($deleteTopicLinks as $deleteTopicLink){
+					$deleteLink->execute(array(
+						'topic_id' => (int) $dataBefore['topic_id'],
+						'deleteTopicLink' => (int) $deleteTopicLink
+					));
+					bibliographie_purge_cache('topic_'.$deleteTopicLink.'_');
 				}
 			}
+
+			/**
+			 * Update the topic data itself if any change was made.
+			 */
+			if($name != $dataBefore['name'] or $description != $dataBefore['description'] or $url != $dataBefore['url']){
+				$updateData = DB::getInstance()->prepare('UPDATE `a2topics` SET
+			`name`= :name,
+			`description` = :description,
+			`url` = :url
+		WHERE
+			`topic_id` = :topic_id
+		LIMIT 1');
+				$updateData->execute(array(
+					'name' => $name,
+					'description' => $description,
+					'url' => $url,
+					'topic_id' => (int) $dataBefore['topic_id']
+				));
+			}
+
+			/**
+			 * Add links to topics that were not in the list of parent topics before.
+			 */
+			$addTopicLinks = array_diff($safeTopics, $dataBefore['topics']);
+			if(count($addTopicLinks) > 0){
+				$addLink = DB::getInstance()->prepare('INSERT INTO `a2topictopiclink` (
+	`source_topic_id`,
+	`target_topic_id`
+) VALUES (
+	:topic_id,
+	:addTopic
+)');
+				foreach($safeTopics as $addTopic){
+					if(!in_array($addTopic, $dataBefore['topics'])){
+						$addLink->execute(array(
+							'topic_id' => (int) $dataBefore['topic_id'],
+							'addTopic' => (int) $addTopic
+						));
+						bibliographie_purge_cache('topic_'.((int) $addTopic).'_');
+					}
+				}
+			}
+
+			$data = array(
+				'dataBefore' => $dataBefore,
+				'dataAfter' => array (
+					'topic_id' => (int) $dataBefore['topic_id'],
+					'name' => $name,
+					'description' => $description,
+					'url' => $url,
+					'topics' => $safeTopics
+				)
+			);
+
+			if($data['dataBefore'] != $data['dataAfter']){
+				bibliographie_log('topics', 'editTopic', json_encode($data));
+				bibliographie_purge_cache('topic_'.((int) $dataBefore['topic_id']).'_');
+			}
+
+			DB::getInstance()->commit();
+			return $data;
+
+		} catch (PDOException $e) {
+			DB::getInstance()->rollBack();
+			bibliographie_exit('Database error', 'There was an error while saving changes! '.$e->getMessage());
 		}
-
-		$data = array(
-			'dataBefore' => $dataBefore,
-			'dataAfter' => array (
-				'topic_id' => (int) $topic_id,
-				'name' => $name,
-				'description' => $description,
-				'url' => $url,
-				'topics' => $safeTopics
-			)
-		);
-
-		if($data['dataBefore'] != $data['dataAfter']){
-			bibliographie_log('topics', 'editTopic', json_encode($data));
-			bibliographie_purge_cache('topic_'.((int) $topic_id).'_');
-		}
-
-		return $data;
 	}
 
 	return false;

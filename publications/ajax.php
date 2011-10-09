@@ -30,9 +30,40 @@ switch($_GET['task']){
 			if(in_array($_GET['target'], array('html', 'text'))){
 				bibliographie_publications_parse_list($publications, $_GET['target']);
 			}else{
-				$result = mysql_query("SELECT `pub_id`, `pub_type`, `bibtex_id`, `address`, `booktitle`, `chapter`, `edition`, `howpublished`, `institution`, `journal`, `month`, `note`, `number`, `organization`, `pages`, `publisher`, `school`, `series`, `title`, `url`, `volume`, `year` FROM `a2publication` WHERE FIND_IN_SET(`pub_id`, '".implode(',', $publications)."') ORDER BY `title`");
+				$publications = array2csv($publications);
 
-				if(mysql_num_rows($result) > 0){
+				$result = DB::getInstance()->prepare("SELECT
+	`pub_id`,
+	`pub_type`,
+	`bibtex_id`,
+	`address`,
+	`booktitle`,
+	`chapter`,
+	`edition`,
+	`howpublished`,
+	`institution`,
+	`journal`,
+	`month`,
+	`note`,
+	`number`,
+	`organization`,
+	`pages`,
+	`publisher`,
+	`school`,
+	`series`,
+	`title`,
+	`url`,
+	`volume`,
+	`year`
+FROM
+	`a2publication`
+WHERE
+	FIND_IN_SET(`pub_id`, :set) ORDER BY `title`");
+				$result->setFetchMode(PDO::FETCH_ASSOC);
+				$result->bindParam('set', $publications);
+				$result->execute();
+
+				if($result->rowCount() > 0){
 					if(in_array($_GET['target'], array('bibTex', 'rtf'))){
 						$bibtex = new Structures_BibTex(array(
 							'stripDelimiter' => true,
@@ -42,7 +73,9 @@ switch($_GET['task']){
 							'extractAuthors' => true
 						));
 
-						while($publication = mysql_fetch_assoc($result)){
+						$publications = $result->fetchAll();
+
+						foreach($publications as $publication){
 							$publication['entryType'] = $publication['pub_type'];
 							if(empty($publication['bibtex_id']))
 								$publication['bibtex_id'] = md5($publication['title']);
