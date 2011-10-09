@@ -17,7 +17,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		$author_id = (int) $author_id;
 
 	if($author === null)
-		$author = DB::getInstance()->exec('INSERT INTO `a2author` (
+		$author = DB::getInstance()->prepare('INSERT INTO `a2author` (
 	`author_id`,
 	`firstname`,
 	`von`,
@@ -38,7 +38,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 )');
 
 	$return = $author->execute(array(
-		'author_id' => $author->author_id,
+		'author_id' => (int) $author->author_id,
 		'firstname' => $firstname,
 		'von' => $von,
 		'surname' => $surname,
