@@ -4,6 +4,8 @@
  * @return array
  */
 function bibliographie_bookmarks_get_bookmarks () {
+	$return = false;
+	
 	if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json'))
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json'));
 
@@ -53,20 +55,18 @@ function bibliographie_bookmarks_unset_bookmark ($pub_id) {
  * @return bool
  */
 function bibliographie_bookmarks_clear_bookmarks () {
+	$return = false;
 	if(count(bibliographie_bookmarks_get_bookmarks()) > 0){
-		mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id()));
-		$return = mysql_affected_rows();
+		$return = DB::getInstance()->exec("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id()));
 
-		if($return){
+		if($return > 0){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json', 'w+');
 			fwrite($cacheFile, '[]');
 			fclose($cacheFile);
 		}
-
-		return $return;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
