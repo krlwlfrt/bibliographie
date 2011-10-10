@@ -253,8 +253,11 @@ function bibliographie_user_get_id ($name = null) {
 		$name = $_SERVER['PHP_AUTH_USER'];
 
 	if(empty($cache[$name])){
-		if($checkUser == null)
-			$checkUser = DB::getInstance()->prepare('SELECT * FROM `a2users` WHERE `login` = :login');
+		if($checkUser == null){
+			$checkUser = DB::getInstance()->prepare('SELECT `user_id`, `login` FROM `a2users` WHERE `login` = :login');
+			$checkUser->setFetchMode(PDO::FETCH_OBJ);
+		}
+
 		$checkUser->execute(array(
 			'login' => $name
 		));

@@ -71,20 +71,6 @@ if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
 mysql_query("SET NAMES 'utf8'");
 mysql_query("SET CHARACTER SET 'utf8'");
 
-/**
- * If an authed user doesn't exist create him/her.
- */
-if(!bibliographie_user_get_id()){
-	try {
-		$createUser = DB::getInstance()->prepare('INSERT INTO `a2users` (`login`) VALUES (:login)');
-		$createUser->execute(array(
-			'login' => $_SERVER['PHP_AUTH_USER']
-		));
-	} catch (PDOException $e) {
-		bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
-	}
-}
-
 if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 	echo '<!DOCTYPE html><html lang="de"><head><title>Initialize database</title></head><body><h1>Initialize database</h1>';
 
@@ -352,6 +338,21 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 	}
 	echo '</body></html>';
 	exit();
+}
+
+/**
+ * If an authed user doesn't exist create him/her.
+ */
+if(!bibliographie_user_get_id()){
+	try {
+		$createUser = DB::getInstance()->prepare('INSERT INTO `a2users` (`login`) VALUES (:login)');
+		$createUser->execute(array(
+			'login' => $_SERVER['PHP_AUTH_USER']
+		));
+		echo '<p class="success">You have been created as a new user (<em>'.htmlspecialchars($_SERVER['PHP_AUTH_USER']).'</em>)!</p>';
+	} catch (PDOException $e) {
+		bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
+	}
 }
 
 /**
