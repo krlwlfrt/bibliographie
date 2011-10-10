@@ -12,10 +12,10 @@ class DB {
 	public static function getInstance () {
 		if(!self::$instance){
 			try {
-				self::$instance = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
+				self::$instance = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE.';charset=UTF-8', BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8') );
 				self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			} catch (PDOException $e) {
-				bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database! '.$e->getMessage());
+				bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!<br />'.$e->getMessage());
 			}
 		}
 
@@ -332,3 +332,6 @@ require dirname(__FILE__).'/tags.php';
 require dirname(__FILE__).'/topics.php';
 
 require dirname(__FILE__).'/../lib/BibTex.php';
+
+set_exception_handler('bibliographie_exception_handler');
+set_error_handler('bibliographie_error_handler');
