@@ -595,12 +595,12 @@ function bibliographie_publications_get_persons ($publication_id, $is_editor = '
 		link.`pub_id` = :pub_id AND
 		link.`author_id` = data.`author_id` AND
 		link.`is_editor` = :is_editor
-	ORDER BY :order");
+	ORDER BY ".$_order);
 
-		$persons->bindParam('pub_id', $publication->pub_id);
-		$persons->bindParam('is_editor', $_is_editor);
-		$persons->bindParam('order', $_order);
-		$persons->execute();
+		$persons->execute(array(
+			'pub_id' => (int) $publication->pub_id,
+			'is_editor' => $_is_editor
+		));
 
 		if($persons->rowCount() > 0)
 			$return = $persons->fetchAll(PDO::FETCH_COLUMN, 0);
