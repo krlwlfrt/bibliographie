@@ -442,8 +442,12 @@ $(function () {
 		<br style="clear: both" />
 
 		<label for="tags" class="block">Tags</label>
-		<em style="float: right"><a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a></em>
+		<em style="float: right; text-align: right;">
+			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
+			<span id="tags_tagNotExisting"></em>
+		</em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" tabindex="8" />
+		<br style="clear: both;" />
 	</div>
 
 	<div class="unit bibtex"><h4>Association</h4>
@@ -555,7 +559,16 @@ $(function() {
 		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
 		preventDuplicates: true,
 		theme: 'facebook',
-		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>
+		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>,
+		onResult: function (results) {
+			$('#tags_tagNotExisting').empty();
+			$('#bibliographie_charmap').hide();
+
+			if(results.length == 0)
+				$('#tags_tagNotExisting').html('<span class="error">Tag is not existing. Create it here!</span>');
+
+			return results;
+		}
 	});
 
 	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
