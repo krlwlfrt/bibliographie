@@ -81,13 +81,17 @@ function bibliographie_history_rewrite_links ($matches) {
 	if(empty($bibliographie_history_path_identifier))
 		bibliographie_history_append_step('generic', 'Generic AJAX task');
 
-	if($matches[4] != 'javascript:;'){
+	$link = $matches[4];
+
+	if($link != 'javascript:;'){
+		$link = explode('#', $link);
+
 		$connector = '&amp;';
-		if(mb_strpos($matches[4], '?') === false)
+		if(mb_strpos($link[0], '?') === false)
 			$connector = '?';
 
-		if(mb_strpos($matches[4], 'from') === false)
-			$matches[4] .= $connector.'from='.$bibliographie_history_path_identifier;
+		if(mb_strpos($link[0], 'from') === false)
+			$link[0] .= $connector.'from='.$bibliographie_history_path_identifier.$link[1];
 	}
 
 	return '<'.$matches[1].$matches[2].$matches[3].'="'.$matches[4].'"';
