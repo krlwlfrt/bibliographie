@@ -132,21 +132,27 @@ function bibliographie_icon_get ($name) {
  * @param mixed $data Some kind of JSON representation from json_encode()
  */
 function bibliographie_log ($category, $action, $data) {
+	static $logAccess = null;
+
 	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
 	$time = date('r');
 
-	mysql_query("INSERT INTO `bibliographie_log` (
+	if($logAccess === null)
+		$logAccess = DB::getInstance()->prepare('INSERT INTO `bibliographie_log` (
 	`log_file`,
 	`log_time`
 ) VALUES (
-	'".mysql_real_escape_string(stripslashes('log_'.date('W_Y').'.log'))."',
-	'".mysql_real_escape_string(stripslashes($time))."'
-)");
+	:file,
+	:time
+)');
 
-	echo mysql_error();
+	$logAccess->execute(array(
+		'file' => 'log_'.date('W_Y').'.log',
+		'time' => $time
+	));
 
 	$addFile = json_encode(array(
-		'id' => mysql_insert_id(),
+		'id' => DB::getInstance()->lastInsertId(),
 		'user' => bibliographie_user_get_id(),
 		'time' => $time,
 		'category' => $category,
@@ -282,11 +288,21 @@ function bibliographie_user_get_id ($name = null) {
  * @return string
  */
 function bibliographie_user_get_name ($user_id) {
-	if(is_numeric($user_id)){
-		$user = mysql_query("SELECT * FROM `a2users` WHERE `user_id` = ".((int) $user_id));
+	static $checkUser = null;
 
-		if(mysql_num_rows($user) == 1){
-			$user = mysql_fetch_object($user);
+	if(is_numeric($user_id)){
+		if($checkUser === null){
+			$checkUser = DB::getInstance()->prepare('SELECT `login` FROM `a2users` WHERE `user_id` = :user_id LIMIT 1');
+			$checkUser->setFetchMode(PDO::FETCH_OBJ);
+		}
+
+		$checkUser->execute(array(
+			'user_id' => (int) $user_id
+		));
+
+		if($checkUser->rowCount() == 1){
+			$user = $checkUser->fetch();
+
 			return $user->login;
 		}
 	}
