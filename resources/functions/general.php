@@ -245,21 +245,32 @@ function bibliographie_print_pages ($amountOfItems, $baseLink) {
  * @return bool True on success, false otherwise.
  */
 function bibliographie_user_get_id ($name = null) {
-	static $cache = array();
+	static $cache = array(), $checkUser = null;
+
+	$return = false;
 
 	if(empty($name))
 		$name = $_SERVER['PHP_AUTH_USER'];
 
 	if(empty($cache[$name])){
-		$user = mysql_query("SELECT * FROM `a2users` WHERE `login` = '".mysql_real_escape_string(stripslashes($name))."'");
-		if(mysql_num_rows($user)){
-			$user = mysql_fetch_object($user);
+		if($checkUser == null)
+			$checkUser = DB::getInstance()->prepare('SELECT * FROM `a2users` WHERE `login` = :login');
+		$checkUser->execute(array(
+			'login' => $name
+		));
+
+		if($checkUser->rowCount() == 1){
+			$user = $checkUser->fetch();
+
 			if($user->login == $name)
 				$cache[$name] = $user->user_id;
 		}
 	}
 
-	return $cache[$name];
+	if(!empty($cache[$name]))
+		$return = $cache[$name];
+
+	return $return;
 }
 
 /**

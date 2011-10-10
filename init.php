@@ -43,10 +43,17 @@ if(!defined('BIBLIOGRAPHIE_ROOT_PATH'))
 	define('BIBLIOGRAPHIE_ROOT_PATH', dirname(__FILE__));
 
 /**
+ * If outputting of body isnt defined yet then define it with the default value.
+ */
+if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
+	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
+
+/**
  * Set global variables...
  */
 $bibliographie_history_path_identifier = '';
 $bibliographie_title = 'bibliographie';
+$bibliographie_database_queries = array();
 
 /**
  * Check mysql connection.
@@ -373,6 +380,3 @@ foreach(scandir(dirname(__FILE__).'/cache') as $object){
 	if(filemtime(dirname(__FILE__).'/cache/'.$object) + (60 * 60 * 24 * 2) < time())
 		unlink(dirname(__FILE__).'/cache/'.$object);
 }
-
-if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
-	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
