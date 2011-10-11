@@ -4,32 +4,37 @@
  * @return array
  */
 function bibliographie_bookmarks_get_bookmarks () {
-	$return = false;
-	
+	static $bookmarks = null;
+
+	$return = array();
+
 	if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json'))
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json'));
 
-	$bookmarks = array();
-	$bookmarksResult = mysql_query("SELECT publications.`pub_id` FROM
+	if($bookmarks === null)
+		$bookmarks = DB::getInstance()->prepare('SELECT publications.`pub_id` FROM
 		`a2userbookmarklists` bookmarks,
 		`a2publication` publications
 	WHERE
 		publications.`pub_id` = bookmarks.`pub_id` AND
-		bookmarks.`user_id` = ".((int) bibliographie_user_get_id()."
+		bookmarks.`user_id` = :user_id
 	ORDER BY
-		publications.`year` DESC"));
+		publications.`year` DESC');
 
-	if(mysql_num_rows($bookmarksResult) > 0)
-		while($bookmark = mysql_fetch_object($bookmarksResult))
-			$bookmarks[] = $bookmark->pub_id;
+	$bookmarks->execute(array(
+		'user_id' => (int) bibliographie_user_get_id()
+	));
+
+	if($bookmarks->rowCount() > 0)
+		$return = $bookmarks->fetchAll(PDO::FETCH_COLUMN, 0);
 
 	if(BIBLIOGRAPHIE_CACHING){
 		$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json', 'w+');
-		fwrite($cacheFile, json_encode($bookmarks));
+		fwrite($cacheFile, json_encode($return));
 		fclose($cacheFile);
 	}
 
-	return $bookmarks;
+	return $return;
 }
 
 /**
@@ -137,55 +142,86 @@ function bibliographie_bookmarks_unset_bookmark (pub_id) {
 }
 
 /**
- * Set bookmarks for a given list of publications.
- * @param array $list
- * @return mixed Amount of set bookmarks or false on error.
+ *
+ * @staticvar string $bookmark
+ * @param array $publications
+ * @return type
  */
-function bibliographie_bookmarks_set_bookmarks_for_list (array $list) {
-	if(count($list) > 0){
-		$mysqlString = "";
+function bibliographie_bookmarks_set_bookmarks_for_list (array $publications) {
+	static $bookmark = null;
 
-		$list = array_diff($list, bibliographie_bookmarks_get_bookmarks());
-		if(count($list) > 0)
-			foreach($list as $pub_id){
-				if(!empty($mysqlString))
-					$mysqlString .= ",";
-				$mysqlString .= "(".((int) bibliographie_user_get_id()).",".((int) $pub_id).")";
-			}
+	$return = false;
 
+	if(count($publications) > 0){
 		$return = 0;
-		if(!empty($mysqlString)){
-			mysql_query("INSERT INTO `a2userbookmarklists` (`user_id`,`pub_id`) VALUES ".$mysqlString.";");
-			$return = mysql_affected_rows();
+		$notBookmarkedPublications = array_diff($publications, bibliographie_bookmarks_get_bookmarks());
+		if(count($notBookmarkedPublications) > 0){
+			$return = count($notBookmarkedPublications);
+			try {
+				DB::getInstance()->beginTransaction();
+
+				foreach($notBookmarkedPublications as $pub_id){
+					if($bookmark === null)
+						$bookmark = DB::getInstance()->prepare('INSERT INTO `a2userbookmarklists` (
+	`user_id`,
+	`pub_id`
+) VALUES (
+	:user_id,
+	:pub_id
+)');
+
+					$bookmark->execute(array(
+						'user_id' => (int) bibliographie_user_get_id(),
+						'pub_id' => (int) $pub_id
+					));
+				}
+
+				DB::getInstance()->commit();
+
+				bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
+			} catch (PDOException $e) {
+				echo '<p class="error">There was an error trying to set the bookmarks!</p><p>'.$e->getMessage().'</p>';
+			}
 		}
-
-		bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
-
-		return $return;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
- * Unset bookmarks for a given list of publications
- * @param array $list
- * @return mixed Amount of unset bookmarks or false on error.
+ *
+ * @param array $publications
+ * @return type
  */
-function bibliographie_bookmarks_unset_bookmarks_for_list (array $list) {
-	if(count($list)){
-		$list = array_intersect($list, bibliographie_bookmarks_get_bookmarks());
+function bibliographie_bookmarks_unset_bookmarks_for_list (array $publications) {
+	static $unbookmark = null;
+
+	$return = false;
+
+	if(count($publications)){
 		$return = 0;
-		if(count($list) > 0){
-			mysql_query("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id())." AND FIND_IN_SET(`pub_id`, '".implode(',', $list)."')");
-			$return = mysql_affected_rows();
+
+		$bookmarkedPublications = array_intersect($publications, bibliographie_bookmarks_get_bookmarks());
+
+		if(count($bookmarkedPublications) > 0){
+			if($unbookmark === null)
+				$unbookmark = DB::getInstance()->prepare('DELETE FROM
+	`a2userbookmarklists`
+WHERE
+	`user_id` = :user_id AND
+	FIND_IN_SET(`pub_id`, :set)');
+
+			$unbookmark->execute(array(
+				'user_id' => (int) bibliographie_user_get_id(),
+				'set' => array2csv($bookmarkedPublications)
+			));
+
+			$return = $unbookmark->rowCount();
+
+			if($return > 0)
+				bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
 		}
-
-		if($return > 0)
-			bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
-
-		return $return;
 	}
 
-	return false;
+	return $return;
 }
