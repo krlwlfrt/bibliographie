@@ -57,7 +57,7 @@ $(function () {
 		delayRequest('bibliographie_authors_get_publications_for_authors_set', Array($('#authors').val(), $('#query').val()));
 	});
 
-	$('input').charmap();
+	$('#content input').charmap();
 	$('#bibliographie_charmap').dodge();
 });
 	/* ]]> */

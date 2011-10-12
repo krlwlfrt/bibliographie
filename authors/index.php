@@ -120,7 +120,7 @@ var author_id = <?php
 				echo 0;
 ?>;
 $(function () {
-	$('input, textarea').charmap();
+	$('#content input, #content textarea').charmap();
 	$('#bibliographie_charmap').dodge();
 
 	$('#firstname, #surname').bind('keyup change', function (event) {

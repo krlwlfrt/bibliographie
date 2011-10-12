@@ -144,7 +144,7 @@ $(function () {
 		delayRequest('bibliographie_topics_check_name', Array($('#name').val(), topic_id));
 	});
 
-	$('input, textarea').charmap();
+	$('#content input, #content textarea').charmap();
 	$('#bibliographie_charmap').dodge();
 });
 	/* ]]> */

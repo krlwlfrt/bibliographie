@@ -565,7 +565,7 @@ $(function() {
 			$('#bibliographie_charmap').hide();
 
 			if(results.length == 0)
-				$('#tags_tagNotExisting').html('<span class="error">Tag is not existing. Create it here!</span>');
+				$('#tags_tagNotExisting').html('Tag <strong>'+$('#token-input-tags').val()+'</strong> is not existing. <a href="javascript:;" onclick="bibliographie_publications_create_tag(\''+$('#token-input-tags').val()+'\');">Create it here!</a>');
 
 			return results;
 		}
@@ -575,7 +575,7 @@ $(function() {
 
 	bibliographie_publications_show_fields($('#pub_type').val());
 
-	$('input, textarea').charmap();
+	$('#content input, #content textarea').charmap();
 	$('#bibliographie_charmap').dodge();
 
 	bibliographie_publications_check_title($('#title').val(), pub_id);

@@ -12,8 +12,14 @@ function bibliographie_charmap_insert_char (substituteChar) {
 		if(bibliographie_charmap_last_selection != null)
 			$(bibliographie_charmap_last_selection).unbind('focus click keyup');
 
+		var element = $(this).first()[0];
+		$(element.form).prev().before('<a href="javascript:;" style="float: right;" onclick="$(\'#bibliographie_charmap\').show(); $(\'#'+$(element).attr('id')+'\').focus();"><span class="silk-icon silk-icon-keyboard"></span> Show charmap</a>');
+
 		$(this).bind('focus', function (event) {
-			if($(event.target).is('input[type=submit]') == false && $(event.target).is('input[type=checkbox]') == false && $('#bibliographie_charmap_pinner').is(':checked') == false){
+			if($(event.target).is('input[type=submit]') == false
+				&& $(event.target).is('input[type=checkbox]') == false
+				&& $('#bibliographie_charmap_pinner').is(':checked') == false
+				&& $('#bibliographie_charmap').is(':visible') == true){
 				var offsetParent = event.target;
 				var offsetLeft = event.target.offsetLeft;
 				var offsetTop = event.target.offsetTop;
@@ -28,7 +34,6 @@ function bibliographie_charmap_insert_char (substituteChar) {
 
 				bibliographie_charmap_field = event.target;
 				$('#bibliographie_charmap')
-					.show()
 					.animate({'top': offsetTop + event.target.offsetHeight + 10, 'left': offsetLeft + Math.ceil(event.target.offsetWidth / 2)});
 			}
 	  });

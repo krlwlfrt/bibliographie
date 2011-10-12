@@ -207,8 +207,10 @@ function bibliographie_publications_create_tag (tagName) {
 		dataType: 'json',
 		success: function (json) {
 			$.jGrowl(json.text);
-			if(json.status == 'success')
+			if(json.status == 'success'){
 				$('#tags').tokenInput('add', {id: json.tag_id, name: json.tag});
+				$('#tags_tagNotExisting').empty().hide();
+			}
 		}
 	})
 
