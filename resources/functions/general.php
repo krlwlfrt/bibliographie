@@ -363,5 +363,8 @@ require dirname(__FILE__).'/topics.php';
 
 require dirname(__FILE__).'/../lib/BibTex.php';
 
+/**
+ * Set error and exception handling for uncaught errors and exceptions.
+ */
 set_exception_handler('bibliographie_exception_handler');
 set_error_handler('bibliographie_error_handler');

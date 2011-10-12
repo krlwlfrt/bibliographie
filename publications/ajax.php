@@ -14,10 +14,10 @@ switch($_GET['task']){
 			$title = 'Choose export format';
 			$text = '<h3>Export publications</h3>
 <p class="notice">You\'re about to export '.count($publications).' publication(s). Please choose the format that you want to export into.</p>
-	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=html&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-code').' HTML</a><br />
-		<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=text&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-text').' Text</a><br />
 <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-actionscript').' BibTex</a><br />
-<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-word').' RTF</a>';
+<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-word').' RTF</a><br />
+<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=html&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-code').' HTML</a><br />
+<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=text&amp;exportList='.htmlspecialchars($_GET['exportList']).'">'.bibliographie_icon_get('page-white-text').' Text</a>';
 		}
 
 		bibliographie_dialog_create('exportChooseType_'.htmlspecialchars($_GET['exportList']), $title, $text);
