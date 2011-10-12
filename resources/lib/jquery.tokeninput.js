@@ -25,7 +25,7 @@ var DEFAULT_SETTINGS = {
     noResultsText: "No results",
     searchingText: "Searching...",
     deleteText: "&times;",
-    animateDropdown: true,
+    animateDropdown: false,
 
 	// Tokenization settings
     tokenLimit: null,
@@ -634,7 +634,9 @@ $.TokenList = function (input, url_or_data, settings) {
                 position: "absolute",
                 top: $(token_list).offset().top + $(token_list).outerHeight(),
                 left: $(token_list).offset().left,
-                zindex: 999
+                'z-index': 999,
+					 'overflow-y': 'scroll',
+					 'max-height': 300
             })
             .show();
     }

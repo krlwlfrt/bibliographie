@@ -50,19 +50,31 @@ switch($_GET['task']){
 
 	case 'searchAuthors':
 		$result = array();
+
 		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
-			$expandedQuery = bibliographie_search_expand_query($_GET['q'], array('suffixes' => false, 'plurals' => false, 'umlauts' => true));
+			$authors = DB::getInstance()->prepare('SELECT `author_id`, `relevancy` FROM (
+	SELECT
+		`author_id`,
+		(MATCH(`surname`, `firstname`) AGAINST (:expandedQuery)) AS `relevancy`
+	FROM
+		`a2author`
+) fullTextSearch
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC');
 
-			$authors = mysql_query("SELECT * FROM (SELECT `author_id`, (MATCH(`surname`, `firstname`) AGAINST ('".mysql_real_escape_string(stripslashes($expandedQuery))."')) AS `relevancy` FROM `a2author`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
+			$authors->execute(array(
+				'expandedQuery' => bibliographie_search_expand_query($_GET['q'], array('suffixes' => false, 'plurals' => false, 'umlauts' => true))
+			));
 
-			if(mysql_num_rows($authors)){
-				while($author = mysql_fetch_object($authors)){
-					if(empty($_GET['author_id']) or (is_numeric($_GET['author_id']) and $_GET['author_id'] != $author->author_id))
-						$result[] = array (
-							'id' => $author->author_id,
-							'name' => bibliographie_authors_parse_data($author->author_id)
-						);
-				}
+			if($authors->rowCount() > 0){
+				$_result = $authors->fetchAll(PDO::FETCH_COLUMN, 0);
+				foreach($_result as $author_id)
+					$result[] = array (
+						'id' => $author_id,
+						'name' => bibliographie_authors_parse_data($author_id)
+					);
 			}
 		}
 
