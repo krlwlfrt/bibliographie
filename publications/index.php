@@ -207,7 +207,12 @@ $(function () {
 
 		$publication = null;
 		if(!empty($_GET['pub_id']))
-			$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
+			$publication = (array) bibliographie_publications_get_data($_GET['pub_id']);
+
+		if(is_array($publication))
+			bibliographie_history_append_step('publications', 'Editing publication '.$publication['title']);
+		else
+			bibliographie_history_append_step('publications', 'Creating publication');
 
 		if($_GET['skipEntry'] == '1')
 			array_shift($_SESSION['publication_prefetchedData_checked']);
@@ -234,10 +239,12 @@ $(function () {
 					if(is_array($publication)){
 						echo '<h3>Updating publication...</h3>';
 
-						$done = bibliographie_publications_edit_publication($publication['pub_id'], $_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['bibtex_id'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
+						$data = bibliographie_publications_edit_publication($publication['pub_id'], $_POST['pub_type'], $author, $editor, $_POST['title'], $_POST['month'], $_POST['year'], $_POST['booktitle'], $_POST['chapter'], $_POST['series'], $_POST['journal'], $_POST['volume'], $_POST['number'], $_POST['edition'], $_POST['publisher'], $_POST['location'], $_POST['howpublished'], $_POST['organization'], $_POST['institution'], $_POST['school'], $_POST['address'], $_POST['pages'], $_POST['note'], $_POST['abstract'], $_POST['userfields'], $_POST['bibtex_id'], $_POST['isbn'], $_POST['issn'], $_POST['doi'], $_POST['url'], $topics, $tags);
 
-						if($done)
+						if($done){
 							echo '<p class="success">Publication has been edited!</p>';
+							echo 'You can <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showPublication&amp;pub_id='.((int) $data['pub_id']).'">view the created publication</a> or you can proceed by <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor">creating another</a> publication.';
+						}
 					}else{
 						echo '<h3>Creating publication...</h3>';
 
@@ -415,6 +422,9 @@ $(function () {
 
 		<div id="similarTitleContainer" class="bibliographie_similarity_container"></div>
 
+		<label for="bibtex_id" class="block">BibTex cite ID</label>
+		<input id="bibtex_id" name="bibtex_id" style="width: 100%" value="<?php echo htmlspecialchars($_POST['bibtex_id'])?>" class="" tabindex="27" />
+
 		<div style="float: right; width: 50%">
 			<label for="month" class="block">Month</label>
 			<select id="month" name="month" style="width: 100%" class="bibtex" tabindex="5">
@@ -510,9 +520,6 @@ $(function () {
 
 		<label for="userfields" class="block">User fields</label>
 		<textarea id="userfields" name="userfields" cols="10" rows="10" style="width: 100%" class="collapsible" tabindex="6"><?php echo htmlspecialchars($_POST['userfields'])?></textarea>
-
-		<label for="bibtex_id" class="block">BibTex cite ID</label>
-		<input id="bibtex_id" name="bibtex_id" style="width: 100%" value="<?php echo htmlspecialchars($_POST['bibtex_id'])?>" class="collapsible" tabindex="27" />
 	</div>
 
 	<div class="unit"><h4>Identification</h4>

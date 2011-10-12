@@ -1007,8 +1007,10 @@ LIMIT 1");
 		'tags' => $tags
 	));
 
-	if($return)
+	if($return){
 		bibliographie_log('publications', 'editPublication', $data);
+		$return = $data;
+	}
 
 	bibliographie_purge_cache('publication_'.((int) $pub_id));
 	bibliographie_purge_cache('publications');
