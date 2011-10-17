@@ -340,7 +340,7 @@ $(function () {
 					foreach($tags as $tag)
 						$prePopulateTags[] = array (
 							'id' => $tag,
-							'name' => bibliographie_tags_tag_by_id($tag)
+							'name' => bibliographie_tags_parse_tag($tag)
 						);
 				}
 			}
