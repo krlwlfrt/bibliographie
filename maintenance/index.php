@@ -65,27 +65,10 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$topics = csv2array($_POST['topics'], 'int');
-			echo '<ul>';
+			$lockedTopics = bibliographie_maintenance_lock_topics($topics);
 
-			foreach($topics as $topic){
-				$topic = bibliographie_topics_get_data($topic);
+			'<p class="notice">'.((int) $lockedTopics).' have been locked!</p>';
 
-				if(is_object($topic)){
-					if(in_array($topic->topic_id, $lockedTopics))
-						echo '<li class="notice">The topic <em>'.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).'</em> was in the list of locked tables yet.</li>';
-
-					else{
-						$result = bibliographie_maintenance_lock_topic($topic->topic_id);
-
-						if($result)
-							echo '<li class="success">The topic <em>'.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).'</em> was added to the list of locked tables.</li>';
-						else
-							echo '<li class="error">The topic <em>'.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).'</em> could not be added to the list of locked tables!</li>';
-					}
-				}
-			}
-
-			echo '</ul>';
 			$lockedTopics = bibliographie_topics_get_locked_topics();
 		}
 
@@ -179,8 +162,8 @@ $(function () {
 
 <table class="dataContainer">
 	<tr>
-		<th style="width: 40%">Meta</th>
-		<th style="width: 60%">Data</th>
+		<th>Meta</th>
+		<th>Data</th>
 	</tr>
 <?php
 				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
@@ -217,7 +200,7 @@ $(function () {
 					echo 'at <em>', $logRow['time'], '</em>';
 					echo '</td>';
 
-					echo '<td style="font-size: 0.7em; overflow: scroll;"><pre>', print_r(json_decode($logRow['data'], true), true), '</pre></td>';
+					echo '<td style="font-size: 0.7em; width: 500px"><pre style="overflow: scroll; width: 500px; height: 300px">', print_r(json_decode($logRow['data'], true), true), '</pre></td>';
 
 					echo '</tr>';
 				}

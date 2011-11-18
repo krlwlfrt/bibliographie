@@ -57,13 +57,21 @@ $bibliographie_search_queries_umlaut_substitutes = array (
  * @return type
  */
 function bibliographie_search_get_plurals () {
-	if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'))
+	static $sap = null;
+
+	if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'))
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/singulars_and_plurals.json'), true);
 
 	$return = array();
-	$result = mysql_query("SELECT * FROM `singulars_and_plurals`");
-	if(mysql_num_rows($result) > 0){
-		while($pair = mysql_fetch_object($result))
+	if(!($sap instanceof PDOStatement)){
+		$sap = DB::getInstance()->prepare('SELECT `singular`, `plural` FROM `singulars_and_plurals`');
+		$sap->setFetchMode(PDO::FETCH_OBJ);
+	}
+
+	if($sap->rowCount() > 0){
+		$result = $sap->fetchAll();
+
+		foreach($result as $pair)
 			$return[$pair->singular] = $pair->plural;
 
 		if(BIBLIOGRAPHIE_CACHING){

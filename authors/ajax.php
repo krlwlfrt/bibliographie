@@ -9,6 +9,22 @@ $text = (string) 'An error occured!';
 $status = (string) 'error';
 
 switch($_GET['task']){
+	case 'deletePersonConfirm':
+		$person = bibliographie_authors_get_data($_GET['author_id']);
+
+		if(is_object($person)){
+			$publications = array_unique(array_merge(bibliographie_authors_get_publications($person->author_id, false), bibliographie_authors_get_publications($person->author_id, true)));
+			if(count($publications) == 0){
+				$text = 'You are about to delete <em>'.bibliographie_authors_parse_data($person->author_id).'</em>. If you are sure, click "delete" below!'
+					.'<p class="success"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=deleteAuthor&amp;author_id='.((int) $person->author_id).'">'.bibliographie_icon_get('user-delete').' Delete!</a></p>'
+					.'If you dont want to delete the person, press "cancel" below!';
+			}else
+				$text = '<p class="error"><em>'.bibliographie_authors_parse_data($person->author_id).'</em> has '.count($publications).' publications and can therefore not be deleted!</p>';
+		}
+
+		bibliographie_dialog_create('deletePersonConfirm_'.((int) $_GET['author_id']), 'Confirm delete', $text);
+	break;
+
 	case 'createPerson':
 		$author_id = (int) 0;
 		$name = (string) '';

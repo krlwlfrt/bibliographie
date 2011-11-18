@@ -79,3 +79,28 @@ function bibliographie_authors_get_co_authors (field, container) {
 		}
 	})
 }
+
+function bibliographie_authors_confirm_delete (author_id) {
+	$.ajax({
+		'url': bibliographie_web_root+'/authors/ajax.php',
+		'data': {
+			'task': 'deletePersonConfirm',
+			'author_id': author_id
+		},
+		'success': function (html) {
+			$('#dialogContainer').append(html);
+			$('#deletePersonConfirm_'+author_id).dialog({
+				'width': 400,
+				'buttons': {
+					'cancel': function () {
+						$(this).dialog('close');
+					}
+				},
+				'close': function () {
+					$(this).remove();
+				},
+				'modal': true
+			})
+		}
+	})
+}

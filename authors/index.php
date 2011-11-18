@@ -9,6 +9,23 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <?php
 $bibliographie_title = 'Authors';
 switch($_GET['task']){
+	case 'deleteAuthor':
+		$person = bibliographie_authors_get_data($_GET['author_id']);
+
+		if(is_object($person)){
+			$publications = array_unique(array_merge(bibliographie_authors_get_publications($person->author_id, false), bibliographie_authors_get_publications($person->author_id, true)));
+			if(count($publications) == 0){
+				echo '<h3>Deleting <em>'.bibliographie_authors_parse_data($person->author_id).'</em></h3>';
+				if(bibliographie_authors_delete($person->author_id))
+					echo '<p class="success">Person was successfully deleted!</p>';
+				else
+					echo '<p class="error">An error occured!</p>';
+			}else
+				echo '<p class="error"><em>'.bibliographie_authors_parse_data($person->author_id).'</em> has '.count($publications).' publications and can therefore not be deleted!</p>';
+		}else
+			echo '<p class="error">Person could not be found!</p>';
+	break;
+
 	case 'authorEditor':
 		$done = false;
 
@@ -148,13 +165,15 @@ $(function () {
 			$topicsArray = array();
 ?>
 
-<em style="float: right;"><a href="/bibliographie/authors/?task=authorEditor&amp;author_id=<?php echo ((int) $author->author_id)?>"><?php echo bibliographie_icon_get('user-edit')?> Edit author</a></em>
+<em style="float: right;">
+	<a href="/bibliographie/authors/?task=authorEditor&amp;author_id=<?php echo ((int) $author->author_id)?>"><?php echo bibliographie_icon_get('user-edit')?> Edit</a>
+	<a href="javascript:;" onclick="bibliographie_authors_confirm_delete(<?php echo $author->author_id?>)"><?php echo bibliographie_icon_get('user-delete')?> Delete</a>
+</em>
 <h3><?php echo bibliographie_authors_parse_data($author)?></h3>
 <ul>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=0">Show publications as author (<?php echo count(bibliographie_authors_get_publications($author->author_id, 0))?>)</a></li>
 	<li><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showPublications&amp;author_id=<?php echo ((int) $author->author_id)?>&amp;asEditor=1">Show publications as editor (<?php echo count(bibliographie_authors_get_publications($author->author_id, 1))?>)</a></li>
 </ul>
-
 <?php
 			$tagsArray = bibliographie_authors_get_tags($author->author_id);
 			if(is_array($tagsArray) and count($tagsArray) > 0){
@@ -220,7 +239,7 @@ $(function () {
 <?php
 		}
 
-		bibliographie_history_append_step('authors', 'Showing list of authors (selection '.$_GET['intial'].')');
+		bibliographie_history_append_step('authors', 'Showing list of authors (selection '.htmlspecialchars($_GET['intial']).')');
 ?>
 
 <h3>List of authors</h3>

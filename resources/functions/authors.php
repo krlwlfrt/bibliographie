@@ -372,3 +372,28 @@ ORDER BY
 
 	return $return;
 }
+
+function bibliographie_authors_delete ($author_id) {
+	static $deletePerson = null;
+
+	$person = bibliographie_authors_get_data($author_id);
+	$return = false;
+
+	if(is_object($person)){
+		$publications = array_unique(array_merge(bibliographie_authors_get_publications($person->author_id, false), bibliographie_authors_get_publications($person->author_id, true)));
+		if(count($publications) == 0){
+			if($deletePerson === null)
+				$deletePerson = DB::getInstance()->prepare('DELETE FROM `a2author` WHERE `author_id` = :author_id LIMIT 1');
+
+			$deletePerson->bindParam('author_id', $person->author_id);
+			$return = $deletePerson->execute();
+
+			if($return){
+				bibliographie_purge_cache('author_'.((int) $person->author_id));
+				bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
+			}
+		}
+	}
+
+	return $return;
+}
