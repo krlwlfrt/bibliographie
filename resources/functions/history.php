@@ -9,6 +9,11 @@ $bibliographie_history_icons = array (
 	'topics' => 'folder'
 );
 
+/**
+ *
+ * @global type $bibliographie_history_path_identifier
+ * @global array $bibliographie_history_icons
+ */
 function bibliographie_history_parse () {
 	global $bibliographie_history_path_identifier, $bibliographie_history_icons;
 
@@ -31,10 +36,12 @@ function bibliographie_history_parse () {
 		$step = $_SESSION['bibliographie_history_path'][$parent];
 		$parent = $step['parent'];
 
+		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' ';
 		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic')
-			$step['description'] = '<a href="'.$step['url'].'">'.$step['description'].'</a>';
-
-		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' '.$step['description'].' ('.$step['method'].')</div>';
+			echo '<a href="'.$step['url'].'">'.$step['description'].'</a>';
+		else
+			echo $step['description'];
+		echo ' ('.$step['method'].')</div>';
 		$i++;
 
 		if($i == 100)
@@ -44,6 +51,12 @@ function bibliographie_history_parse () {
 	echo '</div></div>';
 }
 
+/**
+ *
+ * @global type $bibliographie_history_path_identifier
+ * @param type $category
+ * @param type $description
+ */
 function bibliographie_history_append_step ($category, $description) {
 	global $bibliographie_history_path_identifier;
 
@@ -76,6 +89,12 @@ function bibliographie_history_append_step ($category, $description) {
 	}
 }
 
+/**
+ *
+ * @global type $bibliographie_history_path_identifier
+ * @param type $matches
+ * @return type
+ */
 function bibliographie_history_rewrite_links ($matches) {
 	global $bibliographie_history_path_identifier;
 
@@ -97,6 +116,8 @@ function bibliographie_history_rewrite_links ($matches) {
 
 			if(mb_strpos($link[0], 'from') === false)
 				$link = $link[0].$connector.'from='.$bibliographie_history_path_identifier.$link[1];
+			else
+				$link = $link[0];
 
 
 		}elseif(empty($link[0]) and !empty($link[1])){
