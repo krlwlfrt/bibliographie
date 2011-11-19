@@ -87,15 +87,22 @@ function bibliographie_bookmarks_check_publication ($pub_id) {
  * @param int $pub_id
  */
 function bibliographie_bookmarks_print_html ($pub_id) {
-	$str = '<div id="bibliographie_bookmark_container_'.((int) $pub_id).'" class="bibliographie_bookmark_container">';
+	$publication = bibliographie_publications_get_data($pub_id);
+	$str = (string) '';
 
-	if(bibliographie_bookmarks_check_publication($pub_id)){
-		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_unset_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('cross').'</a>';
-	}else{
-		$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_set_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('star').'</a>';
+	if(is_object($publication)){
+		$str .= '<div id="bibliographie_bookmark_container_'.((int) $pub_id).'" class="bibliographie_bookmark_container">';
+
+		if(bibliographie_bookmarks_check_publication($pub_id)){
+			$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_unset_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('cross').'</a>';
+		}else{
+			$str .= '<a href="javascript:;" onclick="bibliographie_bookmarks_set_bookmark('.((int) $pub_id).')">'.bibliographie_icon_get('star').'</a>';
+		}
+
+		$str .= '&nbsp;<a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.bibliographie_publications_cache_list(array($pub_id)).'\')">'.bibliographie_icon_get('page-white-go').'</a>';
+
+		$str .= '</div>';
 	}
-
-	$str .= '</div>';
 
 	return $str;
 }

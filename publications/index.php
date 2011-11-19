@@ -598,11 +598,11 @@ $(function() {
 		$publication = bibliographie_publications_get_data($_GET['pub_id'], 'assoc');
 
 		if(is_array($publication)){
+			bibliographie_history_append_step('publications', 'Showing publication '.htmlspecialchars($publication['title']));
 ?>
 
 <em style="float: right">
-	<a href="javascript:;" onclick="bibliographie_publications_export_choose_type('<?php echo bibliographie_publications_cache_list(array($publication['pub_id']))?>')"><em><?php echo bibliographie_icon_get('page-white-go')?> Export</em></a>
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit publication</a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit</a>
 </em>
 <h3><?php echo htmlspecialchars($publication['title'])?></h3>
 <?php
@@ -668,7 +668,8 @@ $(function() {
 				}
 			}
 			echo '</table>';
-		}
+		}else
+			bibliographie_history_append_step('publications', 'Publication not existing');
 	break;
 }
 
