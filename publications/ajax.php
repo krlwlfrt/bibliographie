@@ -69,7 +69,7 @@ WHERE
 							'stripDelimiter' => true,
 							'validate' => true,
 							'unwrap' => true,
-							'removeCurlyBraces' => true,
+							//'removeCurlyBraces' => true,
 							'extractAuthors' => true
 						));
 
@@ -190,7 +190,7 @@ WHERE
 						'stripDelimiter' => true,
 						'validate' => true,
 						'unwrap' => true,
-						'removeCurlyBraces' => true,
+						//'removeCurlyBraces' => true,
 						'extractAuthors' => true
 					));
 					$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
@@ -252,7 +252,7 @@ WHERE
 						'stripDelimiter' => true,
 						'validate' => true,
 						'unwrap' => true,
-						'removeCurlyBraces' => true,
+						//'removeCurlyBraces' => true,
 						'extractAuthors' => true
 					));
 					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexRemote'])));
