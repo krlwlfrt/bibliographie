@@ -38,7 +38,7 @@ function bibliographie_history_parse () {
 		$parent = $step['parent'];
 
 		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' ';
-		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic')
+		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic' and $step['redoable'])
 			echo '<a href="'.$step['url'].'">'.$step['description'].'</a>';
 		else
 			echo $step['description'];
@@ -58,7 +58,7 @@ function bibliographie_history_parse () {
  * @param type $category
  * @param type $description
  */
-function bibliographie_history_append_step ($category, $description) {
+function bibliographie_history_append_step ($category, $description, $redoable = true) {
 	global $bibliographie_history_path_identifier;
 
 	$thisStep = array (
@@ -67,7 +67,8 @@ function bibliographie_history_append_step ($category, $description) {
 		'task' => $_GET['task'],
 		'url' => $_SERVER['REQUEST_URI'],
 		'parent' => $_GET['from'],
-		'method' => $_SERVER['REQUEST_METHOD']
+		'method' => $_SERVER['REQUEST_METHOD'],
+		'redoable' => $redoable
 	);
 
 	$history = (string) '';

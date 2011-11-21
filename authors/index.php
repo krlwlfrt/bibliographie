@@ -24,6 +24,8 @@ switch($_GET['task']){
 				echo '<p class="error"><em>'.bibliographie_authors_parse_data($person->author_id).'</em> has '.count($publications).' publications and can therefore not be deleted!</p>';
 		}else
 			echo '<p class="error">Person could not be found!</p>';
+
+		bibliographie_history_append_step('authors', 'Delete author', false);
 	break;
 
 	case 'authorEditor':
@@ -200,53 +202,74 @@ $(function () {
 	break;
 
 	case 'showList':
-		$initialsResult = mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial`, COUNT(*) AS `count` FROM `a2author` GROUP BY `initial` ORDER BY `initial`) initials WHERE `initial` REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'");
+		$authors = DB::getInstance()->query('SELECT * FROM `a2author`');
+		$initials = DB::getInstance()->query('SELECT * FROM (
+	SELECT UPPER(
+		SUBSTRING(`surname`, 1, 1)
+	) AS `initial`, COUNT(*) AS `count`
+	FROM
+		`a2author`
+	GROUP BY
+		`initial`
+	ORDER BY
+		`initial`
+) initials
+WHERE
+	`initial` REGEXP "[ABCDEFGHIJKLMNOPQRSTUVWXYZ]"');
 
-		$miscResult = mysql_num_rows(mysql_query("SELECT * FROM (SELECT UPPER(SUBSTRING(`surname`, 1, 1)) AS `initial` FROM `a2author`) initials WHERE `initial` NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'"));
+		if($authors->rowCount() > 0){
+			$initials->setFetchMode();
+			$initialsArray = $initials->fetchAll();
+			if($authors->rowCount() != $initials->rowCount())
+				$initialsArray[] = array (
+					'initial' => 'Misc',
+					'count' => $authors->rowCount() - $initials->rowCount()
+				);
 
-		$whereClause = "";
-		if(empty($_GET['initial'])){
-			$_GET['initial'] = 'A';
-			$whereClause = " WHERE SUBSTRING(`surname`, 1, 1) = 'A'";
-		}
+			echo '<p class="bibliographie_pages"><strong>Initials:</strong>';
+			if(empty($_GET['initial']))
+				$_GET['initial'] = 'A';
 
-		if(mysql_num_rows($initialsResult) or $miscResult){
-?>
-
-<p class="bibliographie_pages">
-	<strong>Initials: </strong>
-<?php
-			while($initial = mysql_fetch_object($initialsResult)){
-				if($_GET['initial'] != $initial->initial)
-					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&initial='.$initial->initial.'" title="'.$initial->count.' persons">['.$initial->initial.']</a>'.PHP_EOL;
-				else{
-					echo '<strong>['.$initial->initial.']</strong>'.PHP_EOL;
-					$whereClause = " WHERE UPPER(SUBSTRING(`surname`, 1, 1)) = '".mysql_real_escape_string(stripslashes($initial->initial))."'";
+			$selectedInitial = (string) '';
+			foreach($initialsArray as $initial){
+				if($_GET['initial'] != $initial['initial']){
+					echo ' <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&amp;initial='.$initial['initial'].'" title="'.$initial['count'].' persons">['.$initial['initial'].']</a>';
+				}else{
+					echo ' <strong>['.$initial['initial'].']</strong>';
+					$selectedInitial = $initial['initial'];
 				}
 			}
+			echo '</p>';
 
-			if($miscResult){
-				if($_GET['initial'] != 'Misc')
-					echo '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showList&initial=Misc" title="'.$miscResult.' persons">Misc</a>'.PHP_EOL;
-				else{
-					echo '<strong>Misc</strong>'.PHP_EOL;
-					$whereClause = " WHERE UPPER(SUBSTRING(`surname`, 1, 1)) NOT REGEXP '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'";
-				}
+			$showAuthors = null;
+			if(in_array($selectedInitial, array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'))){
+				$showAuthors = DB::getInstance()->prepare('SELECT
+	`author_id`, `surname`, `firstname`
+FROM
+	`a2author`
+WHERE
+	UPPER(
+		SUBSTRING(`surname`, 1, 1)
+	) = :initial
+ORDER BY `surname`, `firstname`');
+				$showAuthors->bindParam('initial', $selectedInitial);
+			}else{
+				$showAuthors = DB::getInstance()->prepare('SELECT
+	`author_id`, `surname`, `firstname`
+FROM
+	`a2author`
+WHERE
+	UPPER(
+		SUBSTRING(`surname`, 1, 1)
+	) NOT REGEXP "[ABCDEFGHIJKLMNOPQRSTUVWXYZ]"
+ORDER BY `surname`, `firstname`
+');
 			}
-?>
+			$showAuthors->execute();
 
-</p>
-<?php
-		}
-
-		bibliographie_history_append_step('authors', 'Showing list of authors (selection '.htmlspecialchars($_GET['intial']).')');
-?>
-
-<h3>List of authors</h3>
-<?php
-		$authorsResult = mysql_query("SELECT * FROM `a2author` ".$whereClause." ORDER BY `surname`, `firstname`");
-
-		if(mysql_num_rows($authorsResult) > 0){
+			if($showAuthors->rowCount() > 0){
+				$showAuthors->setFetchMode(PDO::FETCH_OBJ);
+				$authorsArray = $showAuthors->fetchAll();
 ?>
 
 <table class="dataContainer">
@@ -255,8 +278,8 @@ $(function () {
 		<th>Firstname</th>
 	</tr>
 <?php
-			while($author = mysql_fetch_object($authorsResult)){
-				$name = bibliographie_authors_parse_data($author, array('splitNames'=>true));
+				foreach($authorsArray as $author){
+					$name = bibliographie_authors_parse_data($author, array('splitNames' => true));
 ?>
 
 	<tr>
@@ -264,7 +287,7 @@ $(function () {
 		<td><?php echo $name['firstname']?></td>
 	</tr>
 <?php
-			}
+				}
 ?>
 
 </table>
@@ -274,6 +297,10 @@ $('.dataContainer').floatingTableHead();
 	/* ]]> */
 </script>
 <?php
+			}else
+				echo '<h3 class="error">No authors in the list!</h3>';
+
+			bibliographie_history_append_step('authors', 'Showing list of authors (selection '.htmlspecialchars($selectedInitial).')');
 		}
 	break;
 }
