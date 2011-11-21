@@ -18,6 +18,7 @@ switch($_GET['task']){
 				echo '<h3>Publications of '.bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true)).' tagged with '.bibliographie_tags_parse_tag($tag->tag_id, array('linkProfile' => true)).'</h3>';
 				$publications = bibliographie_tags_get_publications_with_author($tag->tag_id, $author->author_id);
 				$baseLink = BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $tag->tag_id).'&amp;author_id='.((int) $author->author_id);
+				bibliographie_history_append_step('tags', 'Show publications tagged with '.bibliographie_tags_parse_tag($tag->tag_id).' from '.bibliographie_authors_parse_data($author->author_id));
 
 
 			}elseif(is_numeric($_GET['topic_id']) and bibliographie_topics_get_data($_GET['topic_id'])){
@@ -25,12 +26,14 @@ switch($_GET['task']){
 				echo '<h3>Publications in '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' tagged with '.bibliographie_tags_parse_tag($tag->tag_id, array('linkProfile' => true)).'</h3>';
 				$publications = bibliographie_tags_get_publications_with_topic($tag->tag_id, $topic->topic_id);
 				$baseLink = BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $tag->tag_id).'&amp;topic_id='.((int) $topic->topic_id);
+				bibliographie_history_append_step('tags', 'Show publications tagged with '.bibliographie_tags_parse_tag($tag->tag_id).' in '.bibliographie_topics_parse_name($topic->topic_id));
 
 
 			}else{
 				echo '<h3>Publications tagged with '.bibliographie_tags_parse_tag($tag->tag_id, array('linkProfile' => true)).'</h3>';
 				$publications = bibliographie_tags_get_publications($tag->tag_id);
 				$baseLink = BIBLIOGRAPHIE_WEB_ROOT.'/tags/?task=showTag&amp;tag_id='.((int) $tag->tag_id);
+				bibliographie_history_append_step('tags', 'Show publications tagged with '.bibliographie_tags_parse_tag($tag->tag_id));
 			}
 
 			bibliographie_publications_print_list(
@@ -42,6 +45,7 @@ switch($_GET['task']){
 	break;
 
 	case 'showCloud':
+		bibliographie_history_append_step('tags', 'Show tag cloud');
 ?>
 
 <h3>Tag cloud</h3>

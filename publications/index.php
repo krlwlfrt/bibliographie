@@ -71,6 +71,7 @@ switch($_GET['task']){
 		 * Unset yet checked prefetched data.
 		 */
 		unset($_SESSION['publication_prefetchedData_checked']);
+		bibliographie_history_append_step('publications', 'Precheck data from external source');
 ?>
 
 <h3>Check fetched data</h3>
@@ -177,6 +178,7 @@ $(function () {
 			echo '<p class="error">You did not fetch any data yet! You may want to do so now!</p>';
 
 	case 'fetchData':
+		bibliographie_history_append_step('publications', 'Fetch data from external source');
 		unset($_SESSION['publication_prefetchedData_checked']);
 		unset($_SESSION['publication_prefetchedData_unchecked']);
 ?>

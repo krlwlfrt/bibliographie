@@ -4,8 +4,9 @@ $bibliographie_history_icons = array (
 	'bookmarks' => 'star',
 	'generic' => 'error',
 	'maintenance' => 'wrench',
-	'publications' => 'page-white-text',
 	'notes' => 'note',
+	'publications' => 'page-white-text',
+	'tags' => 'tag-blue',
 	'topics' => 'folder'
 );
 
