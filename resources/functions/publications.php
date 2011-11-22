@@ -503,14 +503,16 @@ function bibliographie_publications_print_list (array $publications, $baseLink, 
 		if(!$onlyPublication){
 			echo '<p class="bibliographie_operations">';
 			if(count($publications) > 1)
-				echo '<span style="float: left">List contains '.count($publications).' publication(s)...</span><strong>List operations: </strong> ';
-
-			echo '<a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.bibliographie_publications_cache_list($publications).'\')"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
+				echo '<span style="float: left">List contains '.count($publications).' publication(s)...</span>';
 
 			if(count($publications) > 1 and $showBookmarkingLink){
 				echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
 				echo ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
 			}
+
+			echo ' <a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.bibliographie_publications_cache_list($publications).'\')"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
+
+			echo ' <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.bibliographie_publications_cache_list($publications).'">'.bibliographie_icon_get('page-white-stack').' Batch</a>';
 			echo '</p>';
 		}
 
@@ -1020,8 +1022,8 @@ LIMIT 1");
 
 /**
  *
- * @param type $listID
- * @return type
+ * @param string $listID
+ * @return array
  */
 function bibliographie_publications_get_cached_list ($listID) {
 	if(strpos($listID, '..') === FALSE and strpos($listID, '/') === FALSE){

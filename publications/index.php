@@ -7,6 +7,40 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'batchOperations':
+		$publications = bibliographie_publications_get_cached_list($_GET['list']);
+
+		if(is_array($publications) and count($publications) > 0){
+			echo '<p class="notice">List of publications contains '.count($publications).' entry/entries.</p>';
+
+			echo '<h3>Topics</h3>';
+			echo '<p>Please select a topic that you want to categorize the publications with or remove from the publications.</p>';
+?>
+
+	<div class="unit">
+		<label for="topics" class="block">Parent topics</label>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
+		<br style="clear: both" />
+	</div>
+<?php
+
+			echo '<h3>Tags</h3>';
+			echo '<p>Please select a tag that you want to tag the publications with or remove from the publications.</p>';
+?>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+$(function () {
+	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+})
+	/* ]]> */
+</script>
+<?php
+		}else
+			echo '<h3 class="error">List was empty</h3><p>Sorry, but the list you provided was empty!</p>';
+	break;
+
 	case 'showContainer':
 		if(in_array($_GET['type'], array('journal', 'book'))){
 			$fields = array (
