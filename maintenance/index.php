@@ -185,7 +185,11 @@ $(function () {
 					'unlockTopic' => 'lock-open',
 					'editPublication' => 'page-white-edit',
 					'createPublication' => 'page-white-create',
-					'createTag' => 'tag-blue-add'
+					'createTag' => 'tag-blue-add',
+					'addTopic' => 'folder-add',
+					'removeTopic' => 'folder-delete',
+					'deleteAuthor' => 'user-delete',
+					'createPublication' => 'page-white-add'
 				);
 
 				foreach($logContent as $logRow){

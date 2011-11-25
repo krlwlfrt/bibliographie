@@ -86,7 +86,7 @@ switch($_GET['task']){
 			}
 ?>
 
-<h3>Topics</h3>
+<h3><?php echo bibliographie_icon_get('folder')?> Topics</h3>
 <p>Please select a topic that you want to categorize the publications with or remove from the publications.</p>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=batchOperations&amp;list=<?php echo $_GET['list']?>&amp;category=topics" method="post">
 	<div class="unit">
@@ -100,11 +100,9 @@ switch($_GET['task']){
 		<input type="submit" name="removeTopics" value="Remove topics" />
 	</div>
 </form>
-<?php
 
-			echo '<h3>Tags</h3>';
-			echo '<p>Please select a tag that you want to tag the publications with or remove from the publications.</p>';
-?>
+<h3><?php echo bibliographie_icon_get('tag-blue')?> Tags</h3>
+<p>Please select a tag that you want to tag the publications with or remove from the publications.</p>
 
 <script type="text/javascript">
 	/* <![CDATA[ */

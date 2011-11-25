@@ -1094,6 +1094,13 @@ function bibliographie_publications_parse_title ($pub_id, array $options = array
 	return $return;
 }
 
+/**
+ * Adds a topic to a list of publications.
+ * @staticvar string $addLink
+ * @param array $publications
+ * @param int $topic_id
+ * @return mixed False on error, an array otherwise.
+ */
 function bibliographie_publications_add_topic (array $publications, $topic_id) {
 	static $addLink = null;
 
@@ -1143,6 +1150,13 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 	return $return;
 }
 
+/**
+ * Removes a topic from a list of publications.
+ * @staticvar string $removeLink
+ * @param array $publications
+ * @param int $topic_id
+ * @return mixed False on error, an array otherwise.
+ */
 function bibliographie_publications_remove_topic (array $publications, $topic_id) {
 	static $removeLink = null;
 
