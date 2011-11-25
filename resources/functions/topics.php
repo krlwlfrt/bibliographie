@@ -601,3 +601,20 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
 	}else
 		echo '<p class="error">Graph is empty!</p>';
 }
+
+function bibliographie_topics_populate_input ($topics) {
+	$prePopulateTopics = array();
+	if(!empty($topics)){
+		if(preg_match('~[0-9]+(\,[0-9]+)*~', $topics)){
+			$topics = csv2array($topics, 'int');
+			foreach($topics as $topic){
+				$prePopulateTopics[] = array (
+					'id' => $topic,
+					'name' => bibliographie_topics_parse_name($topic)
+				);
+			}
+		}
+	}
+
+	return $prePopulateTopics;
+}

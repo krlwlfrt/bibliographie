@@ -239,3 +239,20 @@ function bibliographie_tags_print_cloud (array $tags, array $options = array()) 
 <?php
 	}
 }
+
+function bibliographie_tags_populate_input ($tags) {
+	$prePopulateTags = array();
+
+	if(!empty($tags)){
+		if(is_csv($tags, 'int')){
+			$tags = csv2array($tags, 'int');
+			foreach($tags as $tag)
+				$prePopulateTags[] = array (
+					'id' => $tag,
+					'name' => bibliographie_tags_parse_tag($tag)
+				);
+		}
+	}
+
+	return $prePopulateTags;
+}

@@ -15,8 +15,6 @@ switch($_GET['task']){
 		$publications = bibliographie_publications_get_cached_list($_GET['list']);
 
 		if(is_array($publications) and count($publications) > 0){
-			echo '<p class="success">List of publications contains '.count($publications).' entry/entries.</p>';
-
 			if($_GET['category'] == 'topics'){
 				if(!empty($_POST['topics']) and is_csv($_POST['topics'], 'int')){
 					$topics = csv2array($_POST['topics'], 'int');
@@ -86,35 +84,56 @@ switch($_GET['task']){
 			}
 ?>
 
-<h3><?php echo bibliographie_icon_get('folder')?> Topics</h3>
-<p>Please select a topic that you want to categorize the publications with or remove from the publications.</p>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=batchOperations&amp;list=<?php echo $_GET['list']?>&amp;category=topics" method="post">
+	<h3><?php echo bibliographie_icon_get('folder')?> Topics</h3>
 	<div class="unit">
-		<label for="topics" class="block">Parent topics</label>
+		<label for="topics" class="block">Topics</label>
 		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+
 		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
+
 		<br style="clear: both" />
+
+		<em>Please select the topics that you want to add to or remove from the publications.</em>
 	</div>
+
 	<div class="submit">
 		<input type="submit" name="addTopics" value="Add topics" />
 		<input type="submit" name="removeTopics" value="Remove topics" />
 	</div>
 </form>
 
-<h3><?php echo bibliographie_icon_get('tag-blue')?> Tags</h3>
-<p>Please select a tag that you want to tag the publications with or remove from the publications.</p>
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=batchOperations&amp;list=<?php echo $_GET['list']?>&amp;category=tags" method="post">
+	<h3><?php echo bibliographie_icon_get('tag-blue')?> Tags</h3>
+	<div class="unit">
+		<label for="tags" class="block">Tags</label>
+		<em style="float: right; text-align: right;">
+			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
+			<span id="tags_tagNotExisting"></em>
+		</em>
+		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" tabindex="8" />
+		<br style="clear: both;" />
+		<em>Please select tags that you want to tag the publications with or remove from the publications.</em>
+	</div>
+</form>
+
+<h3><?php echo bibliographie_icon_get('page-white-stack')?> Publications that will be affected</h3>
+<?php
+			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.$_GET['list'], null, false);
+			bibliographie_charmap_print_charmap();
+?>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
 	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
+	bibliographie_tags_input_tokenized('tags', <?php echo json_encode($prePopulateTags)?>);
 
 	$('#topics').charmap();
 })
 	/* ]]> */
 </script>
 <?php
-			bibliographie_charmap_print_charmap();
 			bibliographie_history_append_step('publications', 'Batch operations ('.count($publications).' publications)');
 		}else
 			echo '<h3 class="error">List was empty</h3><p>Sorry, but the list you provided was empty!</p>';
@@ -456,39 +475,12 @@ $(function () {
 			}
 
 			/**
-			 * Fill the prePropulateAuthor array.
+			 * Fill the prePopluate arrays.
 			 */
 			$prePopulateAuthor = bibliographie_authors_populate_input($_POST['author']);
 			$prePopulateEditor = bibliographie_authors_populate_input($_POST['editor']);
-
-			/**
-			 * Fill the prePropulateTags array.
-			 */
-			if(!empty($_POST['tags'])){
-				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['tags'])){
-					$tags = csv2array($_POST['tags'], 'int');
-					foreach($tags as $tag)
-						$prePopulateTags[] = array (
-							'id' => $tag,
-							'name' => bibliographie_tags_parse_tag($tag)
-						);
-				}
-			}
-
-			/**
-			 * Fill the prePropulateTopics array.
-			 */
-			if(!empty($_POST['topics'])){
-				if(preg_match('~[0-9]+(\,[0-9]+)*~', $_POST['topics'])){
-					$topics = csv2array($_POST['topics'], 'int');
-					foreach($topics as $topic){
-						$prePopulateTopics[] = array (
-							'id' => $topic,
-							'name' => bibliographie_topics_parse_name($topic)
-						);
-					}
-				}
-			}
+			$prePopulateTags = bibliographie_tags_populate_input($_POST['tags']);
+			$prePopulateTopics = bibliographie_topics_populate_input($_POST['topics']);
 ?>
 
 <h3>Publication editor</h3>
