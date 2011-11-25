@@ -1093,3 +1093,52 @@ function bibliographie_publications_parse_title ($pub_id, array $options = array
 
 	return $return;
 }
+
+function bibliographie_publications_add_topic (array $publications, $topic_id) {
+	static $addLink = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+
+	$return = false;
+
+	if(is_array($publications) and is_object($topic)){
+		$topicsPublications = bibliographie_topics_get_publications($topic->topic_id);
+
+		// Remove those from the list that have the topic already.
+		$publications = array_diff($publications, $topicsPublications);
+
+		if($addLink === null)
+			$addLink = DB::getInstance()->prepare('INSERT INTO `a2topicpublicationlink` (
+	`topic_id`,
+	`pub_id`
+) VALUES (
+	:topic_id,
+	:pub_id
+)');
+
+		$addedPublications = array();
+		if(count($publications) > 0){
+			foreach($publications as $pub_id){
+				if($addLink->execute(array (
+					'topic_id' => (int) $topic->topic_id,
+					'pub_id' => (int) $pub_id
+				)))
+					$addedPublications[] = $pub_id;
+			}
+		}
+
+		$return = array (
+			'topic_id' => (int) $topic->topic_id,
+			'publicationsBefore' => $topicsPublications,
+			'publicationsToAdd' => $publications,
+			'publicationsAdded' => $addedPublications
+		);
+
+		if(count($addedPublications) > 0){
+			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
+			bibliographie_log('publications', 'addTopic', json_encode($return));
+		}
+	}
+
+	return $return;
+}
