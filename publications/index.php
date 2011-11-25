@@ -72,10 +72,7 @@ switch($_GET['task']){
 							$result = bibliographie_publications_remove_topic($publications, $topic->topic_id);
 							if(is_array($result)){
 								echo bibliographie_icon_get('tick').' Success!<br />'
-									.'<em>'.count($result['publicationsRemoved']).' publications were removed. '.count(array_diff($publications, $result['publicationsToRemove'])).' didn\'t have this topic.</em>';
-
-								if($result['publicationsRemoved'] != count($result['publicationsToRemove']))
-									echo '<br /><span class="error">'.(count($result['publicationsToRemove']) - $result['publicationsRemoved']).' could not be removed.</span>';
+									.'<em>Publications were removed. '.count(array_diff($publications, $result['publicationsToRemove'])).' did not have this topic.</em>';
 							}else
 								echo bibliographie_icon_get('cross').' An error occurred!';
 

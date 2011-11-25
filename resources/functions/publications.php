@@ -1160,24 +1160,19 @@ function bibliographie_publications_remove_topic (array $publications, $topic_id
 			$removeLink = DB::getInstance()->prepare('DELETE FROM
 	`a2topicpublicationlink`
 WHERE
-	FIND_IN_SET(`pub_id`, :list) AND
-	`topic_id` = :topic_id');
+	FIND_IN_SET(`pub_id`, :list) AND `topic_id` = :topic_id');
 
 		if($removeLink->execute(array(
 			'list' => array2csv($publications),
-			'topic_id' => (int) $topic->topic_id,
-			//'amountOfPublications' => (int) count($publications)
+			'topic_id' => (int) $topic->topic_id
 		)))
-			$removedLinks = $removeLink->rowCount();
+			$return = array (
+				'topic_id' => (int) $topic->topic_id,
+				'publicationsBefore' => $topicsPublications,
+				'publicationsToRemove' => $publications
+			);
 
-		$return = array (
-			'topic_id' => (int) $topic->topic_id,
-			'publicationsBefore' => $topicsPublications,
-			'publicationsToRemove' => $publications,
-			'publicationsRemoved' => (int) $removedLinks
-		);
-
-		if($return['publicationsRemoved'] > 0){
+		if(is_array($return)){
 			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
 			bibliographie_log('publications', 'removeTopic', json_encode($return));
 		}
