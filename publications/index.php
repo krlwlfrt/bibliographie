@@ -54,6 +54,33 @@ switch($_GET['task']){
 						echo '</ul>';
 					}elseif($_POST['removeTopics'] == 'Remove topics'){
 
+						foreach($topics as $topic){
+							$topic = bibliographie_topics_get_data($topic);
+
+							if(!is_object($topic))
+								continue;
+
+							$topicFamily = bibliographie_topics_get_parent_topics($topic->topic_id);
+							$topicFamily[] = $topic->topic_id;
+							if(count(array_intersect($topicFamily, bibliographie_topics_get_locked_topics()))){
+								echo '<li>'.bibliographie_icon_get('error').' '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' is in the list of locked topics. No changes were committed to this topic!</li>';
+								continue;
+							}
+
+							echo '<li>';
+							echo 'Removing topic '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' ... ';
+							$result = bibliographie_publications_remove_topic($publications, $topic->topic_id);
+							if(is_array($result)){
+								echo bibliographie_icon_get('tick').' Success!<br />'
+									.'<em>'.count($result['publicationsRemoved']).' publications were removed. '.count(array_diff($publications, $result['publicationsToRemove'])).' didn\'t have this topic.</em>';
+
+								if($result['publicationsRemoved'] != count($result['publicationsToRemove']))
+									echo '<br /><span class="error">'.(count($result['publicationsToRemove']) - $result['publicationsRemoved']).' could not be removed.</span>';
+							}else
+								echo bibliographie_icon_get('cross').' An error occurred!';
+
+							echo '</li>';
+						}
 					}
 				}else
 					echo '<p class="error">You did not supply a list of topics to work with!</p>';

@@ -1142,3 +1142,46 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 
 	return $return;
 }
+
+function bibliographie_publications_remove_topic (array $publications, $topic_id) {
+	static $removeLink = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+
+	$return = false;
+
+	if(is_object($topic)){
+		$topicsPublications = bibliographie_topics_get_publications($topic->topic_id);
+
+		// Only keep those publications to remove from the topic that are actually in the topic.
+		$publications = array_values(array_intersect($topicsPublications, $publications));
+
+		if($removeLink === null)
+			$removeLink = DB::getInstance()->prepare('DELETE FROM
+	`a2topicpublicationlink`
+WHERE
+	FIND_IN_SET(`pub_id`, :list) AND
+	`topic_id` = :topic_id');
+
+		if($removeLink->execute(array(
+			'list' => array2csv($publications),
+			'topic_id' => (int) $topic->topic_id,
+			//'amountOfPublications' => (int) count($publications)
+		)))
+			$removedLinks = $removeLink->rowCount();
+
+		$return = array (
+			'topic_id' => (int) $topic->topic_id,
+			'publicationsBefore' => $topicsPublications,
+			'publicationsToRemove' => $publications,
+			'publicationsRemoved' => (int) $removedLinks
+		);
+
+		if($return['publicationsRemoved'] > 0){
+			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
+			bibliographie_log('publications', 'removeTopic', json_encode($return));
+		}
+	}
+
+	return $return;
+}
