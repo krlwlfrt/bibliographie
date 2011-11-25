@@ -140,7 +140,6 @@ var author_id = <?php
 ?>;
 $(function () {
 	$('#content input, #content textarea').charmap();
-	$('#bibliographie_charmap').dodge();
 
 	$('#firstname, #surname').bind('keyup change', function (event) {
 		delayRequest('bibliographie_authors_check_name', Array($('#firstname').val(), $('#surname').val()));

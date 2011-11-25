@@ -7,6 +7,10 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'showList':
+		// TODO
+	break;
+
 	case 'batchOperations':
 		$publications = bibliographie_publications_get_cached_list($_GET['list']);
 
@@ -37,6 +41,7 @@ $(function () {
 	/* ]]> */
 </script>
 <?php
+			bibliographie_history_append_step('publications', 'Batch operations');
 		}else
 			echo '<h3 class="error">List was empty</h3><p>Sorry, but the list you provided was empty!</p>';
 	break;
@@ -617,7 +622,6 @@ $(function() {
 	bibliographie_publications_show_fields($('#pub_type').val());
 
 	$('#content input, #content textarea').charmap();
-	$('#bibliographie_charmap').dodge();
 
 	bibliographie_publications_check_title($('#title').val(), pub_id);
 });

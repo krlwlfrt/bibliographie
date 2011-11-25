@@ -20,36 +20,41 @@ function bibliographie_history_parse () {
 
 	echo '<div id="bibliographie_history">';
 	echo '<em>Click to toggle!</em>';
-	echo '<strong>Navigation history</strong>';
+	$str = (string) '<strong>Navigation history</strong>';
 
 	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from']){
 		bibliographie_history_append_step('generic', 'Generic task');
-		echo ' '.bibliographie_icon_get('error').' <span class="error">The current action is not yet named!</span>';
+		$str .= ' '.bibliographie_icon_get('bug');
 	}
 
-	echo '<div class="history_steps">';
+	$str .= '<div class="history_steps">';
 
 	$parent = $bibliographie_history_path_identifier;
 	$step = null;
+	$goBack = null;
 
 	$i = (int) 1;
 	do {
 		$step = $_SESSION['bibliographie_history_path'][$parent];
 		$parent = $step['parent'];
 
-		echo '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' ';
+		$str .= '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' ';
 		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic' and $step['redoable'])
-			echo '<a href="'.$step['url'].'">'.$step['description'].'</a>';
+			$str .= '<a href="'.$step['url'].'">'.htmlspecialchars($step['description']).'</a>';
 		else
-			echo $step['description'];
-		echo ' ('.$step['method'].')</div>';
-		$i++;
+			$str .= htmlspecialchars($step['description']);
+		$str .= '</div>';
 
-		if($i == 100)
-			echo '<p class="notice">The history goes further, but the parsing stops here!</p>';
+		if($i == 2 and !empty($step['parent']))
+			$goBack = $step;
+		if(++$i == 100)
+			$str .= '<p class="notice">The history goes further, but the parsing stops here!</p>';
 	} while(!empty($step['parent']) and $i < 100);
 
-	echo '</div></div>';
+	if($goBack != null)
+		echo '<a href="'.$goBack['url'].'" title="'.htmlspecialchars($goBack['description']).'">'.bibliographie_icon_get('arrow-left').'</a> ';
+
+	echo $str.'</div></div>';
 }
 
 /**

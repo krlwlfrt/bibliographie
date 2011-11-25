@@ -36,6 +36,7 @@ function bibliographie_charmap_insert_char (substituteChar) {
 				$('#bibliographie_charmap')
 					.animate({'top': offsetTop + event.target.offsetHeight + 10, 'left': offsetLeft + Math.ceil(event.target.offsetWidth / 2)});
 			}
+			$('#bibliographie_charmap').dodge();
 	  });
 	  bibliographie_charmap_last_selection = this;
 

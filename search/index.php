@@ -58,7 +58,6 @@ $(function () {
 	});
 
 	$('#content input').charmap();
-	$('#bibliographie_charmap').dodge();
 });
 	/* ]]> */
 </script>

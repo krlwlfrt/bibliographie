@@ -145,7 +145,6 @@ $(function () {
 	});
 
 	$('#content input, #content textarea').charmap();
-	$('#bibliographie_charmap').dodge();
 });
 	/* ]]> */
 </script>
