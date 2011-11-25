@@ -1129,8 +1129,10 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 				if($addLink->execute(array (
 					'topic_id' => (int) $topic->topic_id,
 					'pub_id' => (int) $pub_id
-				)))
+				))){
 					$addedPublications[] = $pub_id;
+					bibliographie_purge_cache('publication_'.((int) $pub_id));
+				}
 			}
 		}
 
@@ -1188,6 +1190,101 @@ WHERE
 
 		if(is_array($return)){
 			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
+			bibliographie_purge_cache('publication_');
+			bibliographie_log('publications', 'removeTopic', json_encode($return));
+		}
+	}
+
+	return $return;
+}
+
+/**
+ *
+ */
+function bibliographie_publications_add_tag (array $publications, $tag_id) {
+	static $addLink = null;
+
+	$tag = bibliographie_tags_get_data($tag_id);
+
+	$return = false;
+
+	if(is_object($tag)){
+		$tagsPublications = bibliographie_tags_get_publications($tag->tag_id);
+
+		$publications = array_diff($publications, $tagsPublications);
+
+		if($addLink === null)
+			$addLink = DB::getInstance()->prepare('INSERT INTO `a2publicationtaglink` (
+	`pub_id`,
+	`tag_id`
+) VALUES (
+	:pub_id,
+	:tag_id
+)');
+
+		$addedPublications = array();
+		if(count($publications) > 0){
+			foreach($publications as $pub_id){
+				if($addLink->execute(array (
+					'tag_id' => (int) $tag->tag_id,
+					'pub_id' => (int) $pub_id
+				))){
+					$addedPublications[] = $pub_id;
+					bibliographie_purge_cache('publication_'.((int) $pub_id));
+				}
+			}
+		}
+
+		$return = array (
+			'tag_id' => (int) $tag->tag_id,
+			'publicationsBefore' => $tagsPublications,
+			'publicationsToAdd' => $publications,
+			'publicationsAdded' => $addedPublications
+		);
+
+		if(count($addedPublications) > 0){
+			bibliographie_purge_cache('tag_'.((int) $tag->tag_id));
+			bibliographie_log('publications', 'addTag', json_encode($return));
+		}
+	}
+
+	return $return;
+}
+
+/**
+ *
+ */
+function bibliographie_publications_remove_tag (array $publications, $tag_id) {
+	static $removeLink = null;
+
+	$tag = bibliographie_tags_get_data($tag_id);
+
+	$return = false;
+
+	if(is_object($tag)){
+		$tagsPublications = bibliographie_tags_get_publications($tag->tag_id);
+
+		$publications = array_values(array_intersect($tagsPublications, $publications));
+
+		if($removeLink === null)
+			$removeLink = DB::getInstance()->prepare('DELETE FROM
+	`a2publicationtaglink`
+WHERE
+	FIND_IN_SET(`pub_id`, :list) AND `tag_id` = :tag_id');
+
+		if($removeLink->execute(array(
+			'list' => array2csv($publications),
+			'tag_id' => (int) $tag->tag_id
+		)))
+			$return = array (
+				'tag_id' => (int) $tag->tag_id,
+				'publicationsBefore' => $topicsPublications,
+				'publicationsToRemove' => $publications
+			);
+
+		if(is_array($return)){
+			bibliographie_purge_cache('tag_'.((int) $topic->topic_id));
+			bibliographie_purge_cache('publication_');
 			bibliographie_log('publications', 'removeTopic', json_encode($return));
 		}
 	}

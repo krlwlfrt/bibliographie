@@ -51,7 +51,8 @@ switch($_GET['task']){
 						}
 						echo '</ul>';
 					}elseif($_POST['removeTopics'] == 'Remove topics'){
-
+						echo '<p class="notice">Removing topics from publications...</p>';
+						echo '<ul>';
 						foreach($topics as $topic){
 							$topic = bibliographie_topics_get_data($topic);
 
@@ -70,17 +71,64 @@ switch($_GET['task']){
 							$result = bibliographie_publications_remove_topic($publications, $topic->topic_id);
 							if(is_array($result)){
 								echo bibliographie_icon_get('tick').' Success!<br />'
-									.'<em>Publications were removed. '.count(array_diff($publications, $result['publicationsToRemove'])).' did not have this topic.</em>';
+									.'<em>Topic was removed from the publications.</em>';
 							}else
 								echo bibliographie_icon_get('cross').' An error occurred!';
 
 							echo '</li>';
 						}
+						echo '</ul>';
 					}
 				}else
 					echo '<p class="error">You did not supply a list of topics to work with!</p>';
 			}elseif($_GET['category'] == 'tags'){
+				if(!empty($_POST['tags']) and is_csv($_POST['tags'], 'int')){
+					$tags = csv2array($_POST['tags'], 'int');
 
+					if($_POST['addTags'] == 'Add tags'){
+						echo '<p class="notice">Adding tags to publications...</p>';
+						echo '<ul>';
+						foreach($tags as $tag){
+							$tag = bibliographie_tags_get_data($tag);
+
+							if(!is_object($tag))
+								continue;
+
+							echo 'Adding tag '.bibliographie_tags_parse_tag($tag->tag_id, array('linkProfile' => true)).' ... ';
+							$result = bibliographie_publications_add_tag($publications, $tag->tag_id);
+							if(is_array($result)){
+								echo bibliographie_icon_get('tick').' Success!<br />'
+									.'<em>'.count($result['publicationsAdded']).' publications were added. '.count(array_diff($publications, $result['publicationsToAdd'])).' had this tag already.</em>';
+
+								if(count($result['publicationsAdded']) != count($result['publicationsToAdd']))
+									echo '<br /><span class="error">'.(count($result['publicationsToAdd']) - count($result['publicationsAdded'])).' could not be added.</span>';
+							}else
+								echo bibliographie_icon_get('cross').' An error occurred!';
+						}
+						echo '</ul>';
+					}elseif($_POST['removeTags'] == 'Remove tags'){
+						echo '<p class="notice">Removing tags from publications...</p>';
+						echo '<ul>';
+						foreach($tags as $tag){
+							$tag = bibliographie_tags_get_data($tag);
+
+							if(!is_object($tag))
+								continue;
+
+							echo '<li>';
+							echo 'Removing tag '.bibliographie_tags_parse_tag($tag->tag_id, array('linkProfile' => true)).' ... ';
+							$result = bibliographie_publications_remove_tag($publications, $tag->tag_id);
+							if(is_array($result)){
+								echo bibliographie_icon_get('tick').' Success!<br />'
+									.'<em>Tag was removed from the publications.</em>';
+							}else
+								echo bibliographie_icon_get('cross').' An error occurred!';
+
+							echo '</li>';
+						}
+						echo '</ul>';
+					}
+				}
 			}
 ?>
 
@@ -107,13 +155,13 @@ switch($_GET['task']){
 	<h3><?php echo bibliographie_icon_get('tag-blue')?> Tags</h3>
 	<div class="unit">
 		<label for="tags" class="block">Tags</label>
-		<em style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
-			<span id="tags_tagNotExisting"></em>
-		</em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" tabindex="8" />
-		<br style="clear: both;" />
 		<em>Please select tags that you want to tag the publications with or remove from the publications.</em>
+	</div>
+
+	<div class="submit">
+		<input type="submit" name="addTags" value="Add tags" />
+		<input type="submit" name="removeTags" value="Remove tags" />
 	</div>
 </form>
 
@@ -126,8 +174,8 @@ switch($_GET['task']){
 <script type="text/javascript">
 	/* <![CDATA[ */
 $(function () {
-	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
-	bibliographie_tags_input_tokenized('tags', <?php echo json_encode($prePopulateTags)?>);
+	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode(bibliographie_topics_populate_input($_POST['topics']))?>);
+	bibliographie_tags_input_tokenized('tags', <?php echo json_encode(bibliographie_tags_populate_input($_POST['tags']))?>);
 
 	$('#topics').charmap();
 })
