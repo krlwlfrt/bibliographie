@@ -27,21 +27,29 @@ switch($_GET['task']){
 						foreach($topics as $topic){
 							$topic = bibliographie_topics_get_data($topic);
 
-							if(is_object($topic)){
-								echo '<li>';
-								echo 'Adding topic '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' ... ';
-								$result = bibliographie_publications_add_topic($publications, $topic->topic_id);
-								if(is_array($result)){
-									echo bibliographie_icon_get('tick').' Success!<br />'
-										.'<em>'.count($result['publicationsAdded']).' publications were added. '.count(array_diff($publications, $result['publicationsToAdd'])).' had this topic already.</em>';
+							if(!is_object($topic))
+								continue;
 
-									if(count($result['publicationsAdded']) != count($result['publicationsToAdd']))
-										echo '<br /><span class="error">'.(count($result['publicationsToAdd']) - count($result['publicationsAdded'])).' could not be added.</span>';
-								}else
-									echo bibliographie_icon_get('cross').' An error occurred!';
-
-								echo '</li>';
+							$topicFamily = bibliographie_topics_get_parent_topics($topic->topic_id);
+							$topicFamily[] = $topic->topic_id;
+							if(count(array_intersect($topicFamily, bibliographie_topics_get_locked_topics()))){
+								echo '<li>'.bibliographie_icon_get('error').' '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' is in the list of locked topics. No changes were committed to this topic!</li>';
+								continue;
 							}
+
+							echo '<li>';
+							echo 'Adding topic '.bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true)).' ... ';
+							$result = bibliographie_publications_add_topic($publications, $topic->topic_id);
+							if(is_array($result)){
+								echo bibliographie_icon_get('tick').' Success!<br />'
+									.'<em>'.count($result['publicationsAdded']).' publications were added. '.count(array_diff($publications, $result['publicationsToAdd'])).' had this topic already.</em>';
+
+								if(count($result['publicationsAdded']) != count($result['publicationsToAdd']))
+									echo '<br /><span class="error">'.(count($result['publicationsToAdd']) - count($result['publicationsAdded'])).' could not be added.</span>';
+							}else
+								echo bibliographie_icon_get('cross').' An error occurred!';
+
+							echo '</li>';
 						}
 						echo '</ul>';
 					}elseif($_POST['removeTopics'] == 'Remove topics'){
