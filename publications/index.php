@@ -609,26 +609,9 @@ $(function() {
 		delayRequest('bibliographie_publications_check_title', Array(event.target.value, pub_id));
 	});
 
-	bibliographie_authors_input_tokenized ('author', <?php echo json_encode($prePopulateAuthor)?>);
-	bibliographie_authors_input_tokenized ('editor', <?php echo json_encode($prePopulateEditor)?>);
-
-	$('#tags').tokenInput('<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/tags/ajax.php?task=searchTags', {
-		searchDelay: bibliographie_request_delay,
-		minChars: <?php echo ((int) BIBLIOGRAPHIE_SEARCH_MIN_CHARS)?>,
-		preventDuplicates: true,
-		theme: 'facebook',
-		prePopulate: <?php echo json_encode($prePopulateTags).PHP_EOL?>,
-		onResult: function (results) {
-			$('#tags_tagNotExisting').empty();
-			$('#bibliographie_charmap').hide();
-
-			if(results.length == 0)
-				$('#tags_tagNotExisting').html('Tag <strong>'+$('#token-input-tags').val()+'</strong> is not existing. <a href="javascript:;" onclick="bibliographie_publications_create_tag(\''+$('#token-input-tags').val()+'\');">Create it here!</a>');
-
-			return results;
-		}
-	});
-
+	bibliographie_authors_input_tokenized('author', <?php echo json_encode($prePopulateAuthor)?>);
+	bibliographie_authors_input_tokenized('editor', <?php echo json_encode($prePopulateEditor)?>);
+	bibliographie_tags_input_tokenized('tags', <?php echo json_encode($prePopulateTags)?>);
 	bibliographie_topics_input_tokenized('topics', 'topicsContainer', <?php echo json_encode($prePopulateTopics)?>);
 
 	bibliographie_publications_show_fields($('#pub_type').val());
