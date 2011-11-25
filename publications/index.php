@@ -7,10 +7,6 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
-	case 'showList':
-		// TODO
-	break;
-
 	case 'batchOperations':
 		$publications = bibliographie_publications_get_cached_list($_GET['list']);
 
@@ -155,7 +151,12 @@ switch($_GET['task']){
 	<h3><?php echo bibliographie_icon_get('tag-blue')?> Tags</h3>
 	<div class="unit">
 		<label for="tags" class="block">Tags</label>
-		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" tabindex="8" />
+		<em style="float: right; text-align: right;">
+			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
+			<span id="tags_tagNotExisting"></em>
+		</em>
+		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
+		<br style="clear: both;" />
 		<em>Please select tags that you want to tag the publications with or remove from the publications.</em>
 	</div>
 

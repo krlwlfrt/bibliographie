@@ -1285,7 +1285,7 @@ WHERE
 		if(is_array($return)){
 			bibliographie_purge_cache('tag_'.((int) $topic->topic_id));
 			bibliographie_purge_cache('publication_');
-			bibliographie_log('publications', 'removeTopic', json_encode($return));
+			bibliographie_log('publications', 'removeTag', json_encode($return));
 		}
 	}
 
