@@ -180,6 +180,9 @@ LIMIT 1');
 			);
 
 			if($data['dataBefore'] != $data['dataAfter']){
+				foreach($data['dataBefore']['topics'] as $topic_id)
+					bibliographie_purge_cache('topic_'.((int) $topic_id).'_');
+
 				bibliographie_log('topics', 'editTopic', json_encode($data));
 				bibliographie_purge_cache('topic_'.((int) $dataBefore['topic_id']).'_');
 			}
