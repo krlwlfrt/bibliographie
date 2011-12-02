@@ -136,6 +136,10 @@ $('#jQueryLoading').bind('ajaxSend', function(e, x, o) {
 	$.jGrowl('Request to '+o.url+' failed!\n\n'+x.responseText);
 });
 
+$('body').on('click', function (event) {
+	$('.bibliographie_layers_closing_by_click').hide();
+});
+
 /**
  * Disable caching and attach the from for history to ajax calls.
  */

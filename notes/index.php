@@ -10,29 +10,46 @@ switch($_GET['task']){
 	case 'showNotes':
 ?>
 
-<h3>List of notes</h3>
-<p class="notice">This is a list of your notes sorted by currency.</p>
+<h3>List of publications with notes</h3>
 <?php
 		bibliographie_history_append_step('notes', 'List of notes');
 		$bibliographie_title = 'List of notes';
 
-		$notes = DB::getInstance()->prepare('SELECT `note_id`, `pub_id`, `text` FROM `a2notes` WHERE `user_id` = :user_id ORDER BY `note_id` DESC');
-		$notes->bindParam('user_id', bibliographie_user_get_id());
-		$notes->execute();
+		$publicationsWithNotes = DB::getInstance()->prepare('SELECT
+	`pub_id`
+FROM
+	`a2notes`
+WHERE
+	`user_id` = :user_id
+GROUP BY
+	`pub_id` DESC');
+		$publicationsWithNotes->execute(array(
+			'user_id' => (int) bibliographie_user_get_id()
+		));
 
-		if($notes->rowCount() > 0){
-			$notes->setFetchMode(PDO::FETCH_OBJ);
-			$notesArray = $notes->fetchAll();
-
-			foreach($notesArray as $note){
+		if($publicationsWithNotes->rowCount() > 0){
+			$publicationsWithNotes = $publicationsWithNotes->fetchAll(PDO::FETCH_COLUMN, 0);
+			$publicationsWithNotes = bibliographie_publications_sort($publicationsWithNotes, 'title');
 ?>
 
-<div id="bibliographie_note_<?php echo (int) $note->note_id?>" class="bibliographie_note">
-	<?php echo $note->text?>
-	<div class="bibliographie_note_publication_link"><?php echo bibliographie_publications_parse_title($note->pub_id, array('linkProfile' => true))?></div>
-</div>
+<table class="dataContainer">
+	<tr>
+		<th>Publication</th>
+		<th>Notes</th>
+	</tr>
+<?php
+			foreach($publicationsWithNotes as $pub_id){
+?>
+
+	<tr>
+		<td><?php echo bibliographie_publications_parse_title($pub_id)?></td>
+	</tr>
 <?php
 			}
+?>
+
+</table>
+<?php
 		}else
 			echo '<p class="notice">You do not have any notes!</p>';
 	break;

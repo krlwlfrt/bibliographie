@@ -78,7 +78,10 @@ ORDER BY `surname`, `firstname`");
 					}
 
 					if(count($publications) > 0){
-						bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=authorSets&amp;authors='.$_GET['authors'], $_GET['bookmarkBatch']);
+						bibliographie_publications_print_list(
+							$publications,
+							BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=authorSets&amp;authors='.$_GET['authors']
+						);
 					}else
 						echo '<p class="notice">No publications were found for this set of authors!</p>';
 

@@ -402,6 +402,26 @@
 		max-height: 400px;
 		overflow-y: scroll;
 	}
+
+	.bibliographie_publications_order_selector {
+		background: #ffd;
+		border: 1px solid #eee;
+		color: #000;
+		display: block;
+		position: absolute;
+		width: 70px;
+	}
+
+	.bibliographie_publications_order_selector a {
+		display: block;
+		padding: 2px;
+		text-decoration: none;
+	}
+
+	.bibliographie_publications_order_selector a:hover {
+		background: #eee;
+		color: #000;
+	}
 }
 
 @media print {

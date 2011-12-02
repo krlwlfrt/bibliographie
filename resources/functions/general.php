@@ -193,7 +193,7 @@ function bibliographie_purge_cache ($pattern) {
  * @param int $amountOfItems Amount of items that shall be orderd on pages.
  * @return array Array of parameters that are needed for page navigation.
  */
-function bibliographie_print_pages ($amountOfItems, $baseLink) {
+function bibliographie_pages_print ($amountOfItems, $baseLink) {
 	/**
 	 * Set standard values.
 	 */
@@ -212,11 +212,6 @@ function bibliographie_print_pages ($amountOfItems, $baseLink) {
 	 */
 	$offset = ($page - 1) * $perPage;
 
-	if(mb_strpos($baseLink, '?') !== false)
-		$baseLink .= '&';
-	else
-		$baseLink .= '?';
-
 	/**
 	 * Print page navigation.
 	 */
@@ -230,7 +225,7 @@ function bibliographie_print_pages ($amountOfItems, $baseLink) {
 				$virtualEnd = $amountOfItems;
 
 			if($i != $page)
-				echo '<a href="'.$baseLink.'page='.$i.'">['.($virtualOffset + 1).'-'.$virtualEnd.']</a> ';
+				echo '<a href="'.bibliographie_link_append_param($baseLink, 'page='.$i).'">['.($virtualOffset + 1).'-'.$virtualEnd.']</a> ';
 			else
 				echo '<strong>['.($virtualOffset + 1).'-'.$virtualEnd.']</strong> ';
 		}
@@ -241,7 +236,8 @@ function bibliographie_print_pages ($amountOfItems, $baseLink) {
 		'page' => $page,
 		'perPage' => $perPage,
 		'pages' => $pages,
-		'offset' => $offset
+		'offset' => $offset,
+		'ceiling' => min($amountOfItems, $offset + $perPage)
 	);
 }
 
@@ -337,14 +333,38 @@ function bibliographie_exit ($title, $message) {
 function bibliographie_error_handler ($errno, $errstr, $file, $line) {
 	if($errno != E_STRICT and $errno != E_NOTICE){
 		ob_end_clean();
-		bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.$file.':'.$line.'</em>');
+		bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.basename($file).':'.$line.'</em>');
 	}
 }
 
 function bibliographie_exception_handler ($exception) {
 	ob_end_clean();
 
-	bibliographie_exit('Uncaught exception', $exception->getMessage());
+	bibliographie_exit('Uncaught exception', '<strong>'.$exception->getMessage().'</strong> in <em>'.basename($exception->getFile()).'</em>:'.$exception->getLine().'<br />'.$exception->getTraceAsString());
+}
+
+function bibliographie_options_compare (array $options, array $_options) {
+	foreach($options as $key => $value){
+		if(is_array($options[$key])){
+			if(in_array($_options[$key], $options[$key]['possible'], true))
+				$options[$key] = $_options[$key];
+			else
+				$options[$key] = $options[$key]['default'];
+		}elseif($options[$key] != $_options[$key] and gettype($options[$key]) == gettype($_options[$key]))
+			$options[$key] = $_options[$key];
+	}
+
+	return $options;
+}
+
+function bibliographie_link_append_param ($link, $param, $encode = true) {
+	if(mb_strpos($link, '?') === false)
+		return $link.'?'.$param;
+
+	if($encode)
+		return $link.'&amp;'.$param;
+
+	return $link.'&'.$param;
 }
 
 /**

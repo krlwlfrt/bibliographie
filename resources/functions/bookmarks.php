@@ -143,6 +143,17 @@ function bibliographie_bookmarks_unset_bookmark (pub_id) {
 	})
 }
 
+$(function () {
+	$('span.bibliographie_publications_order_trigger').on('mouseover', function (event) {
+		var id = $(event.target).attr('id');
+		$('#'+id+'_selector')
+			.css('display', 'block')
+			.css('position', 'absolute')
+			.css('left', event.target.offsetLeft)
+			.css('top', event.target.offsetTop - 10);
+	});
+});
+
 <?php
 	if($withHTML)
 		echo '/* ]]> */ </script>';

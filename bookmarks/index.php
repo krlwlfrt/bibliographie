@@ -33,7 +33,13 @@ switch($_GET['task']){
 
 <p class="notice">In total you have set <?php echo count($publications)?> bookmark(s)!</p>
 <?php
-			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/?task=showBookmarks', $_GET['bookmarkBatch'], false);
+			bibliographie_publications_print_list(
+				$publications,
+				BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/?task=showBookmarks',
+				array (
+					'bookmarkingLink' => false
+				)
+			);
 		}else
 			echo '<p class="notice">You have not set any bookmarks!</p>';
 	break;

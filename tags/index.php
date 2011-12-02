@@ -38,8 +38,7 @@ switch($_GET['task']){
 
 			bibliographie_publications_print_list(
 				$publications,
-				$baseLink,
-				$_GET['bookmarkBatch']
+				$baseLink
 			);
 		}
 	break;

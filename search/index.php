@@ -68,7 +68,10 @@ $(function () {
 	case 'showPublications':
 		$publications = bibliographie_publications_get_cached_list($_GET['publicationsList']);
 		if(is_array($publications) and count($publications) > 0){
-			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=showPublications&amp;publicationsList='.htmlspecialchars($_GET['publicationsList']), $_GET['bookmarkBatch']);
+			bibliographie_publications_print_list(
+				$publications,
+				BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=showPublications&amp;publicationsList='.htmlspecialchars($_GET['publicationsList'])
+			);
 		}
 	break;
 

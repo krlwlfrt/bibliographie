@@ -196,7 +196,10 @@ $(function () {
 <h3>Publications of <?php echo bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true))?></h3>
 <?php
 			$publications = bibliographie_authors_get_publications($_GET['author_id'], $_GET['asEditor']);
-			bibliographie_publications_print_list($publications, BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&author_id='.((int) $_GET['author_id'].'&asEditor='.((int) $_GET['asEditor'])), $_GET['bookmarkBatch']);
+			bibliographie_publications_print_list(
+				$publications,
+				BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&author_id='.((int) $_GET['author_id'].'&asEditor='.((int) $_GET['asEditor']))
+			);
 		}
 	break;
 
