@@ -49,7 +49,7 @@ switch($_GET['task']){
 
 <h3>Tag cloud</h3>
 <?php
-		$tagsResult = mysql_query("SELECT occurrences.`tag_id`, `tag`, `count` FROM `a2tags` tags, (SELECT `tag_id`, COUNT(*) AS `count` FROM `a2publicationtaglink` GROUP BY `tag_id`) occurrences WHERE tags.`tag_id` = occurrences.`tag_id` ORDER BY `tag` ASC");
+		$tagsResult = mysql_query("SELECT occurrences.`tag_id`, `tag`, `count` FROM `".BIBLIOGRAPHIE_PREFIX."tags` tags, (SELECT `tag_id`, COUNT(*) AS `count` FROM `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` GROUP BY `tag_id`) occurrences WHERE tags.`tag_id` = occurrences.`tag_id` ORDER BY `tag` ASC");
 
 		if(mysql_num_rows($tagsResult) > 0){
 ?>

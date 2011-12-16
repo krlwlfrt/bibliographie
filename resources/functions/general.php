@@ -256,7 +256,7 @@ function bibliographie_user_get_id ($name = null) {
 
 	if(empty($cache[$name])){
 		if($checkUser == null){
-			$checkUser = DB::getInstance()->prepare('SELECT `user_id`, `login` FROM `a2users` WHERE `login` = :login');
+			$checkUser = DB::getInstance()->prepare('SELECT `user_id`, `login` FROM `'.BIBLIOGRAPHIE_PREFIX.'users` WHERE `login` = :login');
 			$checkUser->setFetchMode(PDO::FETCH_OBJ);
 		}
 
@@ -288,7 +288,7 @@ function bibliographie_user_get_name ($user_id) {
 
 	if(is_numeric($user_id)){
 		if($checkUser === null){
-			$checkUser = DB::getInstance()->prepare('SELECT `login` FROM `a2users` WHERE `user_id` = :user_id LIMIT 1');
+			$checkUser = DB::getInstance()->prepare('SELECT `login` FROM `'.BIBLIOGRAPHIE_PREFIX.'users` WHERE `user_id` = :user_id LIMIT 1');
 			$checkUser->setFetchMode(PDO::FETCH_OBJ);
 		}
 

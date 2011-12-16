@@ -74,7 +74,7 @@ mysql_query("SET CHARACTER SET 'utf8'");
 if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 	echo '<!DOCTYPE html><html lang="de"><head><title>Initialize database</title></head><body><h1>Initialize database</h1>';
 
-	if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'a2publication'")) == 1){
+	if(mysql_num_rows(mysql_query("SHOW TABLES LIKE '".BIBLIOGRAPHIE_PREFIX."publication'")) == 1){
 		/**
 		 * Aigaion scheme is present... Just convert it, to the bibliographie scheme...
 		 */
@@ -84,16 +84,16 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 			echo '<p><a href="?makeScheme=1">Do it now!</a></p>';
 		}elseif($_GET['makeScheme'] == 1){
 			// DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`;
-			mysql_query("ALTER TABLE `a2keywords` RENAME TO `a2tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;");
-			mysql_query("ALTER TABLE `a2publicationkeywordlink` RENAME TO `a2publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;");
-			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);");
-			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);");
-			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);");
-			mysql_query("ALTER TABLE `a2publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);");
-			mysql_query("ALTER TABLE `a2publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;");
-			mysql_query("ALTER TABLE `a2topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
-			mysql_query("ALTER TABLE `a2author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
-			mysql_query("ALTER TABLE `a2tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."keywords` RENAME TO `".BIBLIOGRAPHIE_PREFIX."tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publicationkeywordlink` RENAME TO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
 
 			mysql_query("CREATE TABLE `bibliographie_log` (
 	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -123,7 +123,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 			echo '<p>You don\'t seem to have an appropriate database scheme at all. Do you want it to be created now?</p>';
 			echo '<p><a href="?makeScheme=1">Do it now!</a></p>';
 		}elseif($_GET['makeScheme'] == 1)
-			mysql_query("CREATE TABLE IF NOT EXISTS `a2attachments` (
+			mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."attachments` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
   `location` varchar(255) NOT NULL DEFAULT '',
   `note` varchar(255) NOT NULL DEFAULT '',
@@ -140,7 +140,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
   PRIMARY KEY (`att_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2author` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."author` (
   `author_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `surname` varchar(255) NOT NULL DEFAULT '',
   `von` varchar(255) NOT NULL DEFAULT '',
@@ -154,11 +154,11 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   PRIMARY KEY (`author_id`),
   FULLTEXT KEY `fulltext` (`surname`,`firstname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2notecrossrefid` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."notecrossrefid` (
   `note_id` int(10) NOT NULL DEFAULT '0',
   `xref_id` int(10) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2notes` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."notes` (
   `note_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
   `user_id` int(11) NOT NULL DEFAULT '0',
@@ -171,7 +171,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
   PRIMARY KEY (`note_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2publication` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publication` (
   `pub_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `year` varchar(127) NOT NULL DEFAULT '',
@@ -225,7 +225,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   FULLTEXT KEY `fulltext_booktitle` (`booktitle`),
   FULLTEXT KEY `fulltext` (`title`,`abstract`,`note`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2publicationauthorlink` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
   `author_id` int(10) unsigned NOT NULL DEFAULT '0',
   `rank` int(10) unsigned NOT NULL DEFAULT '1',
@@ -233,24 +233,24 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   PRIMARY KEY (`pub_id`,`author_id`,`is_editor`),
   KEY `pub_id` (`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2publicationtaglink` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (
   `pub_id` int(10) NOT NULL,
   `tag_id` int(10) NOT NULL,
   PRIMARY KEY (`pub_id`,`tag_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2tags` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."tags` (
   `tag_id` int(10) NOT NULL AUTO_INCREMENT,
   `tag` mediumtext NOT NULL,
   `cleankeyword` text NOT NULL,
   PRIMARY KEY (`tag_id`),
   FULLTEXT KEY `fulltext` (`tag`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2topicpublicationlink` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (
   `topic_id` int(10) unsigned NOT NULL DEFAULT '0',
   `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`topic_id`,`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2topics` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topics` (
   `topic_id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `description` mediumtext,
@@ -266,23 +266,23 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   KEY `name` (`name`),
   FULLTEXT KEY `fulltext` (`name`,`description`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2topictopiclink` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topictopiclink` (
   `source_topic_id` int(10) NOT NULL DEFAULT '0',
   `target_topic_id` int(10) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Hierarchy of topics; typed relations';");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2userbookmarklists` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."userbookmarklists` (
   `user_id` int(10) NOT NULL,
   `pub_id` int(10) NOT NULL,
   PRIMARY KEY (`user_id`,`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2userpublicationmark` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."userpublicationmark` (
   `pub_id` int(10) NOT NULL DEFAULT '0',
   `user_id` int(11) NOT NULL DEFAULT '0',
   `mark` enum('','1','2','3','4','5') NOT NULL DEFAULT '3',
   `hasread` enum('y','n') NOT NULL DEFAULT 'y',
   PRIMARY KEY (`pub_id`,`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2users` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."users` (
   `user_id` int(10) NOT NULL AUTO_INCREMENT,
   `theme` varchar(255) NOT NULL DEFAULT 'darkdefault',
   `password_invalidated` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
@@ -309,7 +309,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   `similar_author_test` varchar(20) NOT NULL DEFAULT 'default',
   PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `a2usertopiclink` (
+		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."usertopiclink` (
   `collapsed` int(2) NOT NULL DEFAULT '0',
   `user_id` int(10) NOT NULL DEFAULT '0',
   `topic_id` int(10) NOT NULL DEFAULT '0',
@@ -332,8 +332,8 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
   `plural` tinytext NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
 
-		mysql_query("INSERT INTO `a2users` (`login`) VALUES ('".mysql_real_escape_string(stripslashes($_SERVER['PHP_AUTH_USER']))."');");
-		mysql_query("INSERT INTO `a2topics` (`name`, `description`) VALUES ('Top', 'Meta-topic as top of the topic hierarchy.');");
+		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."users` (`login`) VALUES ('".mysql_real_escape_string(stripslashes($_SERVER['PHP_AUTH_USER']))."');");
+		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topics` (`name`, `description`) VALUES ('Top', 'Meta-topic as top of the topic hierarchy.');");
 		echo '<p>Scheme has been created!!!</p>';
 	}
 	echo '</body></html>';
@@ -345,7 +345,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
  */
 if(!bibliographie_user_get_id()){
 	try {
-		$createUser = DB::getInstance()->prepare('INSERT INTO `a2users` (`login`) VALUES (:login)');
+		$createUser = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'users` (`login`) VALUES (:login)');
 		$createUser->execute(array(
 			'login' => $_SERVER['PHP_AUTH_USER']
 		));

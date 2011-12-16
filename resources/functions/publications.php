@@ -289,7 +289,7 @@ function bibliographie_publications_get_data ($publication_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication_id).'_data.json'));
 
 		if($publication == null){
-			$publication = DB::getInstance()->prepare("SELECT * FROM `a2publication` WHERE `pub_id` = :pub_id");
+			$publication = DB::getInstance()->prepare("SELECT * FROM `".BIBLIOGRAPHIE_PREFIX."publication` WHERE `pub_id` = :pub_id");
 			$publication->setFetchMode(PDO::FETCH_OBJ);
 		}
 
@@ -604,14 +604,14 @@ function bibliographie_publications_get_persons ($publication_id, $is_editor = '
 			$_is_editor = 'Y';
 
 		if($persons === null)
-			$persons = DB::getInstance()->prepare("SELECT data.`author_id` FROM
-		`a2publicationauthorlink` link,
-		`a2author` data
+			$persons = DB::getInstance()->prepare('SELECT data.`author_id` FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` link,
+		`'.BIBLIOGRAPHIE_PREFIX.'author` data
 	WHERE
 		link.`pub_id` = :pub_id AND
 		link.`author_id` = data.`author_id` AND
 		link.`is_editor` = :is_editor
-	ORDER BY ".$_order);
+	ORDER BY '.$_order);
 
 		$persons->execute(array(
 			'pub_id' => (int) $publication->pub_id,
@@ -670,7 +670,7 @@ function bibliographie_publications_get_tags ($publication_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication->pub_id).'_tags.json'));
 
 		if($tags === null)
-			$tags = DB::getInstance()->prepare("SELECT `tag_id` FROM `a2publicationtaglink` WHERE `pub_id` = :pub_id");
+			$tags = DB::getInstance()->prepare('SELECT `tag_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` WHERE `pub_id` = :pub_id');
 
 		$tags->bindParam('pub_id', $publication->pub_id);
 		$tags->execute();
@@ -706,7 +706,7 @@ function bibliographie_publications_get_topics ($publication_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publication_'.((int) $publication->pub_id).'_topics.json'));
 
 		if($topics === null)
-			$topics = DB::getInstance()->prepare("SELECT `topic_id` FROM `a2topicpublicationlink` WHERE `pub_id` = :pub_id");
+			$topics = DB::getInstance()->prepare('SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` WHERE `pub_id` = :pub_id');
 		$topics->bindParam('pub_id', $publication->pub_id);
 		$topics->execute();
 
@@ -763,7 +763,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	if($user_id == null)
 		$user_id = bibliographie_user_get_id ();
 
-	$return = mysql_query("INSERT INTO `a2publication` (
+	$return = mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publication` (
 	`pub_type`,
 	`user_id`,
 	`title`,
@@ -828,22 +828,22 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	if(count($author) > 0 and !empty($author[0])){
 		$rank = (int) 1;
 		foreach($author as $author_id)
-			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
 	}
 
 	if(count($editor) > 0 and !empty($editor[0])){
 		$rank = (int) 1;
 		foreach($editor as $editor_id)
-			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
 	}
 
 	if(count($topics) > 0 and !empty($topics[0]))
 		foreach($topics as $topic_id)
-			mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
 
 	if(count($tags) > 0 and !empty($tags[0]))
 		foreach($tags as $tag_id)
-			mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
 
 	$data = array(
 		'pub_id' => (int) $pub_id,
@@ -930,11 +930,11 @@ function bibliographie_publications_create_publication ($pub_type, array $author
  */
 function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags) {
 
-	mysql_query("DELETE FROM `a2publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
-	mysql_query("DELETE FROM `a2topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
-	mysql_query("DELETE FROM `a2publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
+	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
+	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
+	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
 
-	$return = mysql_query("UPDATE `a2publication` SET
+	$return = mysql_query("UPDATE `".BIBLIOGRAPHIE_PREFIX."publication` SET
 	`pub_type` = '".mysql_real_escape_string(stripslashes($pub_type))."',
 	`title` = '".mysql_real_escape_string(stripslashes($title))."',
 	`month` = '".mysql_real_escape_string(stripslashes($month))."',
@@ -969,22 +969,22 @@ LIMIT 1");
 	if(count($author) > 0 and !empty($author[0])){
 		$rank = (int) 1;
 		foreach($author as $author_id)
-			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
 	}
 
 	if(count($editor) > 0 and !empty($editor[0])){
 		$rank = (int) 1;
 		foreach($editor as $editor_id)
-			mysql_query("INSERT INTO `a2publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
 	}
 
 	if(count($topics) > 0 and !empty($topics[0]))
 		foreach($topics as $topic_id)
-			mysql_query("INSERT INTO `a2topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
 
 	if(count($tags) > 0 and !empty($tags[0]))
 		foreach($tags as $tag_id)
-			mysql_query("INSERT INTO `a2publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
+			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
 
 	$data = json_encode(array(
 		'pub_id' => (int) $pub_id,
@@ -1101,7 +1101,7 @@ function bibliographie_publications_sort (array $publications, $orderBy) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publications_'.$exportHash.'_ordered_'.$orderBy.'.json'));
 
 		if($orderPublications[$orderBy] === null)
-			$orderPublications = DB::getInstance()->prepare('SELECT `pub_id` FROM `a2publication`'.$completions[$orderBy]);
+			$orderPublications = DB::getInstance()->prepare('SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`'.$completions[$orderBy]);
 
 		$orderPublications->execute(array(
 			'publications' => array2csv($publications)
@@ -1161,7 +1161,7 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 		$publications = array_diff($publications, $topicsPublications);
 
 		if($addLink === null)
-			$addLink = DB::getInstance()->prepare('INSERT INTO `a2topicpublicationlink` (
+			$addLink = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` (
 	`topic_id`,
 	`pub_id`
 ) VALUES (
@@ -1220,7 +1220,7 @@ function bibliographie_publications_remove_topic (array $publications, $topic_id
 
 		if($removeLink === null)
 			$removeLink = DB::getInstance()->prepare('DELETE FROM
-	`a2topicpublicationlink`
+	`'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink`
 WHERE
 	FIND_IN_SET(`pub_id`, :list) AND `topic_id` = :topic_id');
 
@@ -1260,7 +1260,7 @@ function bibliographie_publications_add_tag (array $publications, $tag_id) {
 		$publications = array_diff($publications, $tagsPublications);
 
 		if($addLink === null)
-			$addLink = DB::getInstance()->prepare('INSERT INTO `a2publicationtaglink` (
+			$addLink = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` (
 	`pub_id`,
 	`tag_id`
 ) VALUES (
@@ -1314,7 +1314,7 @@ function bibliographie_publications_remove_tag (array $publications, $tag_id) {
 
 		if($removeLink === null)
 			$removeLink = DB::getInstance()->prepare('DELETE FROM
-	`a2publicationtaglink`
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`
 WHERE
 	FIND_IN_SET(`pub_id`, :list) AND `tag_id` = :tag_id');
 

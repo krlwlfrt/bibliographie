@@ -13,8 +13,8 @@ function bibliographie_bookmarks_get_bookmarks () {
 
 	if($bookmarks === null)
 		$bookmarks = DB::getInstance()->prepare('SELECT publications.`pub_id` FROM
-		`a2userbookmarklists` bookmarks,
-		`a2publication` publications
+		`'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` bookmarks,
+		`'.BIBLIOGRAPHIE_PREFIX.'publication` publications
 	WHERE
 		publications.`pub_id` = bookmarks.`pub_id` AND
 		bookmarks.`user_id` = :user_id
@@ -62,7 +62,7 @@ function bibliographie_bookmarks_unset_bookmark ($pub_id) {
 function bibliographie_bookmarks_clear_bookmarks () {
 	$return = false;
 	if(count(bibliographie_bookmarks_get_bookmarks()) > 0){
-		$return = DB::getInstance()->exec("DELETE FROM `a2userbookmarklists` WHERE `user_id` = ".((int) bibliographie_user_get_id()));
+		$return = DB::getInstance()->exec('DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` WHERE `user_id` = '.((int) bibliographie_user_get_id()));
 
 		if($return > 0){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/bookmarks_'.((int) bibliographie_user_get_id()).'.json', 'w+');
@@ -180,7 +180,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $publications) {
 
 				foreach($notBookmarkedPublications as $pub_id){
 					if($bookmark === null)
-						$bookmark = DB::getInstance()->prepare('INSERT INTO `a2userbookmarklists` (
+						$bookmark = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` (
 	`user_id`,
 	`pub_id`
 ) VALUES (
@@ -224,7 +224,7 @@ function bibliographie_bookmarks_unset_bookmarks_for_list (array $publications) 
 		if(count($bookmarkedPublications) > 0){
 			if($unbookmark === null)
 				$unbookmark = DB::getInstance()->prepare('DELETE FROM
-	`a2userbookmarklists`
+	`'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists`
 WHERE
 	`user_id` = :user_id AND
 	FIND_IN_SET(`pub_id`, :set)');

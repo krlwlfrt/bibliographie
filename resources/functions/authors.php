@@ -17,7 +17,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		$author_id = (int) $author_id;
 
 	if($author === null)
-		$author = DB::getInstance()->prepare('INSERT INTO `a2author` (
+		$author = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'author` (
 	`author_id`,
 	`firstname`,
 	`von`,
@@ -98,7 +98,7 @@ function bibliographie_authors_edit_author ($author_id, $firstname, $von, $surna
 		);
 
 		if($dataBefore != $dataAfter){
-			$updateAuthor = DB::getInstance()->prepare('UPDATE `a2author` SET
+			$updateAuthor = DB::getInstance()->prepare('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'author` SET
 	`firstname` = :firstname,
 	`von` = :von,
 	`surname` = :surname,
@@ -160,7 +160,7 @@ function bibliographie_authors_get_data ($author_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/author_'.$author_id.'_data.json'));
 
 		if($author === null){
-			$author = DB::getInstance()->prepare("SELECT
+			$author = DB::getInstance()->prepare('SELECT
 	`author_id`,
 	`firstname`,
 	`von`,
@@ -170,9 +170,9 @@ function bibliographie_authors_get_data ($author_id) {
 	`url`,
 	`institute`
 FROM
-	`a2author`
+	`'.BIBLIOGRAPHIE_PREFIX.'author`
 WHERE
-	`author_id` = :author_id");
+	`author_id` = :author_id');
 			$author->setFetchMode(PDO::FETCH_OBJ);
 		}
 
@@ -261,8 +261,8 @@ function bibliographie_authors_get_publications ($author_id, $is_editor = 0) {
 
 		if($publications === null)
 			$publications = DB::getInstance()->prepare('SELECT publications.`pub_id` FROM
-	`a2publication` publications,
-	`a2publicationauthorlink` relations
+	`'.BIBLIOGRAPHIE_PREFIX.'publication` publications,
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` relations
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
 	relations.`author_id` = :author_id AND
@@ -339,9 +339,9 @@ function bibliographie_authors_get_tags ($author_id) {
 	link.`tag_id`,
 	COUNT(*) AS `count`
 FROM
-	`a2publicationtaglink` link
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` link
 LEFT JOIN (
-	SELECT * FROM `a2tags`
+	SELECT * FROM `'.BIBLIOGRAPHIE_PREFIX.'tags`
 )
 AS
 	data
@@ -383,7 +383,7 @@ function bibliographie_authors_delete ($author_id) {
 		$publications = array_unique(array_merge(bibliographie_authors_get_publications($person->author_id, false), bibliographie_authors_get_publications($person->author_id, true)));
 		if(count($publications) == 0){
 			if($deletePerson === null)
-				$deletePerson = DB::getInstance()->prepare('DELETE FROM `a2author` WHERE `author_id` = :author_id LIMIT 1');
+				$deletePerson = DB::getInstance()->prepare('DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'author` WHERE `author_id` = :author_id LIMIT 1');
 
 			$deletePerson->bindParam('author_id', $person->author_id);
 			$return = $deletePerson->execute();

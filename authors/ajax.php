@@ -73,7 +73,7 @@ switch($_GET['task']){
 		`author_id`,
 		(MATCH(`surname`, `firstname`) AGAINST (:expandedQuery)) AS `relevancy`
 	FROM
-		`a2author`
+		`'.BIBLIOGRAPHIE_PREFIX.'author`
 ) fullTextSearch
 WHERE
 	`relevancy` > 0

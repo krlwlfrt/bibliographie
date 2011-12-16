@@ -204,13 +204,13 @@ $(function () {
 	break;
 
 	case 'showList':
-		$authors = DB::getInstance()->query('SELECT * FROM `a2author`');
+		$authors = DB::getInstance()->query('SELECT * FROM `'.BIBLIOGRAPHIE_PREFIX.'author`');
 		$initials = DB::getInstance()->query('SELECT * FROM (
 	SELECT UPPER(
 		SUBSTRING(`surname`, 1, 1)
 	) AS `initial`, COUNT(*) AS `count`
 	FROM
-		`a2author`
+		`'.BIBLIOGRAPHIE_PREFIX.'author`
 	GROUP BY
 		`initial`
 	ORDER BY
@@ -248,7 +248,7 @@ WHERE
 				$showAuthors = DB::getInstance()->prepare('SELECT
 	`author_id`, `surname`, `firstname`
 FROM
-	`a2author`
+	`'.BIBLIOGRAPHIE_PREFIX.'author`
 WHERE
 	UPPER(
 		SUBSTRING(`surname`, 1, 1)
@@ -259,7 +259,7 @@ ORDER BY `surname`, `firstname`');
 				$showAuthors = DB::getInstance()->prepare('SELECT
 	`author_id`, `surname`, `firstname`
 FROM
-	`a2author`
+	`'.BIBLIOGRAPHIE_PREFIX.'author`
 WHERE
 	UPPER(
 		SUBSTRING(`surname`, 1, 1)

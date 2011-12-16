@@ -8,7 +8,7 @@ function bibliographie_tags_create_tag ($tag) {
 	static $createTag = null;
 
 	if($createTag === null)
-		$createTag = DB::getInstance()->prepare('INSERT INTO `a2tags` (
+		$createTag = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'tags` (
 	`tag`
 ) VALUES (
 	:tag
@@ -66,7 +66,7 @@ function bibliographie_tags_get_data ($tag_id) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/tag_'.((int) $tag_id).'_data.json'));
 
 		if($tag === null){
-			$tag = DB::getInstance()->prepare('SELECT * FROM `a2tags` WHERE `tag_id` = :tag_id');
+			$tag = DB::getInstance()->prepare('SELECT * FROM `'.BIBLIOGRAPHIE_PREFIX.'tags` WHERE `tag_id` = :tag_id');
 			$tag->setFetchMode(PDO::FETCH_OBJ);
 		}
 
@@ -107,15 +107,15 @@ function bibliographie_tags_get_publications ($tag_id) {
 		$return = array();
 
 		if($publications === null){
-			$publications = DB::getInstance()->prepare("SELECT publications.`pub_id`, publications.`year` FROM
-	`a2publicationtaglink` relations,
-	`a2publication` publications
+			$publications = DB::getInstance()->prepare('SELECT publications.`pub_id`, publications.`year` FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` relations,
+	`'.BIBLIOGRAPHIE_PREFIX.'publication` publications
 WHERE
 	publications.`pub_id` = relations.`pub_id` AND
 	relations.`tag_id` = :tag_id
 ORDER BY
 	publications.`year` DESC,
-	publications.`pub_id` DESC");
+	publications.`pub_id` DESC');
 			$publications->setFetchMode(PDO::FETCH_OBJ);
 		}
 

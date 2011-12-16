@@ -32,12 +32,15 @@ define('BIBLIOGRAPHIE_DATABASE_DEBUG', false);
 
 // Wether to use caching or not. Highly recommended for large databases.
 define('BIBLIOGRAPHIE_CACHING', true);
+
+// Prefix for the mysql tables.
+define('BIBLIOGRAPHIE_PREFIX', 'a2');
 ```
 
 ## 2. Step ##
 
-You need a server side directory authentication, e.g. via apaches .htaccess. And the appropriate authentication names in the database table `a2users` with the names in the `login` field.
-If you have the user 'foobar' in your .htaccess file, you'll need a row in the `a2users` table with the login field having the value 'foobar'.
+You need a server side directory authentication, e.g. via apaches .htaccess. And the appropriate authentication names in the database table `users` with the names in the `login` field.
+If you have the user 'foobar' in your .htaccess file, you'll need a row in the `users` table with the login field having the value 'foobar'.
 
 ## 2.1 Step ##
 

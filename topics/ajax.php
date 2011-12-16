@@ -41,7 +41,7 @@ FROM (
 			:expanded_query
 		) AS `relevancy`
 	FROM
-		`a2topics`
+		`'.BIBLIOGRAPHIE_PREFIX.'topics`
 ) fullTextSearch
 WHERE
 	`relevancy` > 0 OR
@@ -91,10 +91,10 @@ LIMIT 50');
 			if(is_numeric($_GET['topic_id']))
 				$topic_id = (int) $_GET['topic_id'];
 
-			$similarTitles = DB::getInstance()->prepare("SELECT * FROM (
+			$similarTitles = DB::getInstance()->prepare('SELECT * FROM (
 	SELECT `topic_id`, `name`, `description`, (`searchRelevancy` * 10 - (ABS(LENGTH(`name`) - LENGTH(:name) / 2))) AS `relevancy`  FROM (
 		SELECT `topic_id`, `name`, `description`, (MATCH(`name`, `description`) AGAINST (:name IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
-		FROM `a2topics`
+		FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`
 		WHERE `topic_id` != :topic_id
 	) fullTextSearch
 ) calculatedRelevancy
@@ -103,7 +103,7 @@ WHERE
 ORDER BY
 	`relevancy` DESC
 LIMIT
-	100");
+	100');
 
 			$similarTitles->bindParam('name', $expandedName);
 			$similarTitles->bindParam('topic_id', $topic_id);

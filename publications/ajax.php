@@ -56,7 +56,7 @@ switch($_GET['task']){
 	`volume`,
 	`year`
 FROM
-	`a2publication`
+	`".BIBLIOGRAPHIE_PREFIX."publication`
 WHERE
 	FIND_IN_SET(`pub_id`, :set) ORDER BY `title`");
 				$result->setFetchMode(PDO::FETCH_ASSOC);
@@ -422,7 +422,7 @@ WHERE
 			$similarTitles = DB::getInstance()->prepare("SELECT * FROM (
 	SELECT `pub_id`, `title`, (`searchRelevancy` * 10 - (ABS(LENGTH(`title`) - LENGTH(:title) / 2))) AS `relevancy`  FROM (
 		SELECT `pub_id`, `title`, (MATCH(`title`) AGAINST (:title IN NATURAL LANGUAGE MODE)) AS `searchRelevancy`
-		FROM `a2publication`
+		FROM `".BIBLIOGRAPHIE_PREFIX."publication`
 		WHERE `pub_id` != :pub_id
 	) fullTextSearch
 ) calculatedRelevancy

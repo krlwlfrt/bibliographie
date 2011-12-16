@@ -46,7 +46,7 @@ FROM (
 		`tag`,
 		MATCH(`tag`) AGAINST (:query) AS `relevancy`
 	FROM
-		`a2tags`
+		`'.BIBLIOGRAPHIE_PREFIX.'tags`
 ) fullTextSearch
 WHERE
 	`relevancy` > 0 OR

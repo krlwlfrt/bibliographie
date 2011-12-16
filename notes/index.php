@@ -18,7 +18,7 @@ switch($_GET['task']){
 		$publicationsWithNotes = DB::getInstance()->prepare('SELECT
 	`pub_id`
 FROM
-	`a2notes`
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
 WHERE
 	`user_id` = :user_id
 GROUP BY
