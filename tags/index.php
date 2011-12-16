@@ -36,7 +36,7 @@ switch($_GET['task']){
 				bibliographie_history_append_step('tags', 'Show publications tagged with '.bibliographie_tags_parse_tag($tag->tag_id));
 			}
 
-			bibliographie_publications_print_list(
+			echo bibliographie_publications_print_list(
 				$publications,
 				$baseLink
 			);

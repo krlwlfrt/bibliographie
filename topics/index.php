@@ -254,7 +254,7 @@ $(function () {
 
 <h3>Publications assigned to <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo $topic->topic_id?>"><?php echo htmlspecialchars($topic->name)?></a><?php echo $title?></h3>
 <?php
-			bibliographie_publications_print_list(
+			echo bibliographie_publications_print_list(
 				bibliographie_topics_get_publications($topic->topic_id, (bool) $_GET['includeSubtopics']),
 				BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showPublications&topic_id='.((int) $_GET['topic_id']).$includeSubtopics
 			);

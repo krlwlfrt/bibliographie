@@ -35,41 +35,13 @@ switch($_GET['task']){
 	case 'searchTags':
 		$result = array();
 
-		if(mb_strlen($_GET['q']) >= 1){
-			$tags = DB::getInstance()->prepare('SELECT
-	`id`,
-	`tag`,
-	`relevancy`
-FROM (
-	SELECT
-		`tag_id` AS `id`,
-		`tag`,
-		MATCH(`tag`) AGAINST (:query) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'tags`
-) fullTextSearch
-WHERE
-	`relevancy` > 0 OR
-	`tag` LIKE "%'.trim(DB::getInstance()->quote($_GET['q']), '\'').'%"
-ORDER BY
-	`relevancy` DESC,
-	LENGTH(`tag`) ASC,
-	`tag`
-LIMIT
-	50');
-			$tags->setFetchMode(PDO::FETCH_OBJ);
-			$tags->execute(array(
-				'query' => bibliographie_search_expand_query($_GET['q'])
-			));
-
-			if($tags->rowCount() > 0){
-				$_result = $tags->fetchAll();
-				foreach($_result as $row)
-					$result[] = array (
-						'id' => $row->id,
-						'name' => $row->tag
-					);
-			}
+		$searchTags = bibliographie_tags_search_tags($_GET['q']);
+		if(count($searchTags) > 0){
+			foreach($searchTags as $tag)
+				$result[] = array (
+					'id' => $tag->tag_id,
+					'name' => $tag->tag
+				);
 		}
 
 		echo json_encode($result);

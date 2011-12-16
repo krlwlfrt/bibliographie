@@ -25,50 +25,17 @@ switch($_GET['task']){
 	case 'searchTopics':
 		$result = array();
 
-		if(mb_strlen($_GET['query']) >= 1){
-			$topics = DB::getInstance()->prepare('SELECT
-	`id`,
-	`name`,
-	`relevancy`
-FROM (
-	SELECT
-		`topic_id` AS `id`,
-		`name`,
-		MATCH(
-			`name`,
-			`description`
-		) AGAINST (
-			:expanded_query
-		) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'topics`
-) fullTextSearch
-WHERE
-	`relevancy` > 0 OR
-	`name` LIKE "%'.trim(DB::getInstance()->quote($_GET['query']), '\'').'%"
-ORDER BY
-	`relevancy` DESC,
-	LENGTH(`name`) ASC,
-	`name`
-LIMIT 50');
-			$topics->setFetchMode(PDO::FETCH_OBJ);
-			$topics->execute(array(
-				'expanded_query' => bibliographie_search_expand_query($_GET['query'])
-			));
+		$searchTopics = bibliographie_topics_search_topics($_GET['query']);
+		if(count($searchTopics) > 0){
+			foreach($searchTopics as $topic){
+				if(mb_strlen($topic->name) > mb_strlen($_GET['query']) + 5 and $topic->relevancy < 1)
+					break;
 
-			if($topics->rowCount() > 0){
-				$_result = $topics->fetchAll();
-
-				foreach($_result as $row){
-					if(mb_strlen($row->name) > mb_strlen($_GET['query']) + 5 and $row->relevancy < 1)
-						break;
-
-					$result[] = array (
-						'id' => (int) $row->id,
-						'name' => htmlspecialchars($row->name),
-						'subtopics' => count(bibliographie_topics_get_subtopics($row->id, false))
-					);
-				}
+				$result[] = array (
+					'id' => (int) $topic->topic_id,
+					'name' => bibliographie_topics_parse_name($topic->topic_id),
+					'subtopics' => count(bibliographie_topics_get_subtopics($topic->topic_id, false))
+				);
 			}
 		}
 

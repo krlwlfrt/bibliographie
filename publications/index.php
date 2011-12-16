@@ -132,7 +132,7 @@ switch($_GET['task']){
 	<h3><?php echo bibliographie_icon_get('folder')?> Topics</h3>
 	<div class="unit">
 		<label for="topics" class="block">Topics</label>
-		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; max-height: 200px; overflow-y: scroll; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
 
 		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" />
 
@@ -168,7 +168,7 @@ switch($_GET['task']){
 
 <h3><?php echo bibliographie_icon_get('page-white-stack')?> Publications that will be affected</h3>
 <?php
-			bibliographie_publications_print_list(
+			echo bibliographie_publications_print_list(
 				$publications,
 				BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.$_GET['list'],
 				array(
@@ -248,7 +248,7 @@ $(function () {
 				while($publication = mysql_fetch_object($result))
 					$publications[] = $publication->pub_id;
 
-				bibliographie_publications_print_list(
+				echo bibliographie_publications_print_list(
 					$publications,
 					BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($_GET['container']).'&amp;year='.((int) $_GET['year']).'&amp;piece='.htmlspecialchars($_GET['piece'])
 				);
@@ -627,7 +627,7 @@ $(function () {
 
 	<div class="unit"><h4>Topics & tags</h4>
 		<label for="topics" class="block">Topics</label>
-		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
+		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; max-height: 200px; overflow-y: scroll; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
 		<input type="text" id="topics" name="topics" style="width: 100%" value="<?php echo htmlspecialchars($_POST['topics'])?>" tabindex="7" />
 		<br style="clear: both" />
 
@@ -770,7 +770,7 @@ $(function() {
 </em>
 <h3><?php echo htmlspecialchars($publication['title'])?></h3>
 <?php
-			bibliographie_publications_print_list(
+			echo bibliographie_publications_print_list(
 				array($publication['pub_id']),
 				BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=publicationEditor&amp;pub_id='.((int) $publication['pub_id']),
 				array(

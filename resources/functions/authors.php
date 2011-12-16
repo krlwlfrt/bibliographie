@@ -373,6 +373,12 @@ ORDER BY
 	return $return;
 }
 
+/**
+ *
+ * @staticvar string $deletePerson
+ * @param type $author_id
+ * @return type
+ */
 function bibliographie_authors_delete ($author_id) {
 	static $deletePerson = null;
 
@@ -392,6 +398,56 @@ function bibliographie_authors_delete ($author_id) {
 				bibliographie_purge_cache('author_'.((int) $person->author_id));
 				bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
 			}
+		}
+	}
+
+	return $return;
+}
+
+/**
+ *
+ * @param type $query
+ * @param type $expandedQuery
+ * @return type
+ */
+function bibliographie_authors_search_authors ($query, $expandedQuery = '') {
+	$return = array();
+
+	if(mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
+		if(empty($expandedQuery))
+			$expandedQuery = bibliographie_search_expand_query($query, array('suffixes' => false, 'plurals' => false, 'umlauts' => true));
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_authors_'.md5($query).'_'.md5($expandedQuery).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_authors_'.md5($query).'_'.md5($expandedQuery).'.json'));
+
+		$authors = DB::getInstance()->prepare('SELECT `author_id`, `surname`, `firstname`, `relevancy` FROM (
+	SELECT
+		`author_id`,
+		`surname`,
+		`firstname`,
+		(MATCH(`surname`, `firstname`) AGAINST (:expandedQuery)) AS `relevancy`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'author`
+) fullTextSearch
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC,
+	`surname` ASC,
+	`firstname` ASC,
+	`author_id` ASC');
+
+		$authors->execute(array(
+			'expandedQuery' => $expandedQuery
+		));
+
+		if($authors->rowCount() > 0)
+			$return = $authors->fetchAll(PDO::FETCH_OBJ);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_authors_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
 		}
 	}
 

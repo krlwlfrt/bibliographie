@@ -605,6 +605,11 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
 		echo '<p class="error">Graph is empty!</p>';
 }
 
+/**
+ *
+ * @param type $topics
+ * @return type
+ */
 function bibliographie_topics_populate_input ($topics) {
 	$prePopulateTopics = array();
 	if(!empty($topics)){
@@ -620,4 +625,58 @@ function bibliographie_topics_populate_input ($topics) {
 	}
 
 	return $prePopulateTopics;
+}
+
+function bibliographie_topics_search_topics ($query, $expandedQuery = '') {
+	$return = array();
+
+	if(mb_strlen($query) >= 1){
+		if(empty($expandedQuery))
+			$expandedQuery = bibliographie_search_expand_query($query);
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_topics_'.md5($query).'_'.md5($expandedQuery).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_topics_'.md5($query).'_'.md5($expandedQuery).'.json'));
+
+		$topics = DB::getInstance()->prepare('SELECT
+	`topic_id`,
+	`name`,
+	`relevancy`
+FROM (
+	SELECT
+		`topic_id`,
+		`name`,
+		IF(LENGTH(`name`) - 5 > LENGTH("'.DB::getInstance()->quote($query).'"), 0, MATCH(
+			`name`,
+			`description`
+		) AGAINST (
+			:expanded_query
+		) + 1) AS `relevancy`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'topics`
+
+) fullTextSearch
+WHERE
+	`relevancy` > 0 AND
+	`name` LIKE "%'.trim(DB::getInstance()->quote($query), '\'').'%"
+ORDER BY
+	`relevancy` DESC,
+	LENGTH(`name`),
+	`name` ASC,
+	`topic_id`');
+
+		$topics->execute(array(
+			'expanded_query' => $expandedQuery
+		));
+
+		if($topics->rowCount() > 0)
+			$return = $topics->fetchAll(PDO::FETCH_OBJ);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_topics_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
 }

@@ -33,7 +33,7 @@ switch($_GET['task']){
 
 <p class="notice">In total you have set <?php echo count($publications)?> bookmark(s)!</p>
 <?php
-			bibliographie_publications_print_list(
+			echo bibliographie_publications_print_list(
 				$publications,
 				BIBLIOGRAPHIE_WEB_ROOT.'/bookmarks/?task=showBookmarks',
 				array (

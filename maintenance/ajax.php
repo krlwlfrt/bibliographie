@@ -89,7 +89,7 @@ switch($_GET['task']){
 					$publicationLinksArray = $publicationLinks->fetchAll(PDO::FETCH_COLUMN, 0);
 
 				$publicationsList = array_values(array_diff($publicationsArray, $publicationLinksArray));
-				bibliographie_publications_print_list($publicationsList);
+				echo bibliographie_publications_print_list($publicationsList);
 			break;
 
 			case 'publications_withoutTag':
@@ -101,7 +101,7 @@ switch($_GET['task']){
 
 				if($publications->rowCount() > 0){
 					$publicationsArray = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
-					bibliographie_publications_print_list($publicationsArray);
+					echo bibliographie_publications_print_list($publicationsArray);
 				}else
 					echo '<p class="success">No publications without a tag assignment were found.';
 			break;

@@ -256,3 +256,56 @@ function bibliographie_tags_populate_input ($tags) {
 
 	return $prePopulateTags;
 }
+
+function bibliographie_tags_search_tags ($query, $expandedQuery = '') {
+	$return = array();
+
+	if(mb_strlen($query) >= 1){
+		if(empty($expandedQuery))
+			$expandedQuery = bibliographie_search_expand_query($query);
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_tags_'.md5($query).'_'.md5($expandedQuery).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_tags_'.md5($query).'_'.md5($expandedQuery).'.json'));
+
+		$tags = DB::getInstance()->prepare('SELECT
+	`tag_id`,
+	`tag`,
+	`relevancy`
+FROM (
+	SELECT
+		`tag_id`,
+		`tag`,
+		IF(LENGTH(`tag`) - 4 > LENGTH("'.DB::getInstance()->quote($query).'"), 0, MATCH(
+			`tag`
+		) AGAINST (
+			:expanded_query
+		) + 1) AS `relevancy`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'tags`
+) fullTextSearch
+WHERE
+	`relevancy` > 0 AND
+	`tag` LIKE "%'.trim(DB::getInstance()->quote($query), '\'').'%"
+ORDER BY
+	`relevancy` DESC,
+	LENGTH(`tag`),
+	`tag`,
+	`tag_id`
+LIMIT
+	50');
+		$tags->execute(array(
+			'expanded_query' => $expandedQuery
+		));
+
+		if($tags->rowCount() > 0)
+			$return = $tags->fetchAll(PDO::FETCH_OBJ);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_tags_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
+}
