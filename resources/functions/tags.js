@@ -1,11 +1,12 @@
 function bibliographie_tags_input_tokenized (field, prePopulate) {
 	$('#'+field).tokenInput(bibliographie_web_root+'/tags/ajax.php?task=searchTags', {
 		searchDelay: bibliographie_request_delay,
-		minChars: bibliographie_search_min_chars,
+		minChars: 1,
 		preventDuplicates: true,
 		theme: 'facebook',
 		prePopulate: prePopulate,
 		onResult: function (results) {
+			alert(results.length);
 			$('#tags_tagNotExisting').empty();
 			$('#bibliographie_charmap').hide();
 

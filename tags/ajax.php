@@ -34,16 +34,42 @@ switch($_GET['task']){
 
 	case 'searchTags':
 		$result = array();
-		if(mb_strlen($_GET['q']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
-			$tags = mysql_query("SELECT * FROM (SELECT `tag_id`, `tag`, (MATCH(`tag`) AGAINST ('".mysql_real_escape_string(stripslashes(bibliographie_search_expand_query($_GET['q'])))."')) AS `relevancy` FROM `a2tags`) fullTextSearch WHERE `relevancy` > 0 ORDER BY `relevancy` DESC");
-			
-			if(mysql_num_rows($tags))
-				while($tag = mysql_fetch_object($tags)){
+
+		if(mb_strlen($_GET['q']) >= 1){
+			$tags = DB::getInstance()->prepare('SELECT
+	`id`,
+	`tag`,
+	`relevancy`
+FROM (
+	SELECT
+		`tag_id` AS `id`,
+		`tag`,
+		MATCH(`tag`) AGAINST (:query) AS `relevancy`
+	FROM
+		`a2tags`
+) fullTextSearch
+WHERE
+	`relevancy` > 0 OR
+	`tag` LIKE "%'.trim(DB::getInstance()->quote($_GET['q']), '\'').'%"
+ORDER BY
+	`relevancy` DESC,
+	LENGTH(`tag`) ASC,
+	`tag`
+LIMIT
+	50');
+			$tags->setFetchMode(PDO::FETCH_OBJ);
+			$tags->execute(array(
+				'query' => bibliographie_search_expand_query($_GET['q'])
+			));
+
+			if($tags->rowCount() > 0){
+				$_result = $tags->fetchAll();
+				foreach($_result as $row)
 					$result[] = array (
-						'id' => $tag->tag_id,
-						'name' => $tag->tag
+						'id' => $row->id,
+						'name' => $row->tag
 					);
-				}
+			}
 		}
 
 		echo json_encode($result);

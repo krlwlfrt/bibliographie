@@ -152,7 +152,7 @@ switch($_GET['task']){
 	<div class="unit">
 		<label for="tags" class="block">Tags</label>
 		<em style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
+			<a href="javascript:;" onclick="bibliographie_tags_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
 			<span id="tags_tagNotExisting"></em>
 		</em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" />
@@ -633,7 +633,7 @@ $(function () {
 
 		<label for="tags" class="block">Tags</label>
 		<em style="float: right; text-align: right;">
-			<a href="javascript:;" onclick="bibliographie_publications_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
+			<a href="javascript:;" onclick="bibliographie_tags_create_tag()"><span class="silk-icon silk-icon-tag-blue-add"></span> Add new tag</a><br />
 			<span id="tags_tagNotExisting"></em>
 		</em>
 		<input type="text" id="tags" name="tags" style="width: 100%" value="<?php echo htmlspecialchars($_POST['tags'])?>" tabindex="8" />

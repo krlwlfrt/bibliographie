@@ -26,7 +26,11 @@ switch($_GET['task']){
 		$result = array();
 
 		if(mb_strlen($_GET['query']) >= 1){
-			$topics = DB::getInstance()->prepare('SELECT `id`, `name`, `relevancy` FROM (
+			$topics = DB::getInstance()->prepare('SELECT
+	`id`,
+	`name`,
+	`relevancy`
+FROM (
 	SELECT
 		`topic_id` AS `id`,
 		`name`,
@@ -45,7 +49,8 @@ WHERE
 ORDER BY
 	`relevancy` DESC,
 	LENGTH(`name`) ASC,
-	`name`');
+	`name`
+LIMIT 50');
 			$topics->setFetchMode(PDO::FETCH_OBJ);
 			$topics->execute(array(
 				'expanded_query' => bibliographie_search_expand_query($_GET['query'])
@@ -54,13 +59,13 @@ ORDER BY
 			if($topics->rowCount() > 0){
 				$_result = $topics->fetchAll();
 
-				foreach($_result as $key => $row){
+				foreach($_result as $row){
 					if(mb_strlen($row->name) > mb_strlen($_GET['query']) + 5 and $row->relevancy < 1)
 						break;
 
-					$result[$key] = array (
+					$result[] = array (
 						'id' => (int) $row->id,
-						'name' => htmlspecialchars($row->name).' ('.$row->relevancy.')',
+						'name' => htmlspecialchars($row->name),
 						'subtopics' => count(bibliographie_topics_get_subtopics($row->id, false))
 					);
 				}
