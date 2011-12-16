@@ -18,6 +18,31 @@ function bibliographie_topics_toggle_visiblity_of_all (expand) {
 	}
 }
 
+function bibliographie_topics_show_subgraph (topic) {
+	$.ajax({
+		url: bibliographie_web_root+'/topics/ajax.php',
+		data: {
+			'task': 'getSubgraph',
+			'topic_id': topic
+		},
+		success: function (html) {
+			$('#dialogContainer').append(html);
+			$('#selectFromTopicSubgraph').dialog({
+				width: 600,
+				modal: true,
+				buttons: {
+					'Ok': function () {
+						$(this).dialog('close');
+					}
+				},
+				close: function () {
+					$(this).remove();
+				}
+			});
+		}
+	});
+}
+
 function bibliographie_topics_input_tokenized (field, container, prePopulate) {
 	$('#'+field).tokenInput(bibliographie_web_root+'/topics/ajax.php?task=searchTopics', {
 		'searchDelay': bibliographie_request_delay,
@@ -42,7 +67,7 @@ function bibliographie_topics_input_tokenized (field, container, prePopulate) {
 					var str = '';
 					str = '<div>';
 					if(value.subtopics > 0)
-						str = str + '<a href="javascript:;" onclick="bibliographie_publications_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>';
+						str = str + '<a href="javascript:;" onclick="bibliographie_topics_show_subgraph(\''+value.id+'\')" style="float: right;"><span class="silk-icon silk-icon-sitemap"></span> graph</a>';
 
 					if(selected){
 						str = str += '<span class="silk-icon silk-icon-tick"></span> <em>'+value.name+'</em> is selected.';

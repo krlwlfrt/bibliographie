@@ -432,9 +432,9 @@ $(function () {
 					if(mb_strpos($requiredField, ',') !== false){
 						$fields = explode(',', $requiredField);
 						if(empty($_POST[$fields[0]]) and empty($_POST[$fields[1]]))
-							$errors[] = 'You have to fill '.$fields[0].' or '.$fields[1].'!';
+							echo '<p class="notice">You should have filled either '.$fields[0].' or '.$fields[1].'!</p>';
 					}elseif(empty($_POST[$requiredField]))
-						$errors[] = 'You did not fill required field '.$requiredField.'!';
+						echo '<p class="notice">You should have filled '.$requiredField.'!</p>';
 				}
 
 				$author = csv2array($_POST['author'], 'int');
@@ -559,12 +559,12 @@ $(function () {
 			}elseif(is_array($publication)){
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>" method="post">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>" method="post" onsubmit="return bibliographie_publications_check_required_fields();">
 <?php
 			}else{
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor" method="post">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor" method="post" onsubmit="return bibliographie_publications_check_required_fields();">
 <?php
 			}
 ?>
@@ -748,6 +748,8 @@ $(function() {
 	$('#content input, #content textarea').charmap();
 
 	bibliographie_publications_check_title($('#title').val(), pub_id);
+
+
 });
 	/* ]]> */
 </script>

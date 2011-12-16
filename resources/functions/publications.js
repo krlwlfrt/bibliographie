@@ -163,29 +163,23 @@ function bibliographie_publications_check_title (title, pub_id) {
 	})
 }
 
-function bibliographie_publications_show_subgraph (topic) {
-	$.ajax({
-		url: bibliographie_web_root+'/topics/ajax.php',
-		data: {
-			'task': 'getSubgraph',
-			'topic_id': topic
-		},
-		success: function (html) {
-			$('#dialogContainer').append(html);
-			$('#selectFromTopicSubgraph').dialog({
-				width: 600,
-				modal: true,
-				buttons: {
-					'Ok': function () {
-						$(this).dialog('close');
-					}
-				},
-				close: function () {
-					$(this).remove();
-				}
-			});
+function bibliographie_publications_check_required_fields () {
+	var filledEverything = true;
+	var notFilled = '';
+
+	$.each($('.bibtexObligatory'), function (ix, element) {
+		if($(element).val() == ''){
+			filledEverything = false;
+			if(notFilled != '')
+				notFilled += ', ';
+			notFilled += $(element).attr('id');
 		}
 	});
+
+	if(!filledEverything)
+		return confirm('You did not fill these required fields: '+notFilled+'\nDo want to proceed anyway?');
+
+	return true;
 }
 
 /*****************************************
