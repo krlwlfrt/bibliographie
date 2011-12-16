@@ -6,7 +6,6 @@ function bibliographie_tags_input_tokenized (field, prePopulate) {
 		theme: 'facebook',
 		prePopulate: prePopulate,
 		onResult: function (results) {
-			alert(results.length);
 			$('#tags_tagNotExisting').empty();
 			$('#bibliographie_charmap').hide();
 
