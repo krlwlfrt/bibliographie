@@ -25,6 +25,7 @@ function bibliographie_tags_create_tag ($tag) {
 		);
 
 		bibliographie_log('tags', 'createTag', json_encode($return));
+		bibliographie_purge_cache('search_');
 	}
 
 	return $return;

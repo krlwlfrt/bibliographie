@@ -64,6 +64,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		);
 
 		bibliographie_log('authors', 'createAuthor', json_encode($return));
+		bibliographie_purge_cache('search_');
 	}
 
 	return $return;
@@ -132,6 +133,7 @@ LIMIT 1');
 			if($data['dataBefore'] != $data['dataAfter']){
 				bibliographie_log('authors', 'editAuthor', json_encode($data));
 				bibliographie_purge_cache('author_'.((int) $dataBefore['author_id']));
+				bibliographie_purge_cache('search_');
 			}
 
 			$return = $data;
@@ -396,6 +398,7 @@ function bibliographie_authors_delete ($author_id) {
 
 			if($return){
 				bibliographie_purge_cache('author_'.((int) $person->author_id));
+				bibliographie_purge_cache('search_');
 				bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
 			}
 		}

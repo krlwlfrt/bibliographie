@@ -58,6 +58,7 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
 
 		if(is_array($return))
 			bibliographie_log('topics', 'createTopic', json_encode($return));
+		bibliographie_purge_cache('search_');
 	}
 
 	return $return;
@@ -188,6 +189,7 @@ LIMIT 1');
 			}
 
 			DB::getInstance()->commit();
+			bibliographie_purge_cache('search_');
 			return $data;
 
 		} catch (PDOException $e) {
