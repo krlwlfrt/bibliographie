@@ -21,7 +21,7 @@ function bibliographie_topics_toggle_visiblity_of_all (expand) {
 function bibliographie_topics_input_tokenized (field, container, prePopulate) {
 	$('#'+field).tokenInput(bibliographie_web_root+'/topics/ajax.php?task=searchTopics', {
 		'searchDelay': bibliographie_request_delay,
-		'minChars': bibliographie_search_min_chars,
+		'minChars': 1,
 		'preventDuplicates': true,
 		'theme': 'facebook',
 		'prePopulate': prePopulate,
