@@ -82,20 +82,29 @@ $(function () {
 			$searchResults = array();
 			$expandedQuery = bibliographie_search_expand_query($_GET['q']);
 
-			if(empty($_GET['category']) or $_GET['category'] == 'authors' and mb_strlen($_GET['q']) > BIBLIOGRAPHIE_SEARCH_MIN_CHARS)
+			if(empty($_GET['category']) or $_GET['category'] == 'authors')
 				$searchResults['authors'] = bibliographie_authors_search_authors($_GET['q']);
-
-			if(empty($_GET['category']) or $_GET['category'] == 'notes' and mb_strlen($_GET['q']) > BIBLIOGRAPHIE_SEARCH_MIN_CHARS)
-				$searchResults['notes'] = bibliographie_notes_search_notes($_GET['q'], $expandedQuery);
 
 			if(empty($_GET['category']) or $_GET['category'] == 'books')
 				$searchResults['books'] = bibliographie_publications_search_books($_GET['q'], $expandedQuery);
+
+			if(empty($_GET['category']) or $_GET['category'] == 'notes')
+				$searchResults['notes'] = bibliographie_notes_search_notes($_GET['q'], $expandedQuery);
 
 			if(empty($_GET['category']) or $_GET['category'] == 'journals')
 				$searchResults['journals'] = bibliographie_publications_search_journals($_GET['q'], $expandedQuery);
 
 			if(empty($_GET['category']) or $_GET['category'] == 'publications')
 				$searchResults['publications'] = bibliographie_publications_search_publications($_GET['q'], $expandedQuery);
+
+			// Show notes for found publications that are not yet found in the notes section.
+			if((empty($_GET['category']) or $_GET['category'] == 'notes') and count(bibliographie_notes_get_publications_with_notes()) > 0){
+				$publications = array_intersect(bibliographie_publications_search_publications($_GET['q'], $expandedQuery), bibliographie_notes_get_publications_with_notes());
+				if(count($publications) > 0)
+					foreach($publications as $publication)
+						foreach(bibliographie_notes_get_notes_of_publication($publication) as $note)
+							$searchResults['notes'][] = $note;
+			}
 
 			if(empty($_GET['category']) or $_GET['category'] == 'tags')
 				$searchResults['tags'] = bibliographie_tags_search_tags($_GET['q'], $expandedQuery);
@@ -155,8 +164,12 @@ $(function () {
 						$options = array();
 						if($_GET['category'] == 'publications'){
 							$results = bibliographie_publications_sort($results, 'year');
-						}elseif(count($results) > $limit and $limit != -1){
-							$results = array_slice($results, 0, $limit);
+						}else{
+							if(count($results) > $limit and $limit != -1){
+								$str .= 'Found <strong>'.count($results).' publications</strong> of which '.$limit.' are shown. <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category=publications&amp;q='.htmlspecialchars($_GET['q']).'">Show all found publications!</a>';
+								$results = array_slice($results, 0, $limit);
+							}else
+								$str .= 'Found <strong>'.count($results).' '.$category.'</strong> shown by relevancy.';
 							$options = array('onlyPublications' => true);
 						}
 
