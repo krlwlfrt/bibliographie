@@ -99,6 +99,8 @@ $(function () {
 			if($_GET['category'] == 'publications')
 				$searchResults['publications'] = bibliographie_publications_sort(bibliographie_publications_search_publications($_GET['q'], $expandedQuery), 'year');
 
+
+
 			if(empty($_GET['category']) or $_GET['category'] == 'tags')
 				$searchResults['tags'] = bibliographie_tags_search_tags($_GET['q'], $expandedQuery);
 
@@ -111,6 +113,7 @@ $(function () {
 			$options = array('linkProfile' => true);
 			$toc = (string) '';
 			$str = (string) '';
+			$limit = (int) -1;
 
 			if(!in_array($_GET['category'], array('authors', 'books', 'journals', 'notes', 'publications', 'tags', 'topics'))){
 				bibliographie_history_append_step('search', 'Search for "'.htmlspecialchars($_GET['q']).'"');
@@ -163,7 +166,7 @@ $(function () {
 			}
 
 			if(!empty($toc)){
-				echo '<em style="float: right">'.round($timer, 6).'s</em>';
+				echo '<em style="float: right; font-size: 0.8em;">'.round($timer, 6).'s, '.count(explode(' ', $expandedQuery)).' words</em>';
 				echo '<ul>'.$toc.'</ul>';
 			}
 			if(!empty($str)){

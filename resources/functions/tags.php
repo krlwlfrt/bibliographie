@@ -276,24 +276,29 @@ FROM (
 	SELECT
 		`tag_id`,
 		`tag`,
-		IF(LENGTH(`tag`) - 4 > LENGTH("'.DB::getInstance()->quote($query).'"), 0, MATCH(
-			`tag`
-		) AGAINST (
-			:expanded_query
-		) + 1) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'tags`
-) fullTextSearch
+		IF(`innerRelevancy` = 0, 1, `innerRelevancy`) AS `relevancy`
+	FROM (
+		SELECT
+			`tag_id`,
+			`tag`,
+			MATCH(
+				`tag`
+			) AGAINST (
+				:expanded_query
+			) AS `innerRelevancy`
+		FROM
+			`'.BIBLIOGRAPHIE_PREFIX.'tags`
+
+	) fullTextSearch
+) likeMatching
 WHERE
 	`relevancy` > 0 AND
 	`tag` LIKE "%'.trim(DB::getInstance()->quote($query), '\'').'%"
 ORDER BY
 	`relevancy` DESC,
 	LENGTH(`tag`),
-	`tag`,
-	`tag_id`
-LIMIT
-	50');
+	`tag` ASC,
+	`tag_id`');
 		$tags->execute(array(
 			'expanded_query' => $expandedQuery
 		));

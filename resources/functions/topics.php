@@ -647,16 +647,22 @@ FROM (
 	SELECT
 		`topic_id`,
 		`name`,
-		IF(LENGTH(`name`) - 5 > LENGTH("'.DB::getInstance()->quote($query).'"), 0, MATCH(
+		IF(`innerRelevancy` = 0, 1, `innerRelevancy`) AS `relevancy`
+	FROM (
+		SELECT
+			`topic_id`,
 			`name`,
-			`description`
-		) AGAINST (
-			:expanded_query
-		) + 1) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'topics`
+			MATCH(
+				`name`,
+				`description`
+			) AGAINST (
+				:expanded_query
+			) AS `innerRelevancy`
+		FROM
+			`'.BIBLIOGRAPHIE_PREFIX.'topics`
 
-) fullTextSearch
+	) fullTextSearch
+) likeMatching
 WHERE
 	`relevancy` > 0 AND
 	`name` LIKE "%'.trim(DB::getInstance()->quote($query), '\'').'%"
