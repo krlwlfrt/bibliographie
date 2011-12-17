@@ -99,8 +99,6 @@ $(function () {
 			if($_GET['category'] == 'publications')
 				$searchResults['publications'] = bibliographie_publications_sort(bibliographie_publications_search_publications($_GET['q'], $expandedQuery), 'year');
 
-
-
 			if(empty($_GET['category']) or $_GET['category'] == 'tags')
 				$searchResults['tags'] = bibliographie_tags_search_tags($_GET['q'], $expandedQuery);
 
@@ -109,15 +107,13 @@ $(function () {
 
 			$timer = microtime(true) - $timer;
 
-
-			$options = array('linkProfile' => true);
 			$toc = (string) '';
 			$str = (string) '';
 			$limit = (int) -1;
 
 			if(!in_array($_GET['category'], array('authors', 'books', 'journals', 'notes', 'publications', 'tags', 'topics'))){
 				bibliographie_history_append_step('search', 'Search for "'.htmlspecialchars($_GET['q']).'"');
-				$limit = 30;
+				$limit = 10;
 			}else{
 				bibliographie_history_append_step('search', 'Search in '.$_GET['category'].' for "'.htmlspecialchars($_GET['q']).'"');
 				$limit = -1;
@@ -131,6 +127,7 @@ $(function () {
 
 					if(in_array($category, array('authors', 'books', 'journals', 'notes', 'tags', 'topics'))){
 						$i = (int) 0;
+						$options = array('linkProfile' => true);
 
 						if(count($results) > $limit and $limit != -1)
 							$str .= 'Found <strong>'.count($results).' '.$category.'</strong> of which '.$limit.' are shown. <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category='.$category.'&amp;q='.htmlspecialchars($_GET['q']).'">Show all found '.$category.'!</a>';
@@ -157,10 +154,15 @@ $(function () {
 							$str .= '</div>';
 						}
 					}elseif($category == 'publications'){
-						if(count($results) > $limit and $limit != -1)
+						$options = array();
+						if($_GET['category'] == 'publications'){
+							$results = bibliographie_publications_sort($results, 'year');
+						}elseif(count($results) > $limit and $limit != -1){
 							$results = array_slice($results, 0, $limit);
+							$options = array('onlyPublications' => true);
+						}
 
-						$str .= bibliographie_publications_print_list($results, '', array('onlyPublications' => true));
+						$str .= bibliographie_publications_print_list($results, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category=publications&amp;q='.htmlspecialchars($_GET['q']), $options);
 					}
 				}
 			}

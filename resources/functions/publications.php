@@ -1104,14 +1104,14 @@ function bibliographie_publications_sort (array $publications, $orderBy) {
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publications_'.$exportHash.'_ordered_'.$orderBy.'.json'));
 
 		if($orderPublications[$orderBy] === null)
-			$orderPublications = DB::getInstance()->prepare('SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`'.$completions[$orderBy]);
+			$orderPublications[$orderBy] = DB::getInstance()->prepare('SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`'.$completions[$orderBy]);
 
-		$orderPublications->execute(array(
+		$orderPublications[$orderBy]->execute(array(
 			'publications' => array2csv($publications)
 		));
 
-		if($orderPublications->rowCount() > 0)
-			$return = $orderPublications->fetchAll(PDO::FETCH_COLUMN, 0);
+		if($orderPublications[$orderBy]->rowCount() > 0)
+			$return = $orderPublications[$orderBy]->fetchAll(PDO::FETCH_COLUMN, 0);
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/publications_'.$exportHash.'_ordered_'.$orderBy.'.json', 'w+');
