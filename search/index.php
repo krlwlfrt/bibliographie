@@ -87,61 +87,13 @@ $(function () {
 				$searchResults['authors'] = bibliographie_authors_search_authors($_GET['q']);
 
 			if(empty($_GET['category']) or $_GET['category'] == 'notes' and mb_strlen($_GET['q']) > BIBLIOGRAPHIE_SEARCH_MIN_CHARS)
-				$searchResults['notes'] = bibliographie_notes_search_notes($_GET['q']);
+				$searchResults['notes'] = bibliographie_notes_search_notes($_GET['q'], $expandedQuery);
 
-			/*if(empty($_GET['category']) or $_GET['category'] == 'books'){
-				$books = DB::getInstance()->prepare('SELECT
-	`booktitle`,
-	`count`
-FROM (
-	SELECT
-		`booktitle`,
-		COUNT(*) AS `count`,
-		MATCH(`booktitle`) AGAINST (:expanded_query) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'publication`
-	GROUP
-		BY `booktitle`
-) fullTextSearch
-WHERE
-	`relevancy` > 0
-ORDER BY
-	`relevancy` DESC,
-	`booktitle`');
-				$books->execute(array(
-					'expanded_query' => $expandedQuery
-				));
+			if(empty($_GET['category']) or $_GET['category'] == 'books')
+				$searchResults['books'] = bibliographie_publications_search_books($_GET['q'], $expandedQuery);
 
-				if($books->rowCount() > 0)
-					$searchResults['books'] = $books->fetchAll(PDO::FETCH_OBJ);
-			}
-
-			if(empty($_GET['category']) or $_GET['category'] == 'journals'){
-				$journals = DB::getInstance()->prepare('SELECT
-	`journal`,
-	`count`
-FROM (
-	SELECT
-		`journal`,
-		COUNT(*) AS `count`,
-		MATCH(`journal`) AGAINST (:expanded_query) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'publication`
-	GROUP
-		BY `journal`
-) fullTextSearch
-WHERE
-	`relevancy` > 0
-ORDER BY
-	`relevancy` DESC,
-	`journal`');
-				$journals->execute(array(
-					'expanded_query' => $expandedQuery
-				));
-
-				if($journals->rowCount() > 0)
-					$searchResults['journals'] = $journals->fetchAll(PDO::FETCH_OBJ);
-			}*/
+			if(empty($_GET['category']) or $_GET['category'] == 'journals')
+				$searchResults['journals'] = bibliographie_publications_search_journals($_GET['q'], $expandedQuery);
 
 			if(empty($_GET['category']))
 				$searchResults['publications'] = bibliographie_publications_search_publications($_GET['q'], $expandedQuery);

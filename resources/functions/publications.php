@@ -502,7 +502,8 @@ function bibliographie_publications_print_list (array $publications, $baseLink =
 		elseif($_GET['bookmarkBatch'] == 'remove')
 			$return .= '<p class="notice">The bookmarks of '.bibliographie_bookmarks_unset_bookmarks_for_list($publications).' publications were deleted!</p>';
 
-		$pageData = bibliographie_pages_print(count($publications), bibliographie_link_append_param($baseLink, 'orderBy='.$options['orderBy']));
+		$pageData = bibliographie_pages_calculate(count($publications));
+		$return .= bibliographie_pages_print($pageData, bibliographie_link_append_param($baseLink, 'orderBy='.$options['orderBy']));
 		$exportHash = bibliographie_publications_cache_list($publications);
 
 		if(!$options['onlyPublications']){
@@ -551,8 +552,7 @@ function bibliographie_publications_print_list (array $publications, $baseLink =
 			$return .= bibliographie_publications_parse_data($publication['pub_id']).'</div>';
 		}
 
-		if($pageData['pages'] > 1)
-			bibliographie_pages_print(count($publications), bibliographie_link_append_param($baseLink, 'orderBy='.$options['orderBy']));
+		$return .= bibliographie_pages_print($pageData, bibliographie_link_append_param($baseLink, 'orderBy='.$options['orderBy']));
 
 		bibliographie_bookmarks_print_javascript();
 	}else
@@ -1380,6 +1380,96 @@ ORDER BY
 
 		if(BIBLIOGRAPHIE_CACHING){
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_publications_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_publications_search_books ($query, $expandedQuery = '') {
+	$return = array();
+
+	if(mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
+		if(empty($expandedQuery))
+			$expandedQuery = bibliographie_search_expand_query($query);
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_books_'.md5($query).'_'.md5($expandedQuery).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_books_'.md5($query).'_'.md5($expandedQuery).'.json'));
+
+		$books = DB::getInstance()->prepare('SELECT
+	`booktitle`,
+	`count`
+FROM (
+	SELECT
+		`booktitle`,
+		COUNT(*) AS `count`,
+		MATCH(`booktitle`) AGAINST (:expanded_query) AS `relevancy`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'publication`
+	GROUP
+		BY `booktitle`
+) fullTextSearch
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC,
+	`booktitle`');
+		$books->execute(array(
+			'expanded_query' => $expandedQuery
+		));
+
+		if($books->rowCount() > 0)
+			$return = $books->fetchAll(PDO::FETCH_OBJ);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_books_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
+			fwrite($cacheFile, json_encode($return));
+			fclose($cacheFile);
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_publications_search_journals ($query, $expandedQuery = '') {
+	$return = array();
+
+	if(mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
+		if(empty($expandedQuery))
+			$expandedQuery = bibliographie_search_expand_query($query);
+
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_journals_'.md5($query).'_'.md5($expandedQuery).'.json'))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_journals_'.md5($query).'_'.md5($expandedQuery).'.json'));
+
+		$books = DB::getInstance()->prepare('SELECT
+	`journal`,
+	`count`
+FROM (
+	SELECT
+		`journal`,
+		COUNT(*) AS `count`,
+		MATCH(`journal`) AGAINST (:expanded_query) AS `relevancy`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'publication`
+	GROUP
+		BY `journal`
+) fullTextSearch
+WHERE
+	`relevancy` > 0
+ORDER BY
+	`relevancy` DESC,
+	`journal`');
+		$books->execute(array(
+			'expanded_query' => $expandedQuery
+		));
+
+		if($books->rowCount() > 0)
+			$return = $books->fetchAll(PDO::FETCH_OBJ);
+
+		if(BIBLIOGRAPHIE_CACHING){
+			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_journals_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
 			fwrite($cacheFile, json_encode($return));
 			fclose($cacheFile);
 		}

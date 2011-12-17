@@ -2,7 +2,7 @@
 function bibliographie_notes_search_notes ($query, $expandedQuery = '') {
 	$return = array();
 
-	if(mb_strlen($query) >= 1){
+	if(mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 		if(empty($expandedQuery))
 			$expandedQuery = bibliographie_search_expand_query($query);
 
