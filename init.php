@@ -94,6 +94,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."notes`  ADD FULLTEXT INDEX `fulltext` (`text`)");
 
 			mysql_query("CREATE TABLE `bibliographie_log` (
 	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -1330,7 +1330,7 @@ WHERE
 		)))
 			$return = array (
 				'tag_id' => (int) $tag->tag_id,
-				'publicationsBefore' => $topicsPublications,
+				'publicationsBefore' => $tagsPublications,
 				'publicationsToRemove' => $publications
 			);
 

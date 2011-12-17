@@ -76,6 +76,7 @@ $(function () {
 	break;
 
 	case 'simpleSearch':
+		bibliographie_history_append_step('search', 'Simple search for '.htmlspecialchars($_GET['q']).'');
 		if(mb_strlen($_GET['q']) >= 1){
 			$timer = microtime(true);
 
@@ -84,6 +85,9 @@ $(function () {
 
 			if(empty($_GET['category']) or $_GET['category'] == 'authors' and mb_strlen($_GET['q']) > BIBLIOGRAPHIE_SEARCH_MIN_CHARS)
 				$searchResults['authors'] = bibliographie_authors_search_authors($_GET['q']);
+
+			if(empty($_GET['category']) or $_GET['category'] == 'notes' and mb_strlen($_GET['q']) > BIBLIOGRAPHIE_SEARCH_MIN_CHARS)
+				$searchResults['notes'] = bibliographie_notes_search_notes($_GET['q']);
 
 			/*if(empty($_GET['category']) or $_GET['category'] == 'books'){
 				$books = DB::getInstance()->prepare('SELECT
@@ -161,7 +165,7 @@ ORDER BY
 					$str .= '<h3 id="bibliographie_search_results_'.$category.'">'.ucfirst($category).'</h3>';
 					$toc .= '<li><a href="#bibliographie_search_results_'.$category.'">'.ucfirst($category).'</a> ('.count($results).' results)</li>';
 
-					if(in_array($category, array('authors', 'books', 'journals', 'tags', 'topics'))){
+					if(in_array($category, array('authors', 'books', 'journals', 'notes', 'tags', 'topics'))){
 						$i = (int) 0;
 						foreach($results as $row){
 							if(++$i == 30)
@@ -174,6 +178,8 @@ ORDER BY
 								$str .= $row->booktitle.', '.$row->count.' article(s)';
 							elseif($category == 'journals')
 								$str .= $row->journal.', '.$row->count.' publication(s)';
+							elseif($category == 'notes')
+								$str .= $row->text.'<br/><em style="font-size: 0.8em">'.bibliographie_publications_parse_data($row->pub_id).'</em>';
 							elseif($category == 'tags')
 								$str .= bibliographie_tags_parse_tag($row->tag_id, $options);
 							elseif($category == 'topics')

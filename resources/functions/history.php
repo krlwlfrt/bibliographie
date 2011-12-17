@@ -6,6 +6,7 @@ $bibliographie_history_icons = array (
 	'maintenance' => 'wrench',
 	'notes' => 'note',
 	'publications' => 'page-white-text',
+	'search' => 'find',
 	'tags' => 'tag-blue',
 	'topics' => 'folder'
 );
