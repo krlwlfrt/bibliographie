@@ -94,10 +94,8 @@ $(function () {
 			if(empty($_GET['category']) or $_GET['category'] == 'journals')
 				$searchResults['journals'] = bibliographie_publications_search_journals($_GET['q'], $expandedQuery);
 
-			if(empty($_GET['category']))
+			if(empty($_GET['category']) or $_GET['category'] == 'publications')
 				$searchResults['publications'] = bibliographie_publications_search_publications($_GET['q'], $expandedQuery);
-			if($_GET['category'] == 'publications')
-				$searchResults['publications'] = bibliographie_publications_sort(bibliographie_publications_search_publications($_GET['q'], $expandedQuery), 'year');
 
 			if(empty($_GET['category']) or $_GET['category'] == 'tags')
 				$searchResults['tags'] = bibliographie_tags_search_tags($_GET['q'], $expandedQuery);
