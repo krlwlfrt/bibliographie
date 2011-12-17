@@ -22,3 +22,7 @@ function delayRequest (functionName, params) {
 function setLoading (selector) {
 	$(selector).html('<span><img src="'+bibliographie_web_root+'/resources/images/loading.gif" alt="loading"> loading</span>')
 }
+
+function bibliographie_ajax_block_ui () {
+	$.blockUI({'message': '<img src="'+bibliographie_web_root+'/resources/images/loading.gif" /> <strong>Server seems to be busy.</strong><br /><em>Please give it a moment and wait for the request to finish!</em>'});
+}

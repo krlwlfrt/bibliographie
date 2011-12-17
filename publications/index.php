@@ -196,6 +196,7 @@ $(function () {
 
 	case 'showContainer':
 		if(in_array($_GET['type'], array('journal', 'book'))){
+			bibliographie_history_append_step('publications', 'Showing '.$_GET['type'].' "'.htmlspecialchars($_GET['container']).'"');
 			$fields = array (
 				'journal',
 				'volume'
@@ -227,6 +228,7 @@ $(function () {
 
 	case 'showContainerPiece':
 		if(in_array($_GET['type'], array('journal', 'book'))){
+			bibliographie_history_append_step('publications', 'Showing '.$_GET['type'].' "'.htmlspecialchars($_GET['container']).'"/'.((int) $_GET['year']).'/'.((int) $_GET['piece']));
 			$fields = array (
 				'journal',
 				'volume'

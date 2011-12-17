@@ -76,7 +76,6 @@ $(function () {
 	break;
 
 	case 'simpleSearch':
-		bibliographie_history_append_step('search', 'Simple search for '.htmlspecialchars($_GET['q']).'');
 		if(mb_strlen($_GET['q']) >= 1){
 			$timer = microtime(true);
 
@@ -112,6 +111,16 @@ $(function () {
 			$options = array('linkProfile' => true);
 			$toc = (string) '';
 			$str = (string) '';
+
+			if(!in_array($_GET['category'], array('authors', 'books', 'journals', 'notes', 'publications', 'tags', 'topics'))){
+				bibliographie_history_append_step('search', 'Search for "'.htmlspecialchars($_GET['q']).'"');
+				$limit = 30;
+			}else{
+				bibliographie_history_append_step('search', 'Search in '.$_GET['category'].' for "'.htmlspecialchars($_GET['q']).'"');
+				$limit = -1;
+			}
+
+
 			foreach($searchResults as $category => $results){
 				if(count($results) > 0){
 					$str .= '<h3 id="bibliographie_search_results_'.$category.'">'.ucfirst($category).'</h3>';
@@ -119,17 +128,23 @@ $(function () {
 
 					if(in_array($category, array('authors', 'books', 'journals', 'notes', 'tags', 'topics'))){
 						$i = (int) 0;
+
+						if(count($results) > $limit and $limit != -1)
+							$str .= 'Found <strong>'.count($results).' '.$category.'</strong> of which '.$limit.' are shown. <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category='.$category.'&amp;q='.htmlspecialchars($_GET['q']).'">Show all found '.$category.'!</a>';
+						else
+							$str .= 'Found <strong>'.count($results).' '.$category.'</strong> shown by relevancy.';
+
 						foreach($results as $row){
-							if(++$i == 30)
+							if(++$i == $limit and $limit != -1)
 								break;
 
 							$str .= '<div class="bibliographie_search_result">';
 							if($category == 'authors')
 								$str .= bibliographie_authors_parse_data($row->author_id, $options);
 							elseif($category == 'books')
-								$str .= $row->booktitle.', '.$row->count.' article(s)';
+								$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&container='.htmlspecialchars($row->booktitle).'">'.$row->booktitle.'</a>, '.$row->count.' article(s)';
 							elseif($category == 'journals')
-								$str .= $row->journal.', '.$row->count.' publication(s)';
+								$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&container='.htmlspecialchars($row->journal).'">'.$row->journal.'</a>, '.$row->count.' publication(s)';
 							elseif($category == 'notes')
 								$str .= $row->text.'<br/><em style="font-size: 0.8em">'.bibliographie_publications_parse_data($row->pub_id).'</em>';
 							elseif($category == 'tags')
@@ -139,9 +154,9 @@ $(function () {
 							$str .= '</div>';
 						}
 					}elseif($category == 'publications'){
-						if(count($results) > 30){
-							$results = array_slice($results, 0, 30);
-						}
+						if(count($results) > $limit and $limit != -1)
+							$results = array_slice($results, 0, $limit);
+
 						$str .= bibliographie_publications_print_list($results, '', array('onlyPublications' => true));
 					}
 				}
