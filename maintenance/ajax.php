@@ -11,29 +11,9 @@ switch($_GET['task']){
 		$delete = bibliographie_authors_get_data($_GET['delete']);
 
 		if(is_object($into) and is_object($delete) and $into->author_id != $delete->author_id){
-			$publications = array_merge(
-				array_diff(bibliographie_authors_get_publications($delete->author_id), bibliographie_authors_get_publications($into->author_id)),
-				array_diff(bibliographie_authors_get_publications($delete->author_id, true), bibliographie_authors_get_publications($into->author_id, true))
-			);
-
-			bibliographie_purge_cache('author_');
-
-			if(count($publications) > 0){
-				$linkPublications = DB::getInstance()->prepare('UPDATE
-	`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
-SET
-	`author_id` = :into_id
-WHERE
-	FIND_IN_SET(`pub_id`, :publications) AND
-	`author_id` = :delelete_id');
-				$linkPublications->execute(array(
-					'into_id' => (int) $into->author_id,
-					'delelete_id' => (int) $delete->author_id,
-					'publications' => array2csv($publications)
-				));
-
-				echo '<span class="success"><strong>'.$linkPublications->rowCount().' publication</strong>(s) have been relinked!</span><br />';
-			}
+			$merge = bibliographie_maintenance_merge_authors($into->author_id, $delete->author_id);
+			if(is_array($merge))
+				echo '<span class="success"><strong>'.$merge['publicationsAffected'].' publication</strong>(s) have been relinked!</span><br />';
 
 			if(bibliographie_authors_delete($delete->author_id))
 				echo '<span class="success">Second author has been deleted!</span><br /><br />';
@@ -69,7 +49,7 @@ ORDER BY
 		$sounds->execute();
 
 		if($sounds->rowCount() > 0){
-			$sounds = array_slice($sounds->fetchAll(PDO::FETCH_COLUMN, 0), 0, 50);
+			$sounds = $sounds->fetchAll(PDO::FETCH_COLUMN, 0);
 
 			$groups = DB::getInstance()->prepare('SELECT
 		`author_id`

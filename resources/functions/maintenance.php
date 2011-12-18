@@ -75,6 +75,11 @@ function bibliographie_maintenance_get_unsimilar_groups () {
 	return $return;
 }
 
+/**
+ *
+ * @param type $author_id
+ * @param type $group_id
+ */
 function bibliographie_maintenance_print_author_profile ($author_id, $group_id = null) {
 
 	$person = bibliographie_authors_get_data($author_id);
@@ -94,4 +99,57 @@ function bibliographie_maintenance_print_author_profile ($author_id, $group_id =
 		echo '<ul><li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&amp;author_id='.((int) $person->author_id).'&amp;asEditor=0">Publications as author ('.count(bibliographie_authors_get_publications($person->author_id)).')</a></li>';
 		echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&amp;author_id='.((int) $person->author_id).'&amp;asEditor=1">Publications as editor ('.count(bibliographie_authors_get_publications($person->author_id, true)).')</a></li></ul>';
 	}
+}
+
+/**
+ *
+ * @staticvar string $linkPublications
+ * @param type $into
+ * @param type $delete
+ * @return type
+ */
+function bibliographie_maintenance_merge_authors ($into, $delete) {
+	static $linkPublications = null;
+
+	$return = false;
+
+	$into = bibliographie_authors_get_data($into);
+	$delete = bibliographie_authors_get_data($delete);
+
+	if(is_object($into) and is_object($delete) and $into->author_id != $delete->author_id){
+		$publications = array_merge(
+			array_diff(bibliographie_authors_get_publications($delete->author_id), bibliographie_authors_get_publications($into->author_id)),
+			array_diff(bibliographie_authors_get_publications($delete->author_id, true), bibliographie_authors_get_publications($into->author_id, true))
+		);
+
+		bibliographie_purge_cache('author_');
+
+		if(count($publications) > 0){
+			if($linkPublications === null)
+				$linkPublications = DB::getInstance()->prepare('UPDATE
+`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+SET
+`author_id` = :into_id
+WHERE
+FIND_IN_SET(`pub_id`, :publications) AND
+`author_id` = :delelete_id');
+
+			$linkPublications->execute(array(
+				'into_id' => (int) $into->author_id,
+				'delelete_id' => (int) $delete->author_id,
+				'publications' => array2csv($publications)
+			));
+
+			$return = array (
+				'into' => $into->author_id,
+				'delete' => $delete->author_id,
+				'publications' => array2csv($publications),
+				'publicationsAffected' => $linkPublications->rowCount()
+			);
+
+			bibliographie_log('maintenance', 'mergeAuthors', json_encode($return));
+		}
+	}
+
+	return $return;
 }

@@ -183,7 +183,7 @@ function bibliographie_purge_cache ($pattern) {
 		$files = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache');
 		foreach($files as $file)
 			if(preg_match('~.*'.preg_quote($pattern, '~').'.*~', $file))
-				unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
+				@unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
 	}
 }
 

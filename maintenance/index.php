@@ -35,6 +35,9 @@ switch($_GET['task']){
 	<div id="bibliographie_maintenance_merge_delete"><?php echo bibliographie_icon_get('flag-red')?> Person to be deleted...</div>
 </div>
 <div id="bibliographie_maintenance_select_persons">You can either start by searching for authors below or you can let bibliographie search for similiar authors. This process could take a few seconds, depending on your database.<br /><a href="javascript:;" onclick="bibliographie_maintenance_get_similar_persons()"><?php echo bibliographie_icon_get('find')?> Get similar persons!</a></div>
+<div id="bibliographie_maintenance_search_persons">
+	<input
+</div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
