@@ -6,6 +6,9 @@ require dirname(__FILE__).'/../init.php';
 $text = 'An error occurred!';
 $status = 'error';
 switch($_GET['task']){
+	case 'positionPerson':
+		print_r(bibliographie_authors_get_data($_GET['person_id']));
+	break;
 	case 'similarPersons':
 		header('Content-Type: text/plain; charset=UTF-8');
 		$similarPersons = array();
@@ -51,7 +54,7 @@ ORDER BY
 					if(!in_array($group, $unsimilarGroups)){
 						foreach($group as $ix => $id)
 							$group[$ix] = array(
-								'author_id' => $id,
+								'id' => $id,
 								'name' => bibliographie_authors_parse_data($id, array('linkProfile' => true))
 							);
 

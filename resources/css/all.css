@@ -424,17 +424,37 @@
 	}
 
 	#bibliographie_maintenance_select_persons {
+		border: 1px solid #eee;
 		max-height: 500px;
 		overflow-y: scroll;
-		width: 40%;
+		padding: 5px;
+		width: 45%;
 	}
 
 	.bibliographie_maintenance_person_groups {
 		background: #fafafa;
 		border: 1px solid #aaa;
 		color: #000;
+		margin: 5px 0;
+		padding: 5px;
+	}
+
+	#bibliographie_maintenance_merge_container {
+		float: right;
+		width: 50%;
+	}
+
+	#bibliographie_maintenance_merge_container div {
 		margin: 5px;
 		padding: 5px;
+	}
+
+	#bibliographie_maintenance_merge_into {
+		border: 2px solid #0a0;
+	}
+
+	#bibliographie_maintenance_merge_delete {
+		border: 2px solid #f00;
 	}
 }
 

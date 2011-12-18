@@ -73,6 +73,7 @@
 
 
 				<h3>Maintenance</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=mergePersons"><?php echo bibliographie_icon_get('arrow-join')?> Merge persons</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
@@ -108,7 +109,7 @@ $(function () {
 		// Show the loading image and set the ui blocking timeout.
 		if(bibliographie_loading == 0){
 			$(this).show();
-			bibliographie_ajax_timeout = setTimeout('bibliographie_ajax_block_ui();', 5000);
+			bibliographie_ajax_timeout = setTimeout('bibliographie_ajax_block_ui();', 2000);
 		}
 
 		// Increase the loading counter.
