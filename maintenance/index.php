@@ -25,6 +25,36 @@ $bibliographie_consistency_checks = array (
 );
 
 switch($_GET['task']){
+	case 'mergePersons':
+?>
+
+<h3>Merge persons</h3>
+
+<a href="javascript:;" onclick="bibliographie_maintenance_get_similar_persons()">Similar persons!</a>
+<div id="bibliographie_maintenance_select_persons" style="max-height: 500px; overflow-y: scroll; width: 40%;"></div>
+
+<script type="text/javascript">
+	/* <![CDATA[ */
+function bibliographie_maintenance_get_similar_persons () {
+	$.ajax({
+		'url': bibliographie_web_root+'/maintenance/ajax.php?task=similarPersons',
+		'dataType': 'json',
+		'success': function (json) {
+			$('#bibliographie_maintenance_select_persons').empty();
+			$.each(json, function (group_id, group) {
+				$('#bibliographie_maintenance_select_persons').append('<div id="group_'+group_id+'" class="bibliographie_maintenance_person_groups"><strong>Group #'+(group_id + 1)+'</strong><ul></ul></div>');
+				$.each(group, function(person_id, person){
+					$('#group_'+group_id+' ul').append('<li>'+person.name+'</li>');
+				});
+			});
+		}
+	})
+}
+	/* ]]> */
+</script>
+<?php
+	break;
+
 	case 'consistencyChecks':
 		bibliographie_history_append_step('maintenance', 'Consistency checks');
 ?>

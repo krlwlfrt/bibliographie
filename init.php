@@ -94,7 +94,7 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
 			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."notes`  ADD FULLTEXT INDEX `fulltext` (`text`)");
+			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."notes` ADD FULLTEXT INDEX `fulltext` (`text`)");
 
 			mysql_query("CREATE TABLE `bibliographie_log` (
 	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -111,7 +111,11 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 	`ln` VARCHAR(2) NOT NULL DEFAULT 'en' COLLATE 'utf8_general_ci',
 	`singular` TINYTEXT NOT NULL COLLATE 'utf8_general_ci',
 	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
-) COLLATE='utf8_general_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT;");
+) COLLATE='utf8_general_ci' ENGINE=MyISAM");
+
+			mysql_query("CREATE TABLE `a2unsimilar_groups_of_authors` (
+	`group` LONGTEXT NOT NULL COLLATE 'utf8_general_ci'
+) COLLATE='utf8_general_ci' ENGINE=MyISAM");
 
 			echo '<p>Scheme has been modified!!!</p>';
 		}

@@ -55,3 +55,18 @@ function bibliographie_maintenance_unlock_topic ($topic_id) {
 
 	return false;
 }
+
+function bibliographie_maintenance_get_unsimilar_groups () {
+	$return = array();
+
+	$groups = DB::getInstance()->prepare('SELECT `group` FROM `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors`');
+	$groups->execute();
+
+	if($groups->rowCount() > 0){
+		$groups = $groups->fetchAll(PDO::FETCH_COLUMN, 0);
+		foreach($groups as $group)
+			$return[] = csv2array($group, 'int');
+	}
+
+	return $return;
+}

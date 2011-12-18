@@ -6,6 +6,64 @@ require dirname(__FILE__).'/../init.php';
 $text = 'An error occurred!';
 $status = 'error';
 switch($_GET['task']){
+	case 'similarPersons':
+		header('Content-Type: text/plain; charset=UTF-8');
+		$similarPersons = array();
+
+		$sounds = DB::getInstance()->prepare('SELECT
+	`sound`
+FROM (
+	SELECT `sound`, COUNT(*) AS `count` FROM (
+		SELECT CONCAT(SOUNDEX(`surname`), SOUNDEX(`firstname`)) AS `sound` FROM `'.BIBLIOGRAPHIE_PREFIX.'author`
+	) gimmeSound
+	GROUP BY
+		`sound`
+) gimmeCount
+WHERE
+	`count` > 1
+ORDER BY
+	`sound`');
+		$sounds->execute();
+
+		if($sounds->rowCount() > 0){
+			$sounds = array_slice($sounds->fetchAll(PDO::FETCH_COLUMN, 0), 0, 50);
+
+			$groups = DB::getInstance()->prepare('SELECT
+		`author_id`
+	FROM
+		`'.BIBLIOGRAPHIE_PREFIX.'author`
+	WHERE
+		CONCAT(SOUNDEX(`surname`), SOUNDEX(`firstname`)) = :sound
+	ORDER BY
+		`author_id`');
+			$groups->setFetchMode();
+
+			$unsimilarGroups = bibliographie_maintenance_get_unsimilar_groups();
+
+			foreach($sounds as $sound){
+				$groups->execute(array(
+					'sound' => $sound
+				));
+
+				if($groups->rowCount() > 0){
+					$group = $groups->fetchAll(PDO::FETCH_COLUMN, 0);
+
+					if(!in_array($group, $unsimilarGroups)){
+						foreach($group as $ix => $id)
+							$group[$ix] = array(
+								'author_id' => $id,
+								'name' => bibliographie_authors_parse_data($id, array('linkProfile' => true))
+							);
+
+						$similarPersons[] = $group;
+					}
+				}
+			}
+		}
+
+		echo json_encode($similarPersons);
+	break;
+
 	case 'consistencyChecks':
 		switch($_GET['consistencyCheckID']){
 			case 'authors_charsetArtifacts':
