@@ -56,6 +56,10 @@ function bibliographie_maintenance_unlock_topic ($topic_id) {
 	return false;
 }
 
+/**
+ *
+ * @return type
+ */
 function bibliographie_maintenance_get_unsimilar_groups () {
 	$return = array();
 
@@ -69,4 +73,25 @@ function bibliographie_maintenance_get_unsimilar_groups () {
 	}
 
 	return $return;
+}
+
+function bibliographie_maintenance_print_author_profile ($author_id, $group_id = null) {
+
+	$person = bibliographie_authors_get_data($author_id);
+	if(is_object($person)){
+		echo '<em class="person_id" style="float: right; font-size: 0.8em;">'.((int) $person->author_id).'</em>';
+		echo bibliographie_authors_parse_data($person->author_id, array('linkProfile' => true)).'<br />';
+		if(is_numeric($group_id))
+			echo '<em class="group_id" style="float: right; font-size: 0.8em;">'.((int) $group_id).'</em>';
+
+		if(!empty($person->email))
+			echo '<strong>Mail</strong>: '.htmlspecialchars($person->email).'<br />';
+		if(!empty($person->url))
+			echo '<strong>URL</strong>: '.htmlspecialchars($person->url).'<br />';
+		if(!empty($person->institute))
+			echo '<strong>Institute</strong>: '.htmlspecialchars($person->institute).'<br />';
+
+		echo '<ul><li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&amp;author_id='.((int) $person->author_id).'&amp;asEditor=0">Publications as author ('.count(bibliographie_authors_get_publications($person->author_id)).')</a></li>';
+		echo '<li><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showPublications&amp;author_id='.((int) $person->author_id).'&amp;asEditor=1">Publications as editor ('.count(bibliographie_authors_get_publications($person->author_id, true)).')</a></li></ul>';
+	}
 }

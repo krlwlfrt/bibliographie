@@ -31,14 +31,51 @@ switch($_GET['task']){
 <h3>Merge persons</h3>
 <div id="bibliographie_maintenance_merge_container">
 	<div id="bibliographie_maintenance_merge_into"><?php echo bibliographie_icon_get('flag-green')?> Person to merge into...</div>
-	<em style="display: block; font-size: 0.8em; text-align: center"><?php echo bibliographie_icon_get('arrow-merge')?> Merge person below into person above!</em>
+	<em style="display: block; font-size: 0.8em; text-align: center"><a href="javascript:;" onclick="bibliographie_maintenance_merge_persons()"><?php echo bibliographie_icon_get('arrow-merge')?> Merge person below into person above!</a></em>
 	<div id="bibliographie_maintenance_merge_delete"><?php echo bibliographie_icon_get('flag-red')?> Person to be deleted...</div>
 </div>
 <div id="bibliographie_maintenance_select_persons">You can either start by searching for authors below or you can let bibliographie search for similiar authors. This process could take a few seconds, depending on your database.<br /><a href="javascript:;" onclick="bibliographie_maintenance_get_similar_persons()"><?php echo bibliographie_icon_get('find')?> Get similar persons!</a></div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
-function bibliographie_maintenance_position_person (person_id, position) {
+function bibliographie_maintenance_merge_persons () {
+	if(confirm('Do you really want to merge the 2 selected authors?\n\This step _can not_ be undone!!!')){
+		var into = $('#bibliographie_maintenance_merge_into em.person_id');
+		var into_group = $('#bibliographie_maintenance_merge_into em.group_id');
+		var del = $('#bibliographie_maintenance_merge_delete em.person_id');
+		var del_group = $('#bibliographie_maintenance_merge_delete em.group_id');
+
+		if(into.length == 1 && del.length == 1){
+			into = parseInt($(into).html());
+			into_group = parseInt($(into_group).html());
+			del = parseInt($(del).html());
+			del_group = parseInt($(del_group).html());
+			if(into != del){
+				$.ajax({
+					'url': bibliographie_web_root+'/maintenance/ajax.php',
+					'data': {
+						'task': 'mergePersons',
+						'into': into,
+						'into_group': into_group,
+						'delete': del
+					},
+					'dataType': 'html',
+					'success': function (html) {
+						$('#bibliographie_maintenance_merge_into').html(html);
+						$('#person_'+del_group+'_'+del).remove();
+						if($('#group_'+del_group+' ul').children().length == 0)
+							$('#group_'+del_group).remove();
+						$('#bibliographie_maintenance_merge_delete').html('<em>Please see above for information on merging process!</em>');
+					}
+				});
+			}else
+				alert('You have to select two distinct persons!');
+		}else
+			alert('You have to select two persons!');
+	}
+}
+
+function bibliographie_maintenance_position_person (person_id, group_id, position) {
 	if(position != 'into' && position != 'delete')
 		return;
 
@@ -46,7 +83,8 @@ function bibliographie_maintenance_position_person (person_id, position) {
 		'url': bibliographie_web_root+'/maintenance/ajax.php',
 		'data': {
 			'task': 'positionPerson',
-			'person_id': person_id
+			'person_id': person_id,
+			'group_id': group_id
 		},
 		'dataType': 'html',
 		'success': function (html) {
@@ -68,8 +106,8 @@ function bibliographie_maintenance_get_similar_persons () {
 				$('#bibliographie_maintenance_select_persons').append('<div id="group_'+group_id+'" class="bibliographie_maintenance_person_groups"><strong>Group #'+(group_id + 1)+'</strong><ul></ul></div>');
 				$.each(group, function(person_id, person){
 					$('#group_'+group_id+' ul').append('<li id="person_'+group_id+'_'+person.id+'">\n\
-<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
-<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
+<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
+<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
 '+person.name+'</li>');
 				});
 			});
