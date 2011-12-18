@@ -109,7 +109,7 @@ $(function () {
 		// Show the loading image and set the ui blocking timeout.
 		if(bibliographie_loading == 0){
 			$(this).show();
-			bibliographie_ajax_timeout = setTimeout('bibliographie_ajax_block_ui();', 2000);
+			bibliographie_ajax_timeout = setTimeout('bibliographie_ajax_block_ui();', 4000);
 		}
 
 		// Increase the loading counter.

@@ -34,13 +34,32 @@ switch($_GET['task']){
 	<em style="display: block; font-size: 0.8em; text-align: center"><a href="javascript:;" onclick="bibliographie_maintenance_merge_persons()"><?php echo bibliographie_icon_get('arrow-merge')?> Merge person below into person above!</a></em>
 	<div id="bibliographie_maintenance_merge_delete"><?php echo bibliographie_icon_get('flag-red')?> Person to be deleted...</div>
 </div>
-<div id="bibliographie_maintenance_select_persons">You can either start by searching for authors below or you can let bibliographie search for similiar authors. This process could take a few seconds, depending on your database.<br /><a href="javascript:;" onclick="bibliographie_maintenance_get_similar_persons()"><?php echo bibliographie_icon_get('find')?> Get similar persons!</a></div>
-<div id="bibliographie_maintenance_search_persons">
-	<input
+<div id="bibliographie_maintenance_select_persons">You can either start by searching for authors below or you can let bibliographie search for similiar authors. This process could take a moment, depending on your database.</div>
+<h4>Search persons</h4>
+<div id="bibliographie_maintenance_search_persons" style="clear: both;">
+	<input type="text" id="searchPersons" style="font-size: 1.2em; padding: 5px; width: 40%;" />
+	<em>Type in a query or <a href="javascript:;" onclick="bibliographie_maintenance_get_similar_persons()"><?php echo bibliographie_icon_get('find')?> get similar persons!</a></em>
 </div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
+function bibliographie_maintenance_mark_unsimilar (group, group_id) {
+	$.ajax({
+		'url': bibliographie_web_root+'/maintenance/ajax.php',
+		'data': {
+			'task': 'markUnsimilar',
+			'group': group
+		},
+		'dataType': 'json',
+		'success': function (json) {
+			if(json.status == 'success')
+				$('#group_'+group_id).remove();
+			else
+				alert('An error occured!');
+		}
+	})
+}
+
 function bibliographie_maintenance_merge_persons () {
 	if(confirm('Do you really want to merge the 2 selected authors?\n\This step _can not_ be undone!!!')){
 		var into = $('#bibliographie_maintenance_merge_into em.person_id');
@@ -66,7 +85,7 @@ function bibliographie_maintenance_merge_persons () {
 					'success': function (html) {
 						$('#bibliographie_maintenance_merge_into').html(html);
 						$('#person_'+del_group+'_'+del).remove();
-						if($('#group_'+del_group+' ul').children().length == 0)
+						if($('#group_'+del_group+' ul').children().length == 1)
 							$('#group_'+del_group).remove();
 						$('#bibliographie_maintenance_merge_delete').html('<em>Please see above for information on merging process!</em>');
 					}
@@ -106,17 +125,54 @@ function bibliographie_maintenance_get_similar_persons () {
 		'success': function (json) {
 			$('#bibliographie_maintenance_select_persons').empty();
 			$.each(json, function (group_id, group) {
-				$('#bibliographie_maintenance_select_persons').append('<div id="group_'+group_id+'" class="bibliographie_maintenance_person_groups"><strong>Group #'+(group_id + 1)+'</strong><ul></ul></div>');
+				$('#bibliographie_maintenance_select_persons').append('<div id="group_'+group_id+'" class="bibliographie_maintenance_person_groups"></div>');
+				var groupStr = '';
+				var str = '';
 				$.each(group, function(person_id, person){
-					$('#group_'+group_id+' ul').append('<li id="person_'+group_id+'_'+person.id+'">\n\
+					str += '<li id="person_'+group_id+'_'+person.id+'">\n\
 <a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
 <a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
-'+person.name+'</li>');
+'+person.name+'</li>';
+					if(groupStr != '')
+						groupStr += ',';
+					groupStr += person.id;
 				});
+				$('#group_'+group_id).append('<em style="float: right; font-size: 0.8em;"><a href="javascript:;" onclick="bibliographie_maintenance_mark_unsimilar(\''+groupStr+'\', '+group_id+');">Mark as unsimilar!</a></em><strong>Group #'+(group_id + 1)+'</strong><ul></ul>');
+				$('#group_'+group_id+' ul').append(str);
 			});
 		}
 	});
 }
+
+function bibliographie_maintenance_search_persons (q) {
+	$.ajax({
+		'url': bibliographie_web_root+'/authors/ajax.php',
+		'data': {
+			'task': 'searchAuthors',
+			'q': q
+		},
+		'dataType': 'json',
+		'success': function (json) {
+			if(json.length == 0){
+				$('#bibliographie_maintenance_select_persons').html('<span class="notice">Sorry, no persons where found!</span>')
+			}else{
+				$('#bibliographie_maintenance_select_persons').html('<div id="group_0" class="bibliographie_maintenance_person_groups"><ul></ul></div>');
+				$.each(json, function(person_id, person){
+					$('#group_0 ul').append('<li id="person_0_'+person.id+'">\n\
+	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
+	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
+	'+person.name+'</li>');
+				});
+			}
+		}
+	});
+}
+
+$(function () {
+	$('#searchPersons').on('keyup mouseup change', function (e) {
+		delayRequest('bibliographie_maintenance_search_persons', Array($('#searchPersons').val()));
+	});
+});
 	/* ]]> */
 </script>
 <?php
@@ -266,10 +322,11 @@ $(function () {
 				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
 
 				$categoryIcons = array (
-					'topics' => 'folder',
 					'authors' => 'user',
+					'maintenance' => 'cog',
 					'publications' => 'page-white-text',
-					'tags' => 'tag-blue'
+					'tags' => 'tag-blue',
+					'topics' => 'folder'
 				);
 
 				$actionIcons = array (
@@ -286,7 +343,8 @@ $(function () {
 					'addTopic' => 'folder-add',
 					'removeTopic' => 'folder-delete',
 					'deleteAuthor' => 'user-delete',
-					'createPublication' => 'page-white-add'
+					'createPublication' => 'page-white-add',
+					'mergeAuthors' => 'arrow-join'
 				);
 
 				foreach($logContent as $logRow){

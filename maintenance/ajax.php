@@ -6,6 +6,18 @@ require dirname(__FILE__).'/../init.php';
 $text = 'An error occurred!';
 $status = 'error';
 switch($_GET['task']){
+	case 'markUnsimilar':
+		$markUnsimilar = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors` (`group`) VALUES (:group)');
+		if($markUnsimilar->execute(array(
+			'group' => $_GET['group']
+		)))
+			$status = 'success';
+
+		echo json_encode(array(
+			'status' => $status
+		));
+	break;
+
 	case 'mergePersons':
 		$into = bibliographie_authors_get_data($_GET['into']);
 		$delete = bibliographie_authors_get_data($_GET['delete']);
