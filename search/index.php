@@ -154,7 +154,7 @@ $(function () {
 
 							$str .= '<div class="bibliographie_search_result">';
 							if($category == 'authors')
-								$str .= bibliographie_authors_parse_data($row->author_id, $options);
+								$str .= bibliographie_authors_parse_data($row->author_id, $options).' '.$row->relevancy;
 							elseif($category == 'books')
 								$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&container='.htmlspecialchars($row->booktitle).'">'.$row->booktitle.'</a>, '.$row->count.' article(s)';
 							elseif($category == 'journals')

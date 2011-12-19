@@ -506,20 +506,19 @@ function bibliographie_publications_print_list (array $publications, $baseLink =
 		$return .= bibliographie_pages_print($pageData, bibliographie_link_append_param($baseLink, 'orderBy='.$options['orderBy']));
 		$exportHash = bibliographie_publications_cache_list($publications);
 
-		if(!$options['onlyPublications']){
+		if(!$options['onlyPublications'] and count($publications) > 1){
 			$return .= '<p class="bibliographie_operations">';
 
-			if(count($publications) > 1){
-				$return .= '<span style="float: left">List contains <strong>'.count($publications).' publication</strong>(s)...</span>';
+			$return .= '<span style="float: left">List contains <strong>'.count($publications).' publication</strong>(s)...</span>';
 
-				if($options['bookmarkingLink']){
-					$return .= ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
-					$return .= ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
-				}
+			if($options['bookmarkingLink']){
+				$return .= ' <a href="'.$baseLink.'&amp;bookmarkBatch=add"><em>'.bibliographie_icon_get('star').' Bookmark</em></a>';
+				$return .= ' <a href="'.$baseLink.'&amp;bookmarkBatch=remove"><em>'.bibliographie_icon_get('cross').' Unbookmark</em></a>';
 			}
 
 			$return .= ' <a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.$exportHash.'\')"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
 			$return .= ' <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.$exportHash.'">'.bibliographie_icon_get('page-white-stack').' Batch</a>';
+
 			$return .= ' <span id="bibliographie_publications_order_'.$exportHash.'" class="bibliographie_publications_order_trigger">
 	'.bibliographie_icon_get('table').' Order
 	<span style="display: none" id="bibliographie_publications_order_'.$exportHash.'_selector" class="bibliographie_publications_order_selector bibliographie_layers_closing_by_click">
