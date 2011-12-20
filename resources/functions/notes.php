@@ -1,5 +1,7 @@
 <?php
 function bibliographie_notes_search_notes ($query, $expandedQuery = '') {
+	static $notes = null;
+
 	$return = array();
 
 	if(mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
@@ -9,31 +11,49 @@ function bibliographie_notes_search_notes ($query, $expandedQuery = '') {
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_notes_'.bibliographie_user_get_id().'_'.md5($query).'_'.md5($expandedQuery).'.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_notes_'.bibliographie_user_get_id().'_'.md5($query).'_'.md5($expandedQuery).'.json'));
 
-		$notes = DB::getInstance()->prepare('SELECT
+		if(!($notes instanceof PDOStatement))
+			$notes = DB::getInstance()->prepare('SELECT
 	`note_id`,
 	`pub_id`,
 	`user_id`,
-	`text`
+	`text`,
+	`relevancy`
 FROM (
 	SELECT
 		`note_id`,
 		`pub_id`,
 		`user_id`,
 		`text`,
-		MATCH(`text`) AGAINST (:expanded_query) AS `relevancy`
-	FROM
-		`'.BIBLIOGRAPHIE_PREFIX.'notes`
-) fullTextSerach
+		IF(`innerRelevancy` = 0, 1, `innerRelevancy`) AS `relevancy`
+	FROM (
+		SELECT
+			`note_id`,
+			`pub_id`,
+			`user_id`,
+			`text`,
+			MATCH(
+				`text`
+			) AGAINST (
+				:expanded_query
+			) AS `innerRelevancy`
+		FROM
+			`'.BIBLIOGRAPHIE_PREFIX.'notes`
+
+	) fullTextSearch
+) likeMatching
 WHERE
 	`relevancy` > 0 AND
-	`user_id` = :user_id
+	`user_id` = :user_id AND
+	`text` LIKE :query
 ORDER BY
-	`relevancy`,
-	`text`,
-	`note_id`');
+	`relevancy` DESC,
+	LENGTH(`text`),
+	`text` ASC,
+	`note_id` ASC');
 
 		$notes->execute(array(
 			'expanded_query' => $expandedQuery,
+			'query' => '%'.$query.'%',
 			'user_id' => (int) bibliographie_user_get_id()
 		));
 
@@ -114,6 +134,78 @@ ORDER BY
 
 	if($notes->rowCount() > 0)
 		$return = $notes->fetchAll(PDO::FETCH_OBJ);
+
+	return $return;
+}
+
+function bibliographie_notes_get_publications_from_notes (array $notes) {
+	$return = array();
+
+	if(count($notes) > 0){
+		foreach($notes as $note)
+			if(!empty($note->pub_id) and is_numeric($note->pub_id))
+				$return[] = $note->pub_id;
+	}
+
+	return $return;
+}
+
+function bibliographie_notes_get_data ($note_id) {
+	static $note = null;
+
+	$return = false;
+
+	if(is_numeric($note_id)){
+		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/note_'.((int) $note_id.'.json')))
+			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/note_'.((int) $note_id.'.json')));
+
+		if(!($note instanceof PDOStatement)){
+			$note = DB::getInstance()->prepare('SELECT
+	`note_id`,
+	`pub_id`,
+	`user_id`,
+	`text`
+FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
+WHERE
+	`note_id` = :note_id
+LIMIT 1');
+			$note->setFetchMode(PDO::FETCH_OBJ);
+		}
+
+		$note->execute(array(
+			'note_id' => (int) $note_id
+		));
+
+		if($note->rowCount() == 1){
+			$return = $note->fetch();
+
+			if(BIBLIOGRAPHIE_CACHING){
+				$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/note_'.((int) $note_id.'.json'), 'w+');
+				fwrite($cacheFile, json_encode($return));
+				fclose($cacheFile);
+			}
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_notes_print_note ($note_id) {
+	$return = false;
+
+	$note = bibliographie_notes_get_data($note_id);
+
+	if(is_object($note)){
+		$return .= '<div class="bibliographie_notes_note">';
+		$return .= '<div class="bibliographie_notes_actions">';
+		$return .= '<a href="">'.bibliographie_icon_get('note-edit').'</a>';
+		$return .= '<a href="">'.bibliographie_icon_get('note-delete').'</a>';
+		$return .= '</div>';
+		$return .= $note->text;
+		$return .= '<div class="bibliographie_notes_publication_link">'.bibliographie_publications_parse_data($note->pub_id).'</div>';
+		$return .= '</div>';
+	}
 
 	return $return;
 }

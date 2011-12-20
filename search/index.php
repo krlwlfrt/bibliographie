@@ -139,6 +139,9 @@ $(function () {
 					$str .= '<h3 id="bibliographie_search_results_'.$category.'">'.ucfirst($category).'</h3>';
 					$toc .= '<li><a href="#bibliographie_search_results_'.$category.'">'.ucfirst($category).'</a> ('.count($results).' results)</li>';
 
+					if($category == 'notes')
+						$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.bibliographie_publications_cache_list(bibliographie_notes_get_publications_from_notes($searchResults['notes']), true).'" style="float: right">'.bibliographie_icon_get('page-white-stack').' Batch publications</a>';
+
 					if(in_array($category, array('authors', 'books', 'journals', 'notes', 'tags', 'topics'))){
 						$i = (int) 0;
 						$options = array('linkProfile' => true);
@@ -152,20 +155,33 @@ $(function () {
 							if(++$i == $limit and $limit != -1)
 								break;
 
-							$str .= '<div class="bibliographie_search_result">';
-							if($category == 'authors')
-								$str .= bibliographie_authors_parse_data($row->author_id, $options).' '.$row->relevancy;
-							elseif($category == 'books')
-								$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&container='.htmlspecialchars($row->booktitle).'">'.$row->booktitle.'</a>, '.$row->count.' article(s)';
+							if($category == 'authors'){
+								$row = bibliographie_authors_get_data($row->author_id);
+								$str .= '<div class="bibliographie_search_result">'.bibliographie_authors_parse_data($row->author_id, $options);
+								if(!empty($row->email))
+									$str .= ' <em style="font-size: 0.8em;">'.htmlspecialchars($row->email).'</em>';
+								if(!empty($row->url))
+									$str .= '<br /><em style="font-size: 0.8em;"><a href="'.htmlspecialchars($row->url).'">'.htmlspecialchars($row->url).'</a></em>';
+								$str .= '</div>';
+							}elseif($category == 'books')
+								$str .= '<div class="bibliographie_search_result">
+	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&container='.htmlspecialchars($row->booktitle).'">'.$row->booktitle.'</a>, '.$row->count.' article(s)
+</div>';
 							elseif($category == 'journals')
-								$str .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&container='.htmlspecialchars($row->journal).'">'.$row->journal.'</a>, '.$row->count.' publication(s)';
+								$str .= '<div class="bibliographie_search_result">
+	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&container='.htmlspecialchars($row->journal).'">'.$row->journal.'</a>, '.$row->count.' publication(s)
+</div>';
 							elseif($category == 'notes')
-								$str .= $row->text.'<br/><em style="font-size: 0.8em">'.bibliographie_publications_parse_data($row->pub_id).'</em>';
+								$str .= bibliographie_notes_print_note($row->note_id);
 							elseif($category == 'tags')
-								$str .= bibliographie_tags_parse_tag($row->tag_id, $options);
-							elseif($category == 'topics')
-								$str .= bibliographie_topics_parse_name($row->topic_id, $options);
-							$str .= '</div>';
+								$str .= '<div class="bibliographie_search_result">'.bibliographie_tags_parse_tag($row->tag_id, $options).'</div>';
+							elseif($category == 'topics'){
+								$row = bibliographie_topics_get_data($row->topic_id);
+								$str .= '<div class="bibliographie_search_result">'.bibliographie_topics_parse_name($row->topic_id, $options);
+								if(!empty($row->description))
+									$str .= '<br /><em style="0.8em">'.htmlspecialchars($row->description).'</em>';
+								$str .= '</div>';
+							}
 						}
 					}elseif($category == 'publications'){
 						$options = array();

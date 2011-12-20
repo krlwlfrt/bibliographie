@@ -286,26 +286,26 @@
 		padding: 5px;
 	}
 
-	.bibliographie_note {
+	.bibliographie_notes_note {
+		background: #ffd;
 		border: 1px solid #aaa;
+		color: #000;
 		margin: 10px 0;
 		padding: 5px;
 	}
 
-	.bibliographie_note_publication_link {
+	.bibliographie_notes_publication_link {
 		border-top: 1px solid #aaa;
 		font-size: 0.7em;
 		margin-top: 5px;
 		padding-top: 5px;
-		text-align: right;
 	}
 
-	.bibliographie_publication_bookmarked {
-		background: #ffd;
-		color: #000;
+	.bibliographie_notes_publication_link a {
+		font-weight: normal;
 	}
 
-	.bibliographie_publication .bibliographie_bookmark_container {
+	.bibliographie_notes_actions, .bibliographie_bookmark_container {
 		background: #fafafa;
 		border-bottom: 1px solid #aaa;
 		border-left: 1px solid #aaa;
@@ -315,6 +315,11 @@
 		font-size: 0.8em;
 		margin: -5px -5px 5px 5px;
 		padding: 5px;
+	}
+
+	.bibliographie_publication_bookmarked {
+		background: #ffd;
+		color: #000;
 	}
 
 	#jQueryLoading {

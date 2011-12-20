@@ -13,43 +13,15 @@ switch($_GET['task']){
 <h3>List of publications with notes</h3>
 <?php
 		bibliographie_history_append_step('notes', 'List of notes');
-		$bibliographie_title = 'List of notes';
 
-		$publicationsWithNotes = DB::getInstance()->prepare('SELECT
-	`pub_id`
-FROM
-	`'.BIBLIOGRAPHIE_PREFIX.'notes`
-WHERE
-	`user_id` = :user_id
-GROUP BY
-	`pub_id` DESC');
-		$publicationsWithNotes->execute(array(
-			'user_id' => (int) bibliographie_user_get_id()
-		));
+		$publicationsWithNotes = bibliographie_publications_sort(bibliographie_notes_get_publications_with_notes(), 'title');
 
-		if($publicationsWithNotes->rowCount() > 0){
-			$publicationsWithNotes = $publicationsWithNotes->fetchAll(PDO::FETCH_COLUMN, 0);
-			$publicationsWithNotes = bibliographie_publications_sort($publicationsWithNotes, 'title');
-?>
-
-<table class="dataContainer">
-	<tr>
-		<th>Publication</th>
-		<th>Notes</th>
-	</tr>
-<?php
+		if(count($publicationsWithNotes) > 0){
 			foreach($publicationsWithNotes as $pub_id){
-?>
-
-	<tr>
-		<td><?php echo bibliographie_publications_parse_title($pub_id)?></td>
-	</tr>
-<?php
+				$notes = bibliographie_notes_get_notes_of_publication($pub_id);
+				foreach($notes as $note)
+					echo bibliographie_notes_print_note($note->note_id);
 			}
-?>
-
-</table>
-<?php
 		}else
 			echo '<p class="notice">You do not have any notes!</p>';
 	break;
