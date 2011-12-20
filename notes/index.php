@@ -7,6 +7,24 @@ $bibliographie_title = 'Notes';
 <h2>Notes</h2>
 <?php
 switch($_GET['task']){
+	case 'deleteNote':
+		$note = bibliographie_notes_get_data($_GET['note_id']);
+
+		if(is_object($note)){
+			if($note->user_id == bibliographie_user_get_id()){
+				echo '<h3>Deleting note</h3>';
+				if(bibliographie_notes_delete_note($note->note_id))
+					echo '<p class="success">The note was deleted!</p>';
+				else
+					echo '<p class="error">An error occurred!</p>';
+
+				break;
+			}
+		}
+
+		echo '<h3>Error</h3><p class="error">Either this isn\'t your note or no note with this ID exists!</p>';
+	break;
+
 	case 'noteEditor':
 		bibliographie_history_append_step('notes', 'Note editor');
 

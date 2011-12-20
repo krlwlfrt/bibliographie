@@ -200,7 +200,7 @@ function bibliographie_notes_print_note ($note_id) {
 		$return .= '<div class="bibliographie_notes_note">';
 		$return .= '<div class="bibliographie_notes_actions">';
 		$return .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/notes/?task=noteEditor&amp;note_id='.((int) $note->note_id).'">'.bibliographie_icon_get('note-edit').'</a>';
-		$return .= '<a href="javascript:;">'.bibliographie_icon_get('note-delete').'</a>';
+		$return .= '<a href="javascript:;" onclick="bibliographie_notes_confirm_delete('.((int) $note->note_id).')">'.bibliographie_icon_get('note-delete').'</a>';
 		$return .= '</div>';
 		$return .= $note->text;
 		$return .= '<div class="bibliographie_notes_publication_link">'.bibliographie_publications_parse_data($note->pub_id).'</div>';
@@ -275,6 +275,36 @@ LIMIT
 			bibliographie_log('notes', 'editNote', json_encode($data));
 
 			$return = true;
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_notes_delete_note ($note_id) {
+	static $deleteNote = null;
+
+	$return = false;
+
+	$note = bibliographie_notes_get_data($note_id);
+
+	if(is_object($note)){
+		if(!($deleteNote instanceof PDOStatement))
+			$deleteNote = DB::getInstance()->prepare('DELETE FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
+WHERE
+	`note_id` = :note_id
+LIMIT
+	1');
+
+		$return = $deleteNote->execute(array(
+			'note_id' => (int) $note->note_id
+		));
+
+		if($return){
+			bibliographie_cache_purge('note_'.((int) $note->note_id));
+			bibliographie_cache_purge('search_notes_');
+			bibliographie_log('notes', 'deleteNote', json_encode($note));
 		}
 	}
 
