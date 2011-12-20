@@ -103,7 +103,7 @@ var bibliographie_request_delay = 500;
 var bibliographie_ajax_timeout = null;
 
 $(function () {
-	$.jGrowl.defaults.position = 'bottom-right';
+	$.jGrowl.defaults.position = 'bottom-left';
 	$.jGrowl.defaults.life = 10000;
 
 	/**
