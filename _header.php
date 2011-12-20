@@ -53,12 +53,14 @@
 					</div>
 				</form>
 
-				<h1>bibliographie</h1>
+				<h1>
+					<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>"><img src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/favicon.png" type="image/png" height="32" width="32" />ibliographie</a>
+				</h1>
 				<div id="mouse_movement"></div>
 			</div>
 
 			<div id="menu">
-				<h3>Browse</h3>
+				<h3><?php echo bibliographie_icon_get('find')?> Browse</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showGraph"><?php echo bibliographie_icon_get('sitemap')?> Topic graph</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=showList"><?php echo bibliographie_icon_get('group')?> Authors</a>
 				<br />
@@ -67,7 +69,7 @@
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/notes/?task=showNotes"><?php echo bibliographie_icon_get('note')?> Notes</a>
 
 
-				<h3>Add data</h3>
+				<h3><?php echo bibliographie_icon_get('add')?> Add data</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor"><?php echo bibliographie_icon_get('page-white-add')?> Publication</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=fetchData"><?php echo bibliographie_icon_get('page-white-get')?> Use source</a>
 				<br />
@@ -75,7 +77,7 @@
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/authors/?task=authorEditor"><?php echo bibliographie_icon_get('user-add')?> Author</a>
 
 
-				<h3>Maintenance</h3>
+				<h3><?php echo bibliographie_icon_get('cog')?> Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=mergePersons"><?php echo bibliographie_icon_get('arrow-join')?> Merge persons</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>

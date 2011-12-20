@@ -68,6 +68,11 @@
 		padding: 10px;
 	}
 
+	#header h1, #header img {
+		font-size: 25px;
+		vertical-align: top;
+	}
+
 	#search {
 		float: right;
 		width: 40%;
