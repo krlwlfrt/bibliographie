@@ -44,7 +44,7 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
 					'parent_topic' => (int) $parentTopic
 				));
 
-				bibliographie_purge_cache('topic_'.((int) $parentTopic).'_');
+				bibliographie_cache_purge('topic_'.((int) $parentTopic).'_');
 			}
 		}
 
@@ -58,7 +58,7 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
 
 		if(is_array($return))
 			bibliographie_log('topics', 'createTopic', json_encode($return));
-		bibliographie_purge_cache('search_');
+		bibliographie_cache_purge('search_');
 	}
 
 	return $return;
@@ -123,7 +123,7 @@ LIMIT 1');
 						'topic_id' => (int) $dataBefore['topic_id'],
 						'deleteTopicLink' => (int) $deleteTopicLink
 					));
-					bibliographie_purge_cache('topic_'.$deleteTopicLink.'_');
+					bibliographie_cache_purge('topic_'.$deleteTopicLink.'_');
 				}
 			}
 
@@ -164,7 +164,7 @@ LIMIT 1');
 							'topic_id' => (int) $dataBefore['topic_id'],
 							'addTopic' => (int) $addTopic
 						));
-						bibliographie_purge_cache('topic_'.((int) $addTopic).'_');
+						bibliographie_cache_purge('topic_'.((int) $addTopic).'_');
 					}
 				}
 			}
@@ -182,14 +182,14 @@ LIMIT 1');
 
 			if($data['dataBefore'] != $data['dataAfter']){
 				foreach($data['dataBefore']['topics'] as $topic_id)
-					bibliographie_purge_cache('topic_'.((int) $topic_id).'_');
+					bibliographie_cache_purge('topic_'.((int) $topic_id).'_');
 
 				bibliographie_log('topics', 'editTopic', json_encode($data));
-				bibliographie_purge_cache('topic_'.((int) $dataBefore['topic_id']).'_');
+				bibliographie_cache_purge('topic_'.((int) $dataBefore['topic_id']).'_');
 			}
 
 			DB::getInstance()->commit();
-			bibliographie_purge_cache('search_');
+			bibliographie_cache_purge('search_');
 			return $data;
 
 		} catch (PDOException $e) {

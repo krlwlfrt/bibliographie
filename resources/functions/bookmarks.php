@@ -196,7 +196,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $publications) {
 
 				DB::getInstance()->commit();
 
-				bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
+				bibliographie_cache_purge('bookmarks_'.((int) bibliographie_user_get_id()));
 			} catch (PDOException $e) {
 				echo '<p class="error">There was an error trying to set the bookmarks!</p><p>'.$e->getMessage().'</p>';
 			}
@@ -237,7 +237,7 @@ WHERE
 			$return = $unbookmark->rowCount();
 
 			if($return > 0)
-				bibliographie_purge_cache('bookmarks_'.((int) bibliographie_user_get_id()));
+				bibliographie_cache_purge('bookmarks_'.((int) bibliographie_user_get_id()));
 		}
 	}
 

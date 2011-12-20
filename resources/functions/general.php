@@ -178,7 +178,7 @@ function bibliographie_print_errors ($errors) {
  * Purge the cache for a specific pattern.
  * @param string $pattern Pattern for files that shall be deleted.
  */
-function bibliographie_purge_cache ($pattern) {
+function bibliographie_cache_purge ($pattern) {
 	if(mb_strpos($pattern, '..') === false and mb_strpos($pattern, '/') === false){
 		$files = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache');
 		foreach($files as $file)

@@ -158,6 +158,8 @@
 		background: #fff;
 		border: 1px solid #aaa;
 		color: #000;
+		font-family: sans-serif;
+		line-height: 1.5em;
 	}
 
 	.unit input.obligatory, .unit textarea.obligatory, .unit select.obligatory {

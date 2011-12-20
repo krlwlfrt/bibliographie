@@ -24,7 +24,7 @@ function bibliographie_maintenance_lock_topics (array $topics) {
 		DB::getInstance()->commit();
 
 		if($lockedTopics > 0)
-			bibliographie_purge_cache('topics_locked');
+			bibliographie_cache_purge('topics_locked');
 	} catch (PDOException $e) {
 		DB::getInstance()->rollBack();
 		echo '<p>An error occured while locking topics.! '.$e->getMessage().'</p>';
@@ -46,7 +46,7 @@ function bibliographie_maintenance_unlock_topic ($topic_id) {
 		$return = (bool) mysql_affected_rows();
 
 		if($return){
-			bibliographie_purge_cache('topics_locked');
+			bibliographie_cache_purge('topics_locked');
 			bibliographie_log('topics', 'unlockTopic', json_encode(array('topic_id' => ((int) $topic_id))));
 		}
 
@@ -122,7 +122,7 @@ function bibliographie_maintenance_merge_authors ($into, $delete) {
 			array_diff(bibliographie_authors_get_publications($delete->author_id, true), bibliographie_authors_get_publications($into->author_id, true))
 		);
 
-		bibliographie_purge_cache('author_');
+		bibliographie_cache_purge('author_');
 
 		if(count($publications) > 0){
 			if($linkPublications === null)

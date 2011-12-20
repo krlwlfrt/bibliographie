@@ -534,7 +534,7 @@ function bibliographie_publications_print_list (array $publications, $baseLink =
 		for($i = $pageData['offset']; $i < $pageData['ceiling']; $i++){
 			$publication = (array) bibliographie_publications_get_data($publications[$i]);
 
-			if(!$options['onlyPublications']){
+			if(!$options['onlyPublications'] and count($publications) > 1){
 				if($options['orderBy'] == 'year' and $cutter != $publication['year']){
 					$cutter = $publication['year'];
 					$return .= '<h4>Publications in '.((int) $cutter).'</h4>';
@@ -884,8 +884,8 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 		'tags' => $tags
 	);
 
-	bibliographie_purge_cache('publications');
-	bibliographie_purge_cache('tags');
+	bibliographie_cache_purge('publications');
+	bibliographie_cache_purge('tags');
 
 	if($return){
 		bibliographie_log('publications', 'createPublication', json_encode($data));
@@ -1030,8 +1030,8 @@ LIMIT 1");
 		$return = $data;
 	}
 
-	bibliographie_purge_cache('publication_'.((int) $pub_id));
-	bibliographie_purge_cache('publications');
+	bibliographie_cache_purge('publication_'.((int) $pub_id));
+	bibliographie_cache_purge('publications');
 
 	return $return;
 }
@@ -1179,7 +1179,7 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 					'pub_id' => (int) $pub_id
 				))){
 					$addedPublications[] = $pub_id;
-					bibliographie_purge_cache('publication_'.((int) $pub_id));
+					bibliographie_cache_purge('publication_'.((int) $pub_id));
 				}
 			}
 		}
@@ -1192,8 +1192,8 @@ function bibliographie_publications_add_topic (array $publications, $topic_id) {
 		);
 
 		if(count($addedPublications) > 0){
-			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
-			bibliographie_purge_cache('search_');
+			bibliographie_cache_purge('topic_'.((int) $topic->topic_id));
+			bibliographie_cache_purge('search_');
 			bibliographie_log('publications', 'addTopic', json_encode($return));
 		}
 	}
@@ -1238,9 +1238,9 @@ WHERE
 			);
 
 		if(is_array($return)){
-			bibliographie_purge_cache('topic_'.((int) $topic->topic_id));
-			bibliographie_purge_cache('publication_');
-			bibliographie_purge_cache('search_');
+			bibliographie_cache_purge('topic_'.((int) $topic->topic_id));
+			bibliographie_cache_purge('publication_');
+			bibliographie_cache_purge('search_');
 			bibliographie_log('publications', 'removeTopic', json_encode($return));
 		}
 	}
@@ -1280,7 +1280,7 @@ function bibliographie_publications_add_tag (array $publications, $tag_id) {
 					'pub_id' => (int) $pub_id
 				))){
 					$addedPublications[] = $pub_id;
-					bibliographie_purge_cache('publication_'.((int) $pub_id));
+					bibliographie_cache_purge('publication_'.((int) $pub_id));
 				}
 			}
 		}
@@ -1293,8 +1293,8 @@ function bibliographie_publications_add_tag (array $publications, $tag_id) {
 		);
 
 		if(count($addedPublications) > 0){
-			bibliographie_purge_cache('tag_'.((int) $tag->tag_id));
-			bibliographie_purge_cache('search_');
+			bibliographie_cache_purge('tag_'.((int) $tag->tag_id));
+			bibliographie_cache_purge('search_');
 			bibliographie_log('publications', 'addTag', json_encode($return));
 		}
 	}
@@ -1334,9 +1334,9 @@ WHERE
 			);
 
 		if(is_array($return)){
-			bibliographie_purge_cache('tag_'.((int) $topic->topic_id));
-			bibliographie_purge_cache('publication_');
-			bibliographie_purge_cache('search_');
+			bibliographie_cache_purge('tag_'.((int) $topic->topic_id));
+			bibliographie_cache_purge('publication_');
+			bibliographie_cache_purge('search_');
 			bibliographie_log('publications', 'removeTag', json_encode($return));
 		}
 	}

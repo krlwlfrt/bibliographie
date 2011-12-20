@@ -84,6 +84,7 @@ $(function () {
 				'topics' => array(),
 				'tags' => array(),
 				'authors' => array(),
+				'bookmarks' => array(),
 				'notes' => array(),
 				'journals' => array(),
 				'books' => array()
@@ -112,6 +113,9 @@ $(function () {
 								$searchResults['notes'][] = $note;
 				}
 			}
+
+			if(empty($_GET['category']) or $_GET['category'] == 'bookmarks')
+				$searchResults['bookmarks'] = array_values(array_intersect($searchResults['publications'], bibliographie_bookmarks_get_bookmarks()));
 
 			if(empty($_GET['category']) or $_GET['category'] == 'journals')
 				$searchResults['journals'] = bibliographie_publications_search_journals($_GET['q'], $expandedQuery);
@@ -163,18 +167,26 @@ $(function () {
 								if(!empty($row->url))
 									$str .= '<br /><em style="font-size: 0.8em;"><a href="'.htmlspecialchars($row->url).'">'.htmlspecialchars($row->url).'</a></em>';
 								$str .= '</div>';
+
+
 							}elseif($category == 'books')
 								$str .= '<div class="bibliographie_search_result">
 	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=book&container='.htmlspecialchars($row->booktitle).'">'.$row->booktitle.'</a>, '.$row->count.' article(s)
 </div>';
+
 							elseif($category == 'journals')
 								$str .= '<div class="bibliographie_search_result">
 	<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainer&amp;type=journal&container='.htmlspecialchars($row->journal).'">'.$row->journal.'</a>, '.$row->count.' publication(s)
 </div>';
+
 							elseif($category == 'notes')
 								$str .= bibliographie_notes_print_note($row->note_id);
+
+
 							elseif($category == 'tags')
 								$str .= '<div class="bibliographie_search_result">'.bibliographie_tags_parse_tag($row->tag_id, $options).'</div>';
+
+
 							elseif($category == 'topics'){
 								$row = bibliographie_topics_get_data($row->topic_id);
 								$str .= '<div class="bibliographie_search_result">'.bibliographie_topics_parse_name($row->topic_id, $options);
@@ -183,17 +195,21 @@ $(function () {
 								$str .= '</div>';
 							}
 						}
-					}elseif($category == 'publications'){
+					}elseif($category == 'publications' or $category == 'bookmarks'){
 						$options = array();
-						if($_GET['category'] == 'publications'){
-							$results = bibliographie_publications_sort($results, 'year');
+
+						if($_GET['category'] == 'publications' or $_GET['category'] == 'bookmarks'){
+							$options['orderBy'] = 'year';
+
+
 						}else{
 							if(count($results) > $limit and $limit != -1){
-								$str .= 'Found <strong>'.count($results).' publications</strong> of which the first '.$limit.' are shown. <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category=publications&amp;q='.htmlspecialchars($_GET['q']).'">Show all found publications!</a>';
+								$str .= 'Found <strong>'.count($results).' '.$category.'</strong> of which the first '.$limit.' are shown. <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category=publications&amp;q='.htmlspecialchars($_GET['q']).'">Show all found '.$category.'!</a>';
 								$results = array_slice($results, 0, $limit);
 							}else
 								$str .= 'Found <strong>'.count($results).' '.$category.'</strong> shown by relevancy.';
-							$options = array('onlyPublications' => true);
+
+							$options['onlyPublications'] = true;
 						}
 
 						$str .= bibliographie_publications_print_list($results, BIBLIOGRAPHIE_WEB_ROOT.'/search/?task=simpleSearch&amp;category=publications&amp;q='.htmlspecialchars($_GET['q']), $options);

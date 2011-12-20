@@ -769,6 +769,7 @@ $(function() {
 
 <em style="float: right">
 	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit</a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/notes/?task=noteEditor&amp;pub_id=<?php echo (int) $publication['pub_id']?>"><?php echo bibliographie_icon_get('note-add')?> Add note</a>
 </em>
 <h3><?php echo htmlspecialchars($publication['title'])?></h3>
 <?php
@@ -854,6 +855,15 @@ $(function() {
 
 	</tbody>
 </table>
+
+<?php
+$notes = bibliographie_notes_get_notes_of_publication($publication['pub_id']);
+if(count($notes) > 0){
+	echo '<h3>Notes</h3>';
+	foreach($notes as $note)
+		echo bibliographie_notes_print_note($note->note_id);
+}
+?>
 
 <script type="text/javascript">
 	/* <![CDATA[ */

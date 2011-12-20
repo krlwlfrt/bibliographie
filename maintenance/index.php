@@ -324,6 +324,7 @@ $(function () {
 				$categoryIcons = array (
 					'authors' => 'user',
 					'maintenance' => 'cog',
+					'notes' => 'note',
 					'publications' => 'page-white-text',
 					'tags' => 'tag-blue',
 					'topics' => 'folder'
@@ -344,7 +345,9 @@ $(function () {
 					'removeTopic' => 'folder-delete',
 					'deleteAuthor' => 'user-delete',
 					'createPublication' => 'page-white-add',
-					'mergeAuthors' => 'arrow-join'
+					'mergeAuthors' => 'arrow-join',
+					'createNote' => 'note-add',
+					'editNote' => 'note-edit'
 				);
 
 				foreach($logContent as $logRow){

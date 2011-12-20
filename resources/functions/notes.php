@@ -199,12 +199,83 @@ function bibliographie_notes_print_note ($note_id) {
 	if(is_object($note)){
 		$return .= '<div class="bibliographie_notes_note">';
 		$return .= '<div class="bibliographie_notes_actions">';
-		$return .= '<a href="">'.bibliographie_icon_get('note-edit').'</a>';
-		$return .= '<a href="">'.bibliographie_icon_get('note-delete').'</a>';
+		$return .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/notes/?task=noteEditor&amp;note_id='.((int) $note->note_id).'">'.bibliographie_icon_get('note-edit').'</a>';
+		$return .= '<a href="javascript:;">'.bibliographie_icon_get('note-delete').'</a>';
 		$return .= '</div>';
 		$return .= $note->text;
 		$return .= '<div class="bibliographie_notes_publication_link">'.bibliographie_publications_parse_data($note->pub_id).'</div>';
 		$return .= '</div>';
+	}
+
+	return $return;
+}
+
+function bibliographie_notes_create_note ($pub_id, $text) {
+	static $createNote = null;
+
+	$return = false;
+
+	$publication = bibliographie_publications_get_data($pub_id);
+
+	if(is_object($publication)){
+		if(!($createNote instanceof PDOStatement))
+			$createNote = DB::getInstance()->prepare('INSERT
+INTO
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
+(
+	`pub_id`,
+	`user_id`,
+	`text`
+) VALUES (
+	:pub_id,
+	:user_id,
+	:text
+)');
+		$data = array (
+			'pub_id' => (int) $publication->pub_id,
+			'user_id' => (int) bibliographie_user_get_id(),
+			'text' => $text
+		);
+		if($createNote->execute($data)){
+			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
+			bibliographie_log('notes', 'createNote', json_encode($data));
+			$return = true;
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_notes_edit_note ($note_id, $text) {
+	static $editNote = null;
+
+	$return = false;
+
+	$note = bibliographie_notes_get_data($note_id);
+
+	if(is_object($note)){
+		if(!($editNote instanceof PDOStatement))
+			$editNote = DB::getInstance()->prepare('UPDATE
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
+SET
+	`text` = :text
+WHERE
+	`note_id` = :note_id
+LIMIT
+	1');
+		$data = array (
+			'note_id' => (int) $note->note_id,
+			'text' => $text
+		);
+		if($editNote->execute($data)){
+			$data['textBefore'] = $note->text;
+
+			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
+			bibliographie_cache_purge('note_'.((int) $note->note_id));
+			bibliographie_log('notes', 'editNote', json_encode($data));
+
+			$return = true;
+		}
 	}
 
 	return $return;
