@@ -238,6 +238,7 @@ INTO
 		);
 		if($createNote->execute($data)){
 			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
+			bibliographie_cache_purge('notes_'.((int) bibliographie_user_get_id()));
 			bibliographie_log('notes', 'createNote', json_encode($data));
 			$return = true;
 		}
@@ -271,6 +272,7 @@ LIMIT
 			$data['textBefore'] = $note->text;
 
 			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
+			bibliographie_cache_purge('notes_'.((int) bibliographie_user_get_id()));
 			bibliographie_cache_purge('note_'.((int) $note->note_id));
 			bibliographie_log('notes', 'editNote', json_encode($data));
 
@@ -302,8 +304,9 @@ LIMIT
 		));
 
 		if($return){
+			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
+			bibliographie_cache_purge('notes_'.((int) bibliographie_user_get_id()));
 			bibliographie_cache_purge('note_'.((int) $note->note_id));
-			bibliographie_cache_purge('search_notes_');
 			bibliographie_log('notes', 'deleteNote', json_encode($note));
 		}
 	}
