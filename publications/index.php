@@ -207,13 +207,34 @@ $(function () {
 					'number'
 				);
 
-			$result = mysql_query("SELECT `year`, `".$fields[0]."`, `".$fields[1]."`, COUNT(*) AS `count` FROM `".BIBLIOGRAPHIE_PREFIX."publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' GROUP BY `".$fields[1]."` ORDER BY `year`, `volume`");
+			$containers = DB::getInstance()->prepare('SELECT
+	`year`,
+	`journal`,
+	`volume`,
+	`booktitle`,
+	`number`,
+	COUNT(*) AS `count`
+FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'publication`
+WHERE
+	`'.$fields[0].'` = :container
+GROUP BY
+	`'.$fields[1].'`
+ORDER BY
+	`year`,
+	`'.$fields[1].'`');
+			$containers->execute(array(
+				'container' => $_GET['container']
+			));
 
-			if(mysql_num_rows($result) > 0){
+			if($containers->rowCount() > 0){
+				$result = $containers->fetchAll(PDO::FETCH_ASSOC);
+
 				echo '<h3>Chronology of '.htmlspecialchars($_GET['container']).'</h3>';
 				echo '<table class="dataContainer">';
-				echo '<tr><th></th><th>'.htmlspecialchars($fields[0]).'</th><th>Year & '.htmlspecialchars($fields[1]).'</th><th>Articles</th></tr>';
-				while($container = mysql_fetch_assoc($result)){
+				echo '<tr><th></th><th>'.htmlspecialchars($fields[0]).'</th><th>Year & '.htmlspecialchars($fields[1]).'</th><th># of articles</th></tr>';
+
+				foreach($result as $container){
 					echo '<tr>'
 						.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($container[$fields[0]]).'&amp;year='.((int) $container['year']).'&amp;piece='.htmlspecialchars($container[$fields[1]]).'">'.bibliographie_icon_get('page-white-stack').'</a></td>'
 						.'<td>'.htmlspecialchars($container[$fields[0]]).'</td>'
@@ -239,20 +260,34 @@ $(function () {
 					'number'
 				);
 
-			$result = mysql_query("SELECT `pub_id` FROM `".BIBLIOGRAPHIE_PREFIX."publication` WHERE `".$fields[0]."` = '".mysql_real_escape_string(stripslashes($_GET['container']))."' AND `year` = ".((int) $_GET['year'])." AND `".$fields[1]."` = '".mysql_real_escape_string(stripslashes($_GET['piece']))."' ORDER BY `title`");
+			$publications = DB::getInstance()->prepare('SELECT
+	`pub_id`
+FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'publication`
+WHERE
+	`'.$fields[0].'` = :container AND
+	`year` = :year AND
+	`'.$fields[1].'` = :piece');
 
-			if(mysql_num_rows($result) > 0){
-	?>
+			$publications->execute(array(
+				'container' => $_GET['container'],
+				'year' => (int) $_GET['year'],
+				'piece' => $_GET['piece']
+			));
 
-	<h3>Publications in <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showContainer&amp;type=<?php echo htmlspecialchars($_GET['type'])?>&amp;container=<?php echo htmlspecialchars($_GET['container'])?>"><?php echo htmlspecialchars($_GET['container'])?></a>, <?php echo ((int) $_GET['year']).' '.htmlspecialchars($_GET[$field[1]])?></h3>
-	<?php
-				$publications = array();
-				while($publication = mysql_fetch_object($result))
-					$publications[] = $publication->pub_id;
+			$publications = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
 
+			if(count($publications) > 0){
+?>
+
+<h3>Publications in <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=showContainer&amp;type=<?php echo htmlspecialchars($_GET['type'])?>&amp;container=<?php echo htmlspecialchars($_GET['container'])?>"><?php echo htmlspecialchars($_GET['container'])?></a>, <?php echo ((int) $_GET['year']).' '.htmlspecialchars($_GET[$field[1]])?></h3>
+<?php
 				echo bibliographie_publications_print_list(
 					$publications,
-					BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($_GET['container']).'&amp;year='.((int) $_GET['year']).'&amp;piece='.htmlspecialchars($_GET['piece'])
+					BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($_GET['container']).'&amp;year='.((int) $_GET['year']).'&amp;piece='.htmlspecialchars($_GET['piece']),
+					array(
+						'orderBy' => 'title'
+					)
 				);
 			}
 		}

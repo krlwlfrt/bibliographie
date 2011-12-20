@@ -40,20 +40,31 @@ function bibliographie_maintenance_lock_topics (array $topics) {
  * @return bool True on succes, false otherwise.
  */
 function bibliographie_maintenance_unlock_topic ($topic_id) {
-	if(!empty($topic_id) and is_numeric($topic_id)){
-		mysql_query("DELETE FROM `lockedtopics` WHERE `topic_id` = ".((int) $topic_id)." LIMIT 1");
+	static $deleteLock = null;
 
-		$return = (bool) mysql_affected_rows();
+	$return = false;
+
+	if(!empty($topic_id) and is_numeric($topic_id)){
+		if(!($deleteLock instanceof PDOStatement))
+			$deleteLock = DB::getInstance()->prepare('DELETE FROM
+	`lockedtopics`
+WHERE
+	`topic_id` = :topic_id
+LIMIT 1');
+
+		$data = array (
+			'topic_id' => (int) $topic_id
+		);
+
+		$return = $deleteLock->execute($data);
 
 		if($return){
 			bibliographie_cache_purge('topics_locked');
-			bibliographie_log('topics', 'unlockTopic', json_encode(array('topic_id' => ((int) $topic_id))));
+			bibliographie_log('topics', 'unlockTopic', json_encode($data));
 		}
-
-		return $return;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
