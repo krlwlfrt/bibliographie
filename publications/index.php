@@ -803,8 +803,9 @@ $(function() {
 ?>
 
 <em style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit</a>
 	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/notes/?task=noteEditor&amp;pub_id=<?php echo (int) $publication['pub_id']?>"><?php echo bibliographie_icon_get('note-add')?> Add note</a>
+	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=publicationEditor&amp;pub_id=<?php echo ((int) $publication['pub_id'])?>"><?php echo bibliographie_icon_get('page-white-edit')?> Edit</a>
+	<a href="javascript:;" onclick="bibliographie_publications_confirm_delete(<?php echo (int) $publication['pub_id']?>)"><?php echo bibliographie_icon_get('page-white-delete')?> Delete</a>
 </em>
 <h3><?php echo htmlspecialchars($publication['title'])?></h3>
 <?php

@@ -5,7 +5,7 @@
 	}
 
 	body {
-		font-family: sans-serif;
+		font-family: 'Tahoma', sans-serif;
 		font-size: 15px;
 	}
 
@@ -70,6 +70,7 @@
 
 	h1, #header img {
 		font-size: 25px;
+		letter-spacing: 5px;
 		vertical-align: top;
 	}
 
@@ -169,7 +170,7 @@
 		background: #fff;
 		border: 1px solid #aaa;
 		color: inherit;
-		font-family: sans-serif;
+		font-family: 'Tahoma', sans-serif;
 		line-height: 1.5em;
 	}
 

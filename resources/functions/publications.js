@@ -345,3 +345,28 @@ function bibliographie_publications_check_data_approve_all (entryID) {
 		})
 	})
 }
+
+function bibliographie_publications_confirm_delete (pub_id) {
+	$.ajax({
+		'url': bibliographie_web_root+'/publications/ajax.php',
+		'data': {
+			'task': 'deletePublicationConfirm',
+			'pub_id': pub_id
+		},
+		'success': function (html) {
+			$('#dialogContainer').append(html);
+			$('#deletePublicationConfirm_'+pub_id).dialog({
+				'width': 400,
+				'buttons': {
+					'cancel': function () {
+						$(this).dialog('close');
+					}
+				},
+				'close': function () {
+					$(this).remove();
+				},
+				'modal': true
+			})
+		}
+	})
+}

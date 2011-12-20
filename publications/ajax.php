@@ -7,6 +7,20 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 $title = 'An error occured!';
 $text = 'An error occurred...';
 switch($_GET['task']){
+	case 'deletePublicationConfirm':
+		$publication = bibliographie_publications_get_data($_GET['pub_id']);
+
+		if(is_object($publication)){
+			$text = 'You are about to delete the following publication.'
+				.'<p>'.bibliographie_publications_parse_data($publication->pub_id).'</p>'
+				.'If you are sure, click "delete" below!'
+				.'<p class="success"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=deletePublication&amp;pub_id='.((int) $publication->pub_id).'">'.bibliographie_icon_get('page-white-delete').' Delete!</a></p>'
+				.'If you dont want to delete the publication, press "cancel" below!';
+		}
+
+		bibliographie_dialog_create('deletePublicationConfirm_'.((int) $_GET['pub_id']), 'Confirm delete', $text);
+	break;
+
 	case 'exportChooseType':
 		$publications = bibliographie_publications_get_cached_list($_GET['exportList']);
 

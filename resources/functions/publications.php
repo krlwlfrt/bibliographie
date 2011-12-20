@@ -1476,3 +1476,28 @@ ORDER BY
 
 	return $return;
 }
+
+function bibliographie_publications_delete_publication ($pub_id) {
+	/*static $deletePublication = null;
+
+	$publication = bibliographie_publications_get_data($pub_id);
+	$return = false;
+
+	if(is_object($publication)){
+		$notes = bibliographie_notes_get_notes_of_publication($pub_id);
+
+		if(!($deletePublication instanceof PDOStatement))
+			$deletePublication = DB::getInstance()->prepare('DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publication` WHERE `pub_id` = :pub_id LIMIT 1');
+
+		$return = $deletePublication->execute(array(
+			'pub_id' => (int) $publication->pub_id
+		));
+
+		if($return){
+			bibliographie_cache_purge('publication_'.((int) $publication->pub_id));
+			bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
+		}
+	}
+
+	return $return;*/
+}

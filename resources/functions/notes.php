@@ -307,7 +307,7 @@ LIMIT
 			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
 			bibliographie_cache_purge('notes_'.((int) bibliographie_user_get_id()));
 			bibliographie_cache_purge('note_'.((int) $note->note_id));
-			bibliographie_log('notes', 'deleteNote', json_encode($note));
+			bibliographie_log('notes', 'deleteNote', json_encode(array('dataDeleted' => $note)));
 		}
 	}
 
