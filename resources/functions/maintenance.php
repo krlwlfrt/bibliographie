@@ -11,7 +11,7 @@ function bibliographie_maintenance_lock_topics (array $topics) {
 
 	try {
 		if(!($lockTopic instanceof PDOStatement))
-			$lockTopic = DB::getInstance()->prepare('INSERT INTO `lockedtopics` (`topic_id`) VALUES (:topic_id)');
+			$lockTopic = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (`topic_id`) VALUES (:topic_id)');
 
 		DB::getInstance()->beginTransaction();
 
@@ -47,7 +47,7 @@ function bibliographie_maintenance_unlock_topic ($topic_id) {
 	if(!empty($topic_id) and is_numeric($topic_id)){
 		if(!($deleteLock instanceof PDOStatement))
 			$deleteLock = DB::getInstance()->prepare('DELETE FROM
-	`lockedtopics`
+	`'.BIBLIOGRAPHIE_PREFIX.'lockedtopics`
 WHERE
 	`topic_id` = :topic_id
 LIMIT 1');

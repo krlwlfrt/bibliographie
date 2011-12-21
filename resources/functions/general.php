@@ -138,7 +138,7 @@ function bibliographie_log ($category, $action, $data) {
 	$time = date('r');
 
 	if($logAccess === null)
-		$logAccess = DB::getInstance()->prepare('INSERT INTO `bibliographie_log` (
+		$logAccess = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'log` (
 	`log_file`,
 	`log_time`
 ) VALUES (
@@ -371,6 +371,13 @@ function bibliographie_link_append_param ($link, $param, $encode = true) {
 	return $link.'&'.$param;
 }
 
+function bool2img ($bool) {
+	if($bool)
+		return bibliographie_icon_get('tick');
+
+	return bibliographie_icon_get('cross');
+}
+
 /**
  * Include all needed functions...
  */
@@ -381,6 +388,7 @@ require dirname(__FILE__).'/history.php';
 require dirname(__FILE__).'/maintenance.php';
 require dirname(__FILE__).'/notes.php';
 require dirname(__FILE__).'/publications.php';
+require dirname(__FILE__).'/schemeUpdates.php';
 require dirname(__FILE__).'/search.php';
 require dirname(__FILE__).'/tags.php';
 require dirname(__FILE__).'/topics.php';

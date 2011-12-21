@@ -64,7 +64,7 @@ function bibliographie_search_get_plurals () {
 
 	$return = array();
 	if(!($sap instanceof PDOStatement)){
-		$sap = DB::getInstance()->prepare('SELECT `singular`, `plural` FROM `singulars_and_plurals`');
+		$sap = DB::getInstance()->prepare('SELECT `singular`, `plural` FROM `'.BIBLIOGRAPHIE_PREFIX.'singulars_and_plurals`');
 		$sap->setFetchMode(PDO::FETCH_OBJ);
 	}
 

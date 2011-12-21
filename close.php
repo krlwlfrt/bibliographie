@@ -30,7 +30,6 @@ echo preg_replace_callback(
 );
 
 /**
- * Close the mysql connection(s).
+ * Close the mysql connection.
  */
-mysql_close();
 DB::close();

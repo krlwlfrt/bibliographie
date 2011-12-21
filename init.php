@@ -1,4 +1,6 @@
 <?php
+define('BIBLIOGRAPHIE_DATABASE_VERSION', '1');
+
 /**
  * Register starting time.
  */
@@ -19,6 +21,13 @@ mb_internal_encoding('UTF-8');
 date_default_timezone_set('Europe/Berlin');
 
 /**
+ * Check for config file.
+ */
+if(!file_exists(dirname(__FILE__).'/config.php'))
+	bibliographie_exit('Config file missing!', 'Sorry, but we have no config file!');
+require dirname(__FILE__).'/config.php';
+
+/**
  * Require functions.
  */
 require dirname(__FILE__).'/resources/functions/general.php';
@@ -30,11 +39,33 @@ if(!isset($_SERVER['PHP_AUTH_USER']))
 	bibliographie_exit('Authentication error', 'It seems that there is an error with your authentication. Bibliographie can not read your login name and must therefore stop right here.');
 
 /**
- * Check for config file.
+ * Check if database scheme is the same as expected by bibliographie.
  */
-if(!file_exists(dirname(__FILE__).'/config.php'))
-	bibliographie_exit('Config file missing!', 'Sorry, but we have no config file!');
-require dirname(__FILE__).'/config.php';
+$databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `'.BIBLIOGRAPHIE_PREFIX.'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
+if(BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
+	bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
+elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
+	try {
+		DB::getInstance()->beginTransaction();
+
+		echo '<h2>Updating database scheme</h2><p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p><ul>';
+		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
+			//DB::getInstance()->query($bibliographie_database_updates[$i]);
+			echo '<li>'
+				.'<em>'.$bibliographie_database_updates[$i]['description'].'</em> '
+				.bool2img((bool) DB::getInstance()->exec($bibliographie_database_updates[$i]['query']))
+				. '</li>';
+		}
+		echo '</ul>';
+
+		DB::getInstance()->exec('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'settings` SET `value` = '.DB::getInstance()->quote(BIBLIOGRAPHIE_DATABASE_VERSION).' WHERE `key` = "DATABASE_VERSION"');
+
+		DB::getInstance()->commit();
+	} catch (PDOException $e) {
+		DB::getInstance()->rollBack();
+		bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />'.$e->__toString());
+	}
+}
 
 /**
  * If root path isnt defined by program file then define it now with the default value.
@@ -53,80 +84,90 @@ if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
  */
 $bibliographie_history_path_identifier = '';
 $bibliographie_title = 'bibliographie';
-$bibliographie_database_queries = array();
 
-/**
- * Check mysql connection.
- */
-if(@mysql_connect(BIBLIOGRAPHIE_MYSQL_HOST, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD))
-	if(@mysql_select_db(BIBLIOGRAPHIE_MYSQL_DATABASE))
-		define('BIBLIOGRAPHIE_MYSQL_CONNECTED', true);
+if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->rowCount() == 0){
+	/**
+	 * We don't have the bibliographie database scheme!
+	 */
+?>
 
-if(!defined('BIBLIOGRAPHIE_MYSQL_CONNECTED'))
-	bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!');
-
-/**
- * Initialize UTF-8.
- */
-mysql_query("SET NAMES 'utf8'");
-mysql_query("SET CHARACTER SET 'utf8'");
-
-if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
-	echo '<!DOCTYPE html><html lang="de"><head><title>Initialize database</title></head><body><h1>Initialize database</h1>';
-
-	if(mysql_num_rows(mysql_query("SHOW TABLES LIKE '".BIBLIOGRAPHIE_PREFIX."publication'")) == 1){
-		/**
-		 * Aigaion scheme is present... Just convert it, to the bibliographie scheme...
-		 */
-
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<title>Initialize database</title>
+	</head>
+	<body>
+		<h1>Initialize database</h1>
+<?php
+	if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'publication"')->rowCount() == 1){
 		if(empty($_GET['makeScheme'])){
-			echo '<p>You have the aigaion scheme. We need to make a few tiny little changes for bibliographie.</p>';
-			echo '<p><a href="?makeScheme=1">Do it now!</a></p>';
+?>
+
+		<p>You have the aigaion scheme. We need to make a few changes for bibliographie.</p>
+		<p><a href="?makeScheme=1">Do it now!</a></p>
+<?php
 		}elseif($_GET['makeScheme'] == 1){
-			// DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`;
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."keywords` RENAME TO `".BIBLIOGRAPHIE_PREFIX."tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publicationkeywordlink` RENAME TO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."publication` ADD COLUMN `missingFields` SMALLINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `pages`;");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."tags` ADD FULLTEXT INDEX `fulltext` (`tag`);");
-			mysql_query("ALTER TABLE `".BIBLIOGRAPHIE_PREFIX."notes` ADD FULLTEXT INDEX `fulltext` (`text`)");
+			try {
+				DB::getInstance()->beginTransaction();
 
-			mysql_query("CREATE TABLE `bibliographie_log` (
-	`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`log_file` TEXT NOT NULL,
-	`log_time` TEXT NOT NULL,
-	PRIMARY KEY (`log_id`)
-) COLLATE='utf8_general_ci' ENGINE=MyISAM;");
+				DB::getInstance()->exec('DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`;');
 
-			mysql_query("CREATE TABLE `lockedtopics` (
-	`topic_id` INT(10) UNSIGNED NOT NULL
-) COLLATE='utf8_general_ci' ENGINE=MyISAM;");
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'keywords` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publicationkeywordlink` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'tags` ADD FULLTEXT INDEX `fulltext` (`tag`);');
+				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'notes` ADD FULLTEXT INDEX `fulltext` (`text`)');
 
-			mysql_query("CREATE TABLE `singulars_and_plurals` (
-	`ln` VARCHAR(2) NOT NULL DEFAULT 'en' COLLATE 'utf8_general_ci',
-	`singular` TINYTEXT NOT NULL COLLATE 'utf8_general_ci',
-	`plural` TINYTEXT NOT NULL COLLATE 'utf8_general_ci'
-) COLLATE='utf8_general_ci' ENGINE=MyISAM");
+				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'log` (
+		`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+		`log_file` TEXT NOT NULL,
+		`log_time` TEXT NOT NULL,
+		PRIMARY KEY (`log_id`)
+	) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-			mysql_query("CREATE TABLE `a2unsimilar_groups_of_authors` (
-	`group` LONGTEXT NOT NULL COLLATE 'utf8_general_ci'
-) COLLATE='utf8_general_ci' ENGINE=MyISAM");
+				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (
+		`topic_id` INT(10) UNSIGNED NOT NULL
+	) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-			echo '<p>Scheme has been modified!!!</p>';
+				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'singulars_and_plurals` (
+		`ln` VARCHAR(2) NOT NULL DEFAULT "en" COLLATE "utf8_general_ci",
+		`singular` TINYTEXT NOT NULL COLLATE "utf8_general_ci",
+		`plural` TINYTEXT NOT NULL COLLATE "utf8_general_ci"
+	) COLLATE="utf8_general_ci" ENGINE=MyISAM');
+
+				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors` (
+		`group` LONGTEXT NOT NULL COLLATE "utf8_general_ci"
+	) COLLATE="utf8_general_ci" ENGINE=MyISAM');
+
+				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'settings` (
+	`key` TINYTEXT NOT NULL COLLATE "utf8_general_ci",
+	`value` LONGTEXT NOT NULL COLLATE "utf8_general_ci",
+	UNIQUE INDEX `UNIQUE_KEY` (`key`(100))
+) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
+
+				DB::getInstance()->exec('INSERT INTO `a2settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
+
+				DB::getInstance()->commit();
+
+				echo '<p>Scheme has been modified!</p>';
+				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
+			} catch (PDOException $e) {
+				DB::getInstance()->rollBack();
+				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
+			}
 		}
 	}else{
-		/**
-		 * Aigaion scheme is not present... Create it completely new.
-		 */
+		/*if(empty($_GET['makeScheme'])){
+?>
 
-		if(empty($_GET['makeScheme'])){
-			echo '<p>You don\'t seem to have an appropriate database scheme at all. Do you want it to be created now?</p>';
-			echo '<p><a href="?makeScheme=1">Do it now!</a></p>';
+		<p>You don't seem to have an appropriate database scheme at all. Do you want it to be created now?</p>
+		<p><a href="?makeScheme=1">Do it now!</a></p>
+<?php
 		}elseif($_GET['makeScheme'] == 1)
 			mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."attachments` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -339,9 +380,13 @@ if(mysql_num_rows(mysql_query("SHOW TABLES LIKE 'bibliographie_log'")) == 0){
 
 		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."users` (`login`) VALUES ('".mysql_real_escape_string(stripslashes($_SERVER['PHP_AUTH_USER']))."');");
 		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topics` (`name`, `description`) VALUES ('Top', 'Meta-topic as top of the topic hierarchy.');");
-		echo '<p>Scheme has been created!!!</p>';
+		echo '<p>Scheme has been created!!!</p>';*/
 	}
-	echo '</body></html>';
+?>
+
+	</body>
+</html>
+<?php
 	exit();
 }
 
