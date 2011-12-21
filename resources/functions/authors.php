@@ -13,9 +13,6 @@
 function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $email, $url, $institute, $author_id = null) {
 	static $author = null;
 
-	if($author_id !== null)
-		$author_id = (int) $author_id;
-
 	if($author === null)
 		$author = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'author` (
 	`author_id`,
@@ -64,7 +61,7 @@ function bibliographie_authors_create_author ($firstname, $von, $surname, $jr, $
 		);
 
 		bibliographie_log('authors', 'createAuthor', json_encode($return));
-		bibliographie_cache_purge('search_');
+		bibliographie_cache_purge('search_authors_');
 	}
 
 	return $return;
@@ -398,7 +395,7 @@ function bibliographie_authors_delete ($author_id) {
 
 			if($return){
 				bibliographie_cache_purge('author_'.((int) $person->author_id));
-				bibliographie_cache_purge('search_');
+				bibliographie_cache_purge('search_authors_');
 				bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
 			}
 		}

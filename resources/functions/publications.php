@@ -761,135 +761,245 @@ function bibliographie_publications_get_topics ($publication_id) {
  * @param type $user_id
  * @return type
  */
-function bibliographie_publications_create_publication ($pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags, $user_id = null) {
-	if($user_id == null)
-		$user_id = bibliographie_user_get_id ();
+function bibliographie_publications_create_publication ($pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags, $pub_id = null, $user_id = null) {
+	static
+		$createPublication = null,
+		$linkAuthors = null,
+		$linkEditors = null,
+		$linkTopics = null,
+		$linkTags = null;
 
-	$return = mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publication` (
-	`pub_type`,
-	`user_id`,
-	`title`,
-	`month`,
-	`year`,
-	`booktitle`,
-	`chapter`,
-	`series`,
-	`journal`,
-	`volume`,
-	`number`,
-	`edition`,
-	`publisher`,
-	`location`,
-	`howpublished`,
-	`organization`,
-	`institution`,
-	`school`,
-	`address`,
-	`pages`,
-	`note`,
-	`abstract`,
-	`userfields`,
-	`bibtex_id`,
-	`isbn`,
-	`issn`,
-	`doi`,
-	`url`
+	$return = false;
+
+	try {
+		sort($tags);
+		sort($topics);
+
+		DB::getInstance()->beginTransaction();
+
+		if($user_id == null)
+			$user_id = bibliographie_user_get_id ();
+
+		if(!($createPublication instanceof PDOStatement))
+			$createPublication = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'publication` (
+		`pub_id`
+		`pub_type`,
+		`user_id`,
+		`title`,
+		`month`,
+		`year`,
+		`booktitle`,
+		`chapter`,
+		`series`,
+		`journal`,
+		`volume`,
+		`number`,
+		`edition`,
+		`publisher`,
+		`location`,
+		`howpublished`,
+		`organization`,
+		`institution`,
+		`school`,
+		`address`,
+		`pages`,
+		`note`,
+		`abstract`,
+		`userfields`,
+		`bibtex_id`,
+		`isbn`,
+		`issn`,
+		`doi`,
+		`url`
+	) VALUES (
+		:pub_id,
+		:pub_type,
+		:user_id,
+		:title,
+		:month,
+		:year,
+		:booktitle,
+		:chapter,
+		:series,
+		:journal,
+		:volume,
+		:number,
+		:edition,
+		:publisher,
+		:location,
+		:howpublished,
+		:organization,
+		:institution,
+		:school,
+		:address,
+		:pages,
+		:note,
+		:abstract,
+		:userfields,
+		:bibtex_id,
+		:isbn,
+		:issn,
+		:doi,
+		:url
+	)');
+
+		$data = array(
+			'pub_id' => (int) $pub_id,
+			'pub_type' => $pub_type,
+			'user_id' => (int) $user_id,
+			'title' => $title,
+			'month' => $month,
+			'year' => (int) $year,
+			'booktitle' => $booktitle,
+			'chapter' => $chapter,
+			'series' => $series,
+			'journal' => $journal,
+			'volume' => $volume,
+			'number' => $number,
+			'edition' => $edition,
+			'publisher' => $publisher,
+			'location' => $location,
+			'howpublished' => $howpublished,
+			'organization' => $organization,
+			'institution' => $institution,
+			'school' => $school,
+			'address' => $address,
+			'pages' => $pages,
+			'note' => $note,
+			'abstract' => $abstract,
+			'userfields' => $userfields,
+			'bibtex_id' => $bibtex_id,
+			'isbn' => $isbn,
+			'issn' => $issn,
+			'doi' => $doi,
+			'url' => $url
+		);
+
+		$return = $createPublication->execute($data);
+
+		if($pub_id === null)
+			$pub_id = (int) DB::getInstance()->lastInsertId();
+
+		$data = array_merge($data, array(
+			'pub_id' => $pub_id,
+			'author' => $author,
+			'editor' => $editor,
+			'topics' => $topics,
+			'tags' => $tags
+		));
+
+		if(count($author) > 0 and !empty($author[0])){
+			$rank = (int) 1;
+			foreach($author as $linkAuthor){
+				$linkAuthor = bibliographie_authors_get_data($linkAuthor);
+				if(is_object($linkAuthor)){
+					if(!($linkAuthors instanceof PDOStatement))
+						$linkAuthors = DB::getInstance()->prepare('INSERT INTO
+		`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+	(
+		`pub_id`,
+		`author_id`,
+		`rank`,
+		`is_editor`
+	) VALUES (
+		:pub_id,
+		:author_id,
+		:rank,
+		"N"
+	)');
+					$linkAuthors->execute(array(
+						'pub_id' => (int) $data['pub_id'],
+						'author_id' => (int) $linkAuthor->author_id,
+						'rank' => (int) $rank++
+					));
+					bibliographie_cache_purge('author_'.((int) $linkAuthor->author_id));
+				}
+			}
+		}
+
+		if(count($editor) > 0 and !empty($editor[0])){
+			$rank = (int) 1;
+			foreach($editor as $linkEditor){
+				$linkEditor = bibliographie_authors_get_data($linkEditor);
+				if(is_object($linkEditor)){
+					if(!($linkEditors instanceof PDOStatement))
+						$linkEditors = DB::getInstance()->prepare('INSERT INTO
+		`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+	(
+		`pub_id`,
+		`author_id`,
+		`rank`,
+		`is_editor`
+	) VALUES (
+		:pub_id,
+		:author_id,
+		:rank,
+		"Y"
+	)');
+					$linkEditors->execute(array(
+						'pub_id' => (int) $data['pub_id'],
+						'author_id' => (int) $linkEditor->author_id,
+						'rank' => (int) $rank++
+					));
+					bibliographie_cache_purge('author_'.((int) $linkEditor->author_id));
+				}
+			}
+		}
+
+		if(count($topics) > 0 and !empty($topics[0]))
+			foreach($topics as $linkTopic){
+				$linkTopic = bibliographie_topics_get_data($linkTopic);
+				if(is_object($linkTopic)){
+					if(!($linkTopics instanceof PDOStatement))
+						$linkTopics = DB::getInstance()->prepare('INSERT INTO
+	`'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink`
+(
+	`topic_id`,
+	`pub_id`
 ) VALUES (
-	'".mysql_real_escape_string(stripslashes($pub_type))."',
-	'".((int) $user_id)."',
-	'".mysql_real_escape_string(stripslashes($title))."',
-	'".mysql_real_escape_string(stripslashes($month))."',
-	".((int) $year).",
-	'".mysql_real_escape_string(stripslashes($booktitle))."',
-	'".mysql_real_escape_string(stripslashes($chapter))."',
-	'".mysql_real_escape_string(stripslashes($series))."',
-	'".mysql_real_escape_string(stripslashes($journal))."',
-	'".mysql_real_escape_string(stripslashes($volume))."',
-	'".mysql_real_escape_string(stripslashes($number))."',
-	'".mysql_real_escape_string(stripslashes($edition))."',
-	'".mysql_real_escape_string(stripslashes($publisher))."',
-	'".mysql_real_escape_string(stripslashes($location))."',
-	'".mysql_real_escape_string(stripslashes($howpublished))."',
-	'".mysql_real_escape_string(stripslashes($organization))."',
-	'".mysql_real_escape_string(stripslashes($institution))."',
-	'".mysql_real_escape_string(stripslashes($school))."',
-	'".mysql_real_escape_string(stripslashes($address))."',
-	'".mysql_real_escape_string(stripslashes($pages))."',
-	'".mysql_real_escape_string(stripslashes($note))."',
-	'".mysql_real_escape_string(stripslashes($abstract))."',
-	'".mysql_real_escape_string(stripslashes($userfields))."',
-	'".mysql_real_escape_string(stripslashes($bibtex_id))."',
-	'".mysql_real_escape_string(stripslashes($isbn))."',
-	'".mysql_real_escape_string(stripslashes($issn))."',
-	'".mysql_real_escape_string(stripslashes($doi))."',
-	'".mysql_real_escape_string(stripslashes($url))."'
-)");
+	:topic_id,
+	:pub_id
+)');
+					$linkTopics->execute(array(
+						'topic_id' => (int) $linkTopic->topic_id,
+						'pub_id' => (int) $data['pub_id']
+					));
+					bibliographie_cache_purge('topic_'.((int) $linkTopic->topic_id));
+				}
+			}
 
-	$pub_id = mysql_insert_id();
+		if(count($tags) > 0 and !empty($tags[0])){
+			foreach($tags as $linkTag){
+				$linkTag = bibliographie_tags_get_data($linkTag);
+				if(is_object($linkTag)){
+					if(!($linkTags instanceof PDOStatement))
+						$linkTags = DB::getInstance()->prepare('INSERT INTO
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`
+(
+	`pub_id`,
+	`tag_id`
+) VALUES (
+	:pub_id,
+	:tag_id
+)');
+					$linkTags->execute(array(
+						'pub_id' => (int) $data['pub_id'],
+						'tag_id' => (int) $linkTag->tag_id
+					));
+				}
+			}
+		}
 
-	if(count($author) > 0 and !empty($author[0])){
-		$rank = (int) 1;
-		foreach($author as $author_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
-	}
+		DB::getInstance()->commit();
 
-	if(count($editor) > 0 and !empty($editor[0])){
-		$rank = (int) 1;
-		foreach($editor as $editor_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
-	}
-
-	if(count($topics) > 0 and !empty($topics[0]))
-		foreach($topics as $topic_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
-
-	if(count($tags) > 0 and !empty($tags[0]))
-		foreach($tags as $tag_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
-
-	$data = array(
-		'pub_id' => (int) $pub_id,
-		'pub_type' => $pub_type,
-		'user_id' => (int) $user_id,
-		'title' => $title,
-		'month' => $month,
-		'year' => (int) $year,
-		'booktitle' => $booktitle,
-		'chapter' => $chapter,
-		'series' => $series,
-		'journal' => $journal,
-		'volume' => $volume,
-		'number' => $number,
-		'edition' => $edition,
-		'publisher' => $publisher,
-		'location' => $location,
-		'howpublished' => $howpublished,
-		'organization' => $organization,
-		'institution' => $institution,
-		'school' => $school,
-		'address' => $address,
-		'pages' => $pages,
-		'note' => $note,
-		'abstract' => $abstract,
-		'userfields' => $userfields,
-		'bibtex_id' => $bibtex_id,
-		'isbn' => $isbn,
-		'issn' => $issn,
-		'doi' => $doi,
-		'url' => $url,
-
-		'author' => $author,
-		'editor' => $editor,
-		'topics' => $topics,
-		'tags' => $tags
-	);
-
-	bibliographie_cache_purge('publications');
-	bibliographie_cache_purge('tags');
-
-	if($return){
-		bibliographie_log('publications', 'createPublication', json_encode($data));
-		return $data;
+		if($return){
+			bibliographie_cache_purge('search_publications_');
+			bibliographie_log('publications', 'createPublication', json_encode($data));
+			$return = $data;
+		}
+	} catch (PDOException $e) {
+		DB::getInstance()->rollBack();
+		$return = false;
 	}
 
 	return $return;
@@ -931,107 +1041,258 @@ function bibliographie_publications_create_publication ($pub_type, array $author
  * @return type
  */
 function bibliographie_publications_edit_publication ($pub_id, $pub_type, array $author, array $editor, $title, $month, $year, $booktitle, $chapter, $series, $journal, $volume, $number, $edition, $publisher, $location, $howpublished, $organization, $institution, $school, $address, $pages, $note, $abstract, $userfields, $bibtex_id, $isbn, $issn, $doi, $url, array $topics, array $tags) {
+	static
+		$editPublication = null,
+		$linkAuthors = null,
+		$linkEditors = null,
+		$linkTopics = null,
+		$unlinkTopics = null,
+		$linkTags = null,
+		$unlinkTags = null;
 
-	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".(count(bibliographie_publications_get_authors($pub_id))+count(bibliographie_publications_get_editors($pub_id))));
-	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_topics($pub_id)));
-	mysql_query("DELETE FROM `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` WHERE `pub_id` = ".((int) $pub_id)." LIMIT ".count(bibliographie_publications_get_tags($pub_id)));
+	$return = false;
 
-	$return = mysql_query("UPDATE `".BIBLIOGRAPHIE_PREFIX."publication` SET
-	`pub_type` = '".mysql_real_escape_string(stripslashes($pub_type))."',
-	`title` = '".mysql_real_escape_string(stripslashes($title))."',
-	`month` = '".mysql_real_escape_string(stripslashes($month))."',
-	`year` = ".((int) $year).",
-	`booktitle` = '".mysql_real_escape_string(stripslashes($booktitle))."',
-	`chapter` = '".mysql_real_escape_string(stripslashes($chapter))."',
-	`series` = '".mysql_real_escape_string(stripslashes($series))."',
-	`journal` = '".mysql_real_escape_string(stripslashes($journal))."',
-	`volume` = '".mysql_real_escape_string(stripslashes($volume))."',
-	`number` = '".mysql_real_escape_string(stripslashes($number))."',
-	`edition` = '".mysql_real_escape_string(stripslashes($edition))."',
-	`publisher` = '".mysql_real_escape_string(stripslashes($publisher))."',
-	`location` = '".mysql_real_escape_string(stripslashes($location))."',
-	`howpublished` = '".mysql_real_escape_string(stripslashes($howpublished))."',
-	`organization` = '".mysql_real_escape_string(stripslashes($organization))."',
-	`institution` = '".mysql_real_escape_string(stripslashes($institution))."',
-	`school` = '".mysql_real_escape_string(stripslashes($school))."',
-	`address` = '".mysql_real_escape_string(stripslashes($address))."',
-	`pages` = '".mysql_real_escape_string(stripslashes($pages))."',
-	`note` = '".mysql_real_escape_string(stripslashes($note))."',
-	`abstract` = '".mysql_real_escape_string(stripslashes($abstract))."',
-	`userfields` = '".mysql_real_escape_string(stripslashes($userfields))."',
-	`bibtex_id` = '".mysql_real_escape_string(stripslashes($bibtex_id))."',
-	`isbn` = '".mysql_real_escape_string(stripslashes($isbn))."',
-	`issn` = '".mysql_real_escape_string(stripslashes($issn))."',
-	`doi` = '".mysql_real_escape_string(stripslashes($doi))."',
-	`url` = '".mysql_real_escape_string(stripslashes($url))."'
+	$publication = bibliographie_publications_get_data($pub_id);
+
+	if(is_object($publication)){
+		try {
+			sort($tags);
+			sort($topics);
+
+			DB::getInstance()->beginTransaction();
+
+			if(!($editPublication instanceof PDOStatement))
+				$editPublication = DB::getInstance()->prepare('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'publication` SET
+	`pub_type` = :pub_type,
+	`title` = :title,
+	`month` = :month,
+	`year` = :year,
+	`booktitle` = :booktitle,
+	`chapter` = :chapter,
+	`series` = :series,
+	`journal` = :journal,
+	`volume` = :volume,
+	`number` = :number,
+	`edition` = :edition,
+	`publisher` = :publisher,
+	`location` = :location,
+	`howpublished` = :howpublished,
+	`organization` = :organization,
+	`institution` = :institution,
+	`school` = :school,
+	`address` = :address,
+	`pages` = :pages,
+	`note` = :note,
+	`abstract` = :abstract,
+	`userfields` = :userfields,
+	`bibtex_id` = :bibtex_id,
+	`isbn` = :isbn,
+	`issn` = :issn,
+	`doi` = :doi,
+	`url` = :url
 WHERE
-	`pub_id` = ".((int) $pub_id)."
-LIMIT 1");
+	`pub_id` = :pub_id
+LIMIT 1');
 
-	if(count($author) > 0 and !empty($author[0])){
-		$rank = (int) 1;
-		foreach($author as $author_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $author_id).", ".((int) $rank++).", 'N')");
+			$data = array (
+				'pub_id' => (int) $pub_id,
+				'pub_type' => $pub_type,
+				'title' => $title,
+				'month' => $month,
+				'year' => (int) $year,
+				'booktitle' => $booktitle,
+				'chapter' => $chapter,
+				'series' => $series,
+				'journal' => $journal,
+				'volume' => $volume,
+				'number' => $number,
+				'edition' => $edition,
+				'publisher' => $publisher,
+				'location' => $location,
+				'howpublished' => $howpublished,
+				'organization' => $organization,
+				'institution' => $institution,
+				'school' => $school,
+				'address' => $address,
+				'pages' => $pages,
+				'note' => $note,
+				'abstract' => $abstract,
+				'userfields' => $userfields,
+				'bibtex_id' => $bibtex_id,
+				'isbn' => $isbn,
+				'issn' => $issn,
+				'doi' => $doi,
+				'url' => $url
+			);
+
+			$return = $editPublication->execute($data);
+
+			$data = array_merge($data, array(
+				'author' => $author,
+				'editor' => $editor,
+				'topics' => $topics,
+				'tags' => $tags
+			));
+
+			DB::getInstance()->exec('DELETE FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+WHERE
+	`pub_id` = '.DB::getInstance()->quote((int) $publication->pub_id).'
+LIMIT '.((int) count(bibliographie_publications_get_authors($publication->pub_id)) + count(bibliographie_publications_get_editors($publication->pub_id))));
+
+			if(count($author) > 0 and !empty($author[0])){
+				$rank = (int) 1;
+				foreach($author as $linkAuthor){
+					$linkAuthor = bibliographie_authors_get_data($linkAuthor);
+					if(is_object($linkAuthor)){
+						if(!($linkAuthors instanceof PDOStatement))
+							$linkAuthors = DB::getInstance()->prepare('INSERT INTO
+			`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+		(
+			`pub_id`,
+			`author_id`,
+			`rank`,
+			`is_editor`
+		) VALUES (
+			:pub_id,
+			:author_id,
+			:rank,
+			"N"
+		)');
+						$linkAuthors->execute(array(
+							'pub_id' => (int) $data['pub_id'],
+							'author_id' => (int) $linkAuthor->author_id,
+							'rank' => (int) $rank++
+						));
+						bibliographie_cache_purge('author_'.((int) $linkAuthor->author_id));
+					}
+				}
+			}
+
+			if(count($editor) > 0 and !empty($editor[0])){
+				$rank = (int) 1;
+				foreach($editor as $linkEditor){
+					$linkEditor = bibliographie_authors_get_data($linkEditor);
+					if(is_object($linkEditor)){
+						if(!($linkEditors instanceof PDOStatement))
+							$linkEditors = DB::getInstance()->prepare('INSERT INTO
+			`'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink`
+		(
+			`pub_id`,
+			`author_id`,
+			`rank`,
+			`is_editor`
+		) VALUES (
+			:pub_id,
+			:author_id,
+			:rank,
+			"Y"
+		)');
+						$linkEditors->execute(array(
+							'pub_id' => (int) $data['pub_id'],
+							'author_id' => (int) $linkEditor->author_id,
+							'rank' => (int) $rank++
+						));
+						bibliographie_cache_purge('author_'.((int) $linkEditor->author_id));
+					}
+				}
+			}
+
+			$unlinkedTopics = array_values(array_diff(bibliographie_publications_get_topics($publication->pub_id), $topics));
+			$linkedTopics = array_values(array_diff($topics, bibliographie_publications_get_topics($publication->pub_id)));
+			if(count($unlinkedTopics) > 0){
+				$unlinkTopics = DB::getInstance()->prepare('DELETE FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink`
+WHERE
+	`pub_id` = :pub_id AND
+	`topic_id` = :topic_id
+LIMIT
+	1');
+				foreach($unlinkedTopics as $topic_id){
+					$unlinkTopics->execute(array(
+						'pub_id' => (int) $publication->pub_id,
+						'topic_id' => (int) $topic_id
+					));
+					bibliographie_cache_purge('topic_'.((int) $topic_id));
+				}
+			}
+
+			if(count($linkedTopics) > 0 and !empty($linkedTopics[0]))
+				foreach($linkedTopics as $linkTopic){
+					$linkTopic = bibliographie_topics_get_data($linkTopic);
+					if(is_object($linkTopic)){
+						if(!($linkTopics instanceof PDOStatement))
+							$linkTopics = DB::getInstance()->prepare('INSERT INTO
+		`'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink`
+	(
+		`topic_id`,
+		`pub_id`
+	) VALUES (
+		:topic_id,
+		:pub_id
+	)');
+						$linkTopics->execute(array(
+							'topic_id' => (int) $linkTopic->topic_id,
+							'pub_id' => (int) $data['pub_id']
+						));
+						bibliographie_cache_purge('topic_'.((int) $linkTopic->topic_id));
+					}
+				}
+
+			$unlinkedTags = array_values(array_diff(bibliographie_publications_get_tags($publication->pub_id), $tags));
+			$linkedTags = array_values(array_diff($tags, bibliographie_publications_get_tags($publication->pub_id)));
+			if(count($unlinkedTags) > 0){
+				$unlinkTags = DB::getInstance()->prepare('DELETE FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`
+WHERE
+	`pub_id` = :pub_id AND
+	`tag_id` = :tag_id
+LIMIT
+	1');
+				foreach($unlinkedTags as $tag_id){
+					$unlinkTags->execute(array(
+						'pub_id' => (int) $publication->pub_id,
+						'tag_id' => (int) $tag_id
+					));
+					bibliographie_cache_purge('tag_'.((int) $tag_id));
+				}
+			}
+
+			if(count($linkedTags) > 0 and !empty($linkedTags[0])){
+				foreach($linkedTags as $linkTag){
+					$linkTag = bibliographie_tags_get_data($linkTag);
+					if(is_object($linkTag)){
+						if(!($linkTags instanceof PDOStatement))
+							$linkTags = DB::getInstance()->prepare('INSERT INTO
+		`'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`
+	(
+		`pub_id`,
+		`tag_id`
+	) VALUES (
+		:pub_id,
+		:tag_id
+	)');
+						$linkTags->execute(array(
+							'pub_id' => (int) $data['pub_id'],
+							'tag_id' => (int) $linkTag->tag_id
+						));
+					}
+				}
+			}
+
+			DB::getInstance()->commit();
+
+			if($return){
+				bibliographie_cache_purge('publication_'.((int) $pub_id));
+				bibliographie_cache_purge('search_publications_');
+				bibliographie_log('publications', 'editPublication', json_encode($data));
+				$return = $data;
+			}
+		} catch (PDOException $e){
+			DB::getInstance()->rollBack();
+			$return = false;
+		}
 	}
-
-	if(count($editor) > 0 and !empty($editor[0])){
-		$rank = (int) 1;
-		foreach($editor as $editor_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (`pub_id`, `author_id`, `rank`, `is_editor`) VALUES (".((int) $pub_id).", ".((int) $editor_id).", ".((int) $rank++).", 'Y')");
-	}
-
-	if(count($topics) > 0 and !empty($topics[0]))
-		foreach($topics as $topic_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (`topic_id`, `pub_id`) VALUES (".((int) $topic_id).", ".((int) $pub_id).")");
-
-	if(count($tags) > 0 and !empty($tags[0]))
-		foreach($tags as $tag_id)
-			mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (`pub_id`, `tag_id`) VALUES (".((int) $pub_id).", ".((int) $tag_id).")");
-
-	$data = json_encode(array(
-		'pub_id' => (int) $pub_id,
-		'pub_type' => $pub_type,
-		'user_id' => (int) $user_id,
-		'title' => $title,
-		'month' => $month,
-		'year' => (int) $year,
-		'booktitle' => $booktitle,
-		'chapter' => $chapter,
-		'series' => $series,
-		'journal' => $journal,
-		'volume' => $volume,
-		'number' => $number,
-		'edition' => $edition,
-		'publisher' => $publisher,
-		'location' => $location,
-		'howpublished' => $howpublished,
-		'organization' => $organization,
-		'institution' => $institution,
-		'school' => $school,
-		'address' => $address,
-		'pages' => $pages,
-		'note' => $note,
-		'abstract' => $abstract,
-		'userfields' => $userfields,
-		'bibtex_id' => $bibtex_id,
-		'isbn' => $isbn,
-		'issn' => $issn,
-		'doi' => $doi,
-		'url' => $url,
-
-		'author' => $author,
-		'editor' => $editor,
-		'topics' => $topics,
-		'tags' => $tags
-	));
-
-	if($return){
-		bibliographie_log('publications', 'editPublication', $data);
-		$return = $data;
-	}
-
-	bibliographie_cache_purge('publication_'.((int) $pub_id));
-	bibliographie_cache_purge('publications');
 
 	return $return;
 }
