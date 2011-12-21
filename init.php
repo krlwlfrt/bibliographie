@@ -404,6 +404,17 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 }
 
 /**
+ * Get the log counter from database and compare it with the counter from log file.
+ */
+if(count(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')) > 2){
+	$databaseLogCounter = DB::getInstance()->query('SELECT MAX(`log_id`) FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
+	if($databaseLogCounter < json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id)
+		bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please use log-replay to fill the gap!');
+	elseif($databaseLogCounter > json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id)
+		bibliographie_exit('Bibliographie log error', 'You have more database changes than logged changes. This is a serious problem, since bibliographie doesn\'nt know how to solve the problem!');
+}
+
+/**
  * Check if database scheme is the same as expected by bibliographie.
  */
 $databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `'.BIBLIOGRAPHIE_PREFIX.'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
@@ -415,11 +426,15 @@ elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
 
 		echo '<h2>Updating database scheme</h2><p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p><ul>';
 		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
-			//DB::getInstance()->query($bibliographie_database_updates[$i]);
 			echo '<li>'
 				.'<em>'.$bibliographie_database_updates[$i]['description'].'</em> '
 				.bool2img((bool) DB::getInstance()->exec($bibliographie_database_updates[$i]['query']))
 				. '</li>';
+			bibliographie_log('maintenance', 'Updating database scheme', json_encode(array(
+				'schemeVersion' => $i,
+				'query' => $bibliographie_database_updates[$i]['query'],
+				'description' => $bibliographie_database_updates[$i]['description']
+			)));
 		}
 		echo '</ul>';
 

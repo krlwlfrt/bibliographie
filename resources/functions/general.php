@@ -147,7 +147,7 @@ function bibliographie_log ($category, $action, $data) {
 )');
 
 	$logAccess->execute(array(
-		'file' => 'log_'.date('W_Y').'.log',
+		'file' => 'log_'.date('Y_W').'.log',
 		'time' => $time
 	));
 
