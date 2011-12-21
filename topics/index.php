@@ -278,8 +278,8 @@ $(function () {
 ?>
 
 <span style="float: right">
-	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)">Open</a>
-	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)">Close</a>
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(true)"><?php echo bibliographie_icon_get('bullet-toggle-plus')?> Open</a>
+	<a href="javascript:;" onclick="bibliographie_topics_toggle_visiblity_of_all(false)"><?php echo bibliographie_icon_get('bullet-toggle-minus')?> Close</a>
 	all subtopics
 </span>
 
