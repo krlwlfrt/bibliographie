@@ -539,7 +539,7 @@ function bibliographie_topics_get_locked_topics () {
 		return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/topics_locked.json'));
 
 	if($topics === null){
-		$topics = DB::getInstance()->prepare("SELECT `topic_id` FROM `lockedtopics` ORDER BY `topic_id`");
+		$topics = DB::getInstance()->prepare('SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` ORDER BY `topic_id`');
 		$topics->setFetchMode(PDO::FETCH_OBJ);
 	}
 

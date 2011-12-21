@@ -39,35 +39,6 @@ if(!isset($_SERVER['PHP_AUTH_USER']))
 	bibliographie_exit('Authentication error', 'It seems that there is an error with your authentication. Bibliographie can not read your login name and must therefore stop right here.');
 
 /**
- * Check if database scheme is the same as expected by bibliographie.
- */
-$databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `'.BIBLIOGRAPHIE_PREFIX.'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
-if(BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
-	bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
-elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
-	try {
-		DB::getInstance()->beginTransaction();
-
-		echo '<h2>Updating database scheme</h2><p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p><ul>';
-		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
-			//DB::getInstance()->query($bibliographie_database_updates[$i]);
-			echo '<li>'
-				.'<em>'.$bibliographie_database_updates[$i]['description'].'</em> '
-				.bool2img((bool) DB::getInstance()->exec($bibliographie_database_updates[$i]['query']))
-				. '</li>';
-		}
-		echo '</ul>';
-
-		DB::getInstance()->exec('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'settings` SET `value` = '.DB::getInstance()->quote(BIBLIOGRAPHIE_DATABASE_VERSION).' WHERE `key` = "DATABASE_VERSION"');
-
-		DB::getInstance()->commit();
-	} catch (PDOException $e) {
-		DB::getInstance()->rollBack();
-		bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />'.$e->__toString());
-	}
-}
-
-/**
  * If root path isnt defined by program file then define it now with the default value.
  */
 if(!defined('BIBLIOGRAPHIE_ROOT_PATH'))
@@ -110,7 +81,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 			try {
 				DB::getInstance()->beginTransaction();
 
-				DB::getInstance()->exec('DROP TABLE `a2aigaiongeneral`, `a2availablerights`, `a2changehistory`, `a2config`, `a2grouprightsprofilelink`, `a2logintegration`, `a2rightsprofilerightlink`, `a2rightsprofiles`, `a2usergrouplink`, `a2userrights`;');
+				DB::getInstance()->exec('DROP TABLE `'.BIBLIOGRAPHIE_PREFIX.'aigaiongeneral`, `'.BIBLIOGRAPHIE_PREFIX.'availablerights`, `'.BIBLIOGRAPHIE_PREFIX.'changehistory`, `'.BIBLIOGRAPHIE_PREFIX.'config`, `'.BIBLIOGRAPHIE_PREFIX.'grouprightsprofilelink`, `'.BIBLIOGRAPHIE_PREFIX.'logintegration`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofilerightlink`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofiles`, `'.BIBLIOGRAPHIE_PREFIX.'usergrouplink`, `'.BIBLIOGRAPHIE_PREFIX.'userrights`;');
 
 				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'keywords` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;');
 				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publicationkeywordlink` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;');
@@ -150,7 +121,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 	UNIQUE INDEX `UNIQUE_KEY` (`key`(100))
 ) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-				DB::getInstance()->exec('INSERT INTO `a2settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
+				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
 
 				DB::getInstance()->commit();
 
@@ -162,225 +133,267 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 			}
 		}
 	}else{
-		/*if(empty($_GET['makeScheme'])){
+		if(empty($_GET['makeScheme'])){
 ?>
 
-		<p>You don't seem to have an appropriate database scheme at all. Do you want it to be created now?</p>
+		<p>You don't seem to have an appropriate database scheme at all. I was looking for the database table <code><?php echo BIBLIOGRAPHIE_PREFIX?>publication</code>.</p>
+		<p>Do you want it to be created now?</p>
 		<p><a href="?makeScheme=1">Do it now!</a></p>
 <?php
-		}elseif($_GET['makeScheme'] == 1)
-			mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."attachments` (
-  `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `location` varchar(255) NOT NULL DEFAULT '',
-  `note` varchar(255) NOT NULL DEFAULT '',
-  `ismain` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
-  `user_id` int(11) NOT NULL DEFAULT '0',
-  `mime` varchar(100) NOT NULL DEFAULT '',
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `isremote` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
+		}elseif($_GET['makeScheme'] == 1){
+			try {
+				DB::getInstance()->beginTransaction();
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'attachments` (
+  `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `location` varchar(255) NOT NULL DEFAULT "",
+  `note` varchar(255) NOT NULL DEFAULT "",
+  `ismain` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
+  `user_id` int(11) NOT NULL DEFAULT "0",
+  `mime` varchar(100) NOT NULL DEFAULT "",
+  `name` varchar(255) NOT NULL DEFAULT "",
+  `isremote` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
   `att_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `group_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `derived_read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
+  `read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `group_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `derived_read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `derived_edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
   PRIMARY KEY (`att_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."author` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'author` (
   `author_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `surname` varchar(255) NOT NULL DEFAULT '',
-  `von` varchar(255) NOT NULL DEFAULT '',
-  `firstname` varchar(255) NOT NULL DEFAULT '',
-  `email` varchar(255) NOT NULL DEFAULT '',
-  `url` varchar(255) NOT NULL DEFAULT '',
-  `institute` varchar(255) NOT NULL DEFAULT '',
-  `specialchars` enum('FALSE','TRUE') NOT NULL DEFAULT 'FALSE',
-  `cleanname` varchar(255) NOT NULL DEFAULT '',
-  `jr` varchar(255) DEFAULT '',
+  `surname` varchar(255) NOT NULL DEFAULT "",
+  `von` varchar(255) NOT NULL DEFAULT "",
+  `firstname` varchar(255) NOT NULL DEFAULT "",
+  `email` varchar(255) NOT NULL DEFAULT "",
+  `url` varchar(255) NOT NULL DEFAULT "",
+  `institute` varchar(255) NOT NULL DEFAULT "",
+  `specialchars` enum("FALSE","TRUE") NOT NULL DEFAULT "FALSE",
+  `cleanname` varchar(255) NOT NULL DEFAULT "",
+  `jr` varchar(255) DEFAULT "",
   PRIMARY KEY (`author_id`),
   FULLTEXT KEY `fulltext` (`surname`,`firstname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."notecrossrefid` (
-  `note_id` int(10) NOT NULL DEFAULT '0',
-  `xref_id` int(10) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."notes` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (
+  `topic_id` int(10) unsigned NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'log` (
+  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `log_file` text NOT NULL,
+  `log_time` text NOT NULL,
+  PRIMARY KEY (`log_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'notecrossrefid` (
+  `note_id` int(10) NOT NULL DEFAULT "0",
+  `xref_id` int(10) NOT NULL DEFAULT "0"
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'notes` (
   `note_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `user_id` int(11) NOT NULL DEFAULT '0',
-  `rights` enum('public','private') NOT NULL DEFAULT 'public',
+  `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `user_id` int(11) NOT NULL DEFAULT "0",
+  `rights` enum("public","private") NOT NULL DEFAULT "public",
   `text` mediumtext,
-  `read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `group_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `derived_read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  PRIMARY KEY (`note_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publication` (
+  `read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `group_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `derived_read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `derived_edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  PRIMARY KEY (`note_id`),
+  FULLTEXT KEY `fulltext` (`text`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publication` (
   `pub_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `year` varchar(127) NOT NULL DEFAULT '',
-  `actualyear` varchar(127) NOT NULL DEFAULT '',
+  `user_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `year` varchar(127) NOT NULL DEFAULT "",
+  `actualyear` varchar(127) NOT NULL DEFAULT "",
   `title` mediumtext NOT NULL,
-  `bibtex_id` varchar(255) NOT NULL DEFAULT '',
-  `report_type` varchar(255) NOT NULL DEFAULT '',
-  `pub_type` enum('Article','Book','Booklet','Inbook','Incollection','Inproceedings','Manual','Mastersthesis','Misc','Phdthesis','Proceedings','Techreport','Unpublished') DEFAULT NULL,
-  `survey` tinyint(1) NOT NULL DEFAULT '0',
-  `mark` int(11) NOT NULL DEFAULT '5',
-  `series` varchar(127) NOT NULL DEFAULT '',
-  `volume` varchar(127) NOT NULL DEFAULT '',
-  `publisher` varchar(127) NOT NULL DEFAULT '',
-  `location` varchar(127) NOT NULL DEFAULT '',
-  `issn` varchar(32) NOT NULL DEFAULT '',
-  `isbn` varchar(32) NOT NULL DEFAULT '',
-  `firstpage` varchar(10) NOT NULL DEFAULT '0',
-  `lastpage` varchar(10) NOT NULL DEFAULT '0',
-  `journal` varchar(255) NOT NULL DEFAULT '',
-  `booktitle` varchar(255) NOT NULL DEFAULT '',
-  `number` varchar(255) NOT NULL DEFAULT '',
-  `institution` varchar(255) NOT NULL DEFAULT '',
-  `address` varchar(255) NOT NULL DEFAULT '',
-  `chapter` varchar(127) NOT NULL DEFAULT '',
-  `edition` varchar(255) NOT NULL DEFAULT '',
-  `howpublished` varchar(255) NOT NULL DEFAULT '',
-  `month` varchar(255) NOT NULL DEFAULT '',
-  `organization` varchar(255) NOT NULL DEFAULT '',
-  `school` varchar(255) NOT NULL DEFAULT '',
+  `bibtex_id` varchar(255) NOT NULL DEFAULT "",
+  `report_type` varchar(255) NOT NULL DEFAULT "",
+  `pub_type` enum("Article","Book","Booklet","Inbook","Incollection","Inproceedings","Manual","Mastersthesis","Misc","Phdthesis","Proceedings","Techreport","Unpublished") DEFAULT NULL,
+  `survey` tinyint(1) NOT NULL DEFAULT "0",
+  `mark` int(11) NOT NULL DEFAULT "5",
+  `series` varchar(127) NOT NULL DEFAULT "",
+  `volume` varchar(127) NOT NULL DEFAULT "",
+  `publisher` varchar(127) NOT NULL DEFAULT "",
+  `location` varchar(127) NOT NULL DEFAULT "",
+  `issn` varchar(32) NOT NULL DEFAULT "",
+  `isbn` varchar(32) NOT NULL DEFAULT "",
+  `firstpage` varchar(10) NOT NULL DEFAULT "0",
+  `lastpage` varchar(10) NOT NULL DEFAULT "0",
+  `journal` varchar(255) NOT NULL DEFAULT "",
+  `booktitle` varchar(255) NOT NULL DEFAULT "",
+  `number` varchar(255) NOT NULL DEFAULT "",
+  `institution` varchar(255) NOT NULL DEFAULT "",
+  `address` varchar(255) NOT NULL DEFAULT "",
+  `chapter` varchar(127) NOT NULL DEFAULT "",
+  `edition` varchar(255) NOT NULL DEFAULT "",
+  `howpublished` varchar(255) NOT NULL DEFAULT "",
+  `month` varchar(255) NOT NULL DEFAULT "",
+  `organization` varchar(255) NOT NULL DEFAULT "",
+  `school` varchar(255) NOT NULL DEFAULT "",
   `note` mediumtext NOT NULL,
   `abstract` mediumtext NOT NULL,
-  `url` varchar(255) NOT NULL DEFAULT '',
-  `doi` varchar(255) NOT NULL DEFAULT '',
-  `crossref` varchar(255) NOT NULL DEFAULT '',
-  `namekey` varchar(255) NOT NULL DEFAULT '',
+  `url` varchar(255) NOT NULL DEFAULT "",
+  `doi` varchar(255) NOT NULL DEFAULT "",
+  `crossref` varchar(255) NOT NULL DEFAULT "",
+  `namekey` varchar(255) NOT NULL DEFAULT "",
   `userfields` mediumtext NOT NULL,
-  `specialchars` enum('FALSE','TRUE') NOT NULL DEFAULT 'FALSE',
-  `cleanjournal` varchar(255) NOT NULL DEFAULT '',
-  `cleantitle` varchar(255) NOT NULL DEFAULT '',
-  `read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `group_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `derived_read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
+  `specialchars` enum("FALSE","TRUE") NOT NULL DEFAULT "FALSE",
+  `cleanjournal` varchar(255) NOT NULL DEFAULT "",
+  `cleantitle` varchar(255) NOT NULL DEFAULT "",
+  `read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `group_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `derived_read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `derived_edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
   `cleanauthor` text,
-  `pages` varchar(255) NOT NULL DEFAULT '',
-  `missingFields` smallint(2) unsigned NOT NULL DEFAULT '0',
+  `pages` varchar(255) NOT NULL DEFAULT "",
   PRIMARY KEY (`pub_id`),
   FULLTEXT KEY `fulltext_title` (`title`),
   FULLTEXT KEY `fulltext_journal` (`journal`),
   FULLTEXT KEY `fulltext_booktitle` (`booktitle`),
   FULLTEXT KEY `fulltext` (`title`,`abstract`,`note`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publicationauthorlink` (
-  `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `author_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `rank` int(10) unsigned NOT NULL DEFAULT '1',
-  `is_editor` enum('Y','N') NOT NULL DEFAULT 'N',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` (
+  `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `author_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `rank` int(10) unsigned NOT NULL DEFAULT "1",
+  `is_editor` enum("Y","N") NOT NULL DEFAULT "N",
   PRIMARY KEY (`pub_id`,`author_id`,`is_editor`),
   KEY `pub_id` (`pub_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."publicationtaglink` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` (
   `pub_id` int(10) NOT NULL,
   `tag_id` int(10) NOT NULL,
   PRIMARY KEY (`pub_id`,`tag_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."tags` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'settings` (
+  `key` tinytext NOT NULL,
+  `value` longtext NOT NULL,
+  UNIQUE KEY `UNIQUE_KEY` (`key`(100))
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'singulars_and_plurals` (
+  `ln` varchar(2) NOT NULL DEFAULT "en",
+  `singular` tinytext NOT NULL,
+  `plural` tinytext NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'tags` (
   `tag_id` int(10) NOT NULL AUTO_INCREMENT,
   `tag` mediumtext NOT NULL,
   `cleankeyword` text NOT NULL,
   PRIMARY KEY (`tag_id`),
   FULLTEXT KEY `fulltext` (`tag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topicpublicationlink` (
-  `topic_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `pub_id` int(10) unsigned NOT NULL DEFAULT '0',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` (
+  `topic_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   PRIMARY KEY (`topic_id`,`pub_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topics` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topics` (
   `topic_id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `description` mediumtext,
-  `url` varchar(255) NOT NULL DEFAULT '',
-  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `group_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `derived_read_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
-  `derived_edit_access_level` enum('private','public','intern','group') NOT NULL DEFAULT 'intern',
+  `url` varchar(255) NOT NULL DEFAULT "",
+  `user_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `group_id` int(10) unsigned NOT NULL DEFAULT "0",
+  `derived_read_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
+  `derived_edit_access_level` enum("private","public","intern","group") NOT NULL DEFAULT "intern",
   `cleanname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`topic_id`),
   KEY `name` (`name`),
   FULLTEXT KEY `fulltext` (`name`,`description`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."topictopiclink` (
-  `source_topic_id` int(10) NOT NULL DEFAULT '0',
-  `target_topic_id` int(10) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Hierarchy of topics; typed relations';");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."userbookmarklists` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topictopiclink` (
+  `source_topic_id` int(10) NOT NULL DEFAULT "0",
+  `target_topic_id` int(10) NOT NULL DEFAULT "0"
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT="Hierarchy of topics; typed relations";');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors` (
+  `group` longtext NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` (
   `user_id` int(10) NOT NULL,
   `pub_id` int(10) NOT NULL,
   PRIMARY KEY (`user_id`,`pub_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."userpublicationmark` (
-  `pub_id` int(10) NOT NULL DEFAULT '0',
-  `user_id` int(11) NOT NULL DEFAULT '0',
-  `mark` enum('','1','2','3','4','5') NOT NULL DEFAULT '3',
-  `hasread` enum('y','n') NOT NULL DEFAULT 'y',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'userpublicationmark` (
+  `pub_id` int(10) NOT NULL DEFAULT "0",
+  `user_id` int(11) NOT NULL DEFAULT "0",
+  `mark` enum("","1","2","3","4","5") NOT NULL DEFAULT "3",
+  `hasread` enum("y","n") NOT NULL DEFAULT "y",
   PRIMARY KEY (`pub_id`,`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."users` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'users` (
   `user_id` int(10) NOT NULL AUTO_INCREMENT,
-  `theme` varchar(255) NOT NULL DEFAULT 'darkdefault',
-  `password_invalidated` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
-  `newwindowforatt` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
-  `summarystyle` varchar(255) NOT NULL DEFAULT 'author',
-  `authordisplaystyle` varchar(255) NOT NULL DEFAULT 'vlf',
-  `liststyle` smallint(6) NOT NULL DEFAULT '0',
-  `login` varchar(20) NOT NULL DEFAULT '',
-  `password` varchar(255) NOT NULL DEFAULT '',
+  `theme` varchar(255) NOT NULL DEFAULT "darkdefault",
+  `password_invalidated` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
+  `newwindowforatt` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
+  `summarystyle` varchar(255) NOT NULL DEFAULT "author",
+  `authordisplaystyle` varchar(255) NOT NULL DEFAULT "vlf",
+  `liststyle` smallint(6) NOT NULL DEFAULT "0",
+  `login` varchar(20) NOT NULL DEFAULT "",
+  `password` varchar(255) NOT NULL DEFAULT "",
   `initials` varchar(10) DEFAULT NULL,
   `firstname` varchar(255) DEFAULT NULL,
   `betweenname` varchar(10) DEFAULT NULL,
   `surname` varchar(255) DEFAULT NULL,
   `csname` varchar(10) DEFAULT NULL,
-  `abbreviation` varchar(10) NOT NULL DEFAULT '',
+  `abbreviation` varchar(10) NOT NULL DEFAULT "",
   `email` varchar(255) DEFAULT NULL,
-  `u_rights` tinyint(2) NOT NULL DEFAULT '0',
-  `lastreviewedtopic` int(10) NOT NULL DEFAULT '1',
-  `type` enum('group','anon','normal','external') NOT NULL DEFAULT 'normal',
-  `lastupdatecheck` int(10) unsigned NOT NULL DEFAULT '0',
-  `exportinbrowser` enum('TRUE','FALSE') NOT NULL DEFAULT 'TRUE',
-  `utf8bibtex` enum('TRUE','FALSE') NOT NULL DEFAULT 'FALSE',
-  `language` varchar(20) NOT NULL DEFAULT 'english',
-  `similar_author_test` varchar(20) NOT NULL DEFAULT 'default',
+  `u_rights` tinyint(2) NOT NULL DEFAULT "0",
+  `lastreviewedtopic` int(10) NOT NULL DEFAULT "1",
+  `type` enum("group","anon","normal","external") NOT NULL DEFAULT "normal",
+  `lastupdatecheck` int(10) unsigned NOT NULL DEFAULT "0",
+  `exportinbrowser` enum("TRUE","FALSE") NOT NULL DEFAULT "TRUE",
+  `utf8bibtex` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
+  `language` varchar(20) NOT NULL DEFAULT "english",
+  `similar_author_test` varchar(20) NOT NULL DEFAULT "default",
   PRIMARY KEY (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `".BIBLIOGRAPHIE_PREFIX."usertopiclink` (
-  `collapsed` int(2) NOT NULL DEFAULT '0',
-  `user_id` int(10) NOT NULL DEFAULT '0',
-  `topic_id` int(10) NOT NULL DEFAULT '0',
-  `star` int(2) NOT NULL DEFAULT '0',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+
+				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'usertopiclink` (
+  `collapsed` int(2) NOT NULL DEFAULT "0",
+  `user_id` int(10) NOT NULL DEFAULT "0",
+  `topic_id` int(10) NOT NULL DEFAULT "0",
+  `star` int(2) NOT NULL DEFAULT "0",
   PRIMARY KEY (`user_id`,`topic_id`),
   KEY `topic_id` (`topic_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `bibliographie_log` (
-  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `log_file` text NOT NULL,
-  `log_time` text NOT NULL,
-  PRIMARY KEY (`log_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `lockedtopics` (
-  `topic_id` int(10) unsigned NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-		mysql_query("CREATE TABLE IF NOT EXISTS `singulars_and_plurals` (
-  `ln` varchar(2) NOT NULL DEFAULT 'en',
-  `singular` tinytext NOT NULL,
-  `plural` tinytext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."users` (`login`) VALUES ('".mysql_real_escape_string(stripslashes($_SERVER['PHP_AUTH_USER']))."');");
-		mysql_query("INSERT INTO `".BIBLIOGRAPHIE_PREFIX."topics` (`name`, `description`) VALUES ('Top', 'Meta-topic as top of the topic hierarchy.');");
-		echo '<p>Scheme has been created!!!</p>';*/
+
+				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'users` (`login`) VALUES ('.DB::getInstance()->quote($_SERVER['PHP_AUTH_USER']).');');
+				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'topics` (`name`, `description`) VALUES ("Top", "Meta-topic as top of the topic hierarchy.");');
+				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
+
+				DB::getInstance()->commit();
+
+				echo '<p>Scheme has been created!</p>';
+				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
+			} catch (PDOException $e) {
+				DB::getInstance()->rollBack();
+				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
+			}
+		}
 	}
 ?>
 
@@ -388,6 +401,35 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 </html>
 <?php
 	exit();
+}
+
+/**
+ * Check if database scheme is the same as expected by bibliographie.
+ */
+$databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `'.BIBLIOGRAPHIE_PREFIX.'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
+if(BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
+	bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
+elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
+	try {
+		DB::getInstance()->beginTransaction();
+
+		echo '<h2>Updating database scheme</h2><p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p><ul>';
+		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
+			//DB::getInstance()->query($bibliographie_database_updates[$i]);
+			echo '<li>'
+				.'<em>'.$bibliographie_database_updates[$i]['description'].'</em> '
+				.bool2img((bool) DB::getInstance()->exec($bibliographie_database_updates[$i]['query']))
+				. '</li>';
+		}
+		echo '</ul>';
+
+		DB::getInstance()->exec('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'settings` SET `value` = '.DB::getInstance()->quote(BIBLIOGRAPHIE_DATABASE_VERSION).' WHERE `key` = "DATABASE_VERSION"');
+
+		DB::getInstance()->commit();
+	} catch (PDOException $e) {
+		DB::getInstance()->rollBack();
+		bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />'.$e->__toString());
+	}
 }
 
 /**
