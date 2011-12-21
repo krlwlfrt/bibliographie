@@ -1,4 +1,5 @@
 Intents to be a bibliography management tool that derives from the database scheme of aigaion v2.1.2.
+You can also use it with the current database scheme version v2.2, but when we began the project we started with the v2.1.2.
 
 # Get it running #
 ## 1. step: config file ##
