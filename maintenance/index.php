@@ -2,10 +2,6 @@
 define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
-?>
-
-<h2>Maintenance</h2>
-<?php
 
 $bibliographie_consistency_checks = array (
 	'authors' => array (
@@ -32,6 +28,7 @@ switch($_GET['task']){
 	case 'mergePersons':
 ?>
 
+<h2>Maintenance</h2>
 <h3>Merge persons</h3>
 <div id="bibliographie_maintenance_merge_container">
 	<div id="bibliographie_maintenance_merge_into"><?php echo bibliographie_icon_get('flag-green')?> Person to merge into...</div>
@@ -186,6 +183,7 @@ $(function () {
 		bibliographie_history_append_step('maintenance', 'Consistency checks');
 ?>
 
+<h2>Maintenance</h2>
 <a href="javascript:;" onclick="bibliographie_maintenance_run_all_checks()" style="float: right;"><?php echo bibliographie_icon_get('tick')?> Run all checks...</a>
 <h3>Consistency checks</h3>
 <?php
@@ -216,6 +214,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 		bibliographie_history_append_step('maintenance', 'Locked topics');
 ?>
 
+<h2>Maintenance</h2>
 <h3>Locked topics</h3>
 <?php
 		$lockedTopics = bibliographie_topics_get_locked_topics();
@@ -258,6 +257,7 @@ var bibliographie_maintenance_consistency_checks = <?php echo json_encode($bibli
 			echo '<p class="notice">There are no locked topics!</p>';
 ?>
 
+<h2>Maintenance</h2>
 <h3>Lock topics</h3>
 <form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
 	<div class="unit">
@@ -280,11 +280,11 @@ $(function () {
 	break;
 
 	case 'parseLog':
-	default:
 		bibliographie_history_append_step('maintenance', 'Parse log');
 		$bibliographie_title = 'Parse log';
 ?>
 
+<h2>Maintenance</h2>
 <h3>Parse logs</h3>
 <?php
 		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs', true);
@@ -376,6 +376,49 @@ $(function () {
 <?php
 			}
 		}
+	break;
+
+	default:
+	case 'about':
+		$cacheSize = 0;
+		foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache') as $object){
+			if(is_dir(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$object))
+				continue;
+
+			$cacheSize += filesize(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$object);
+		}
+?>
+
+<h2>About bibliographie</h2>
+<p>
+	Find the project on <a href="https://github.com/animungo/bibliographie">GitHub</a>.<br />
+	Learn more about the author <a href="http://www.animungo.de/">Karl-Philipp Wulfert</a>.
+</p>
+<h3>Status</h3>
+<p>
+	You are on database scheme <strong>version <?php echo BIBLIOGRAPHIE_DATABASE_VERSION?></strong>.<br />
+	Your database contains the following amount of data...
+	<ul>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'author`')->fetch(PDO::FETCH_COLUMN, 0)?> authors</li>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'notes`')->fetch(PDO::FETCH_COLUMN, 0)?> notes</li>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`')->fetch(PDO::FETCH_COLUMN, 0)?> publications</li>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'tags`')->fetch(PDO::FETCH_COLUMN, 0)?> tags</li>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`')->fetch(PDO::FETCH_COLUMN, 0)?> topics</li>
+		<li><?php echo DB::getInstance()->query('SELECT COUNT(*) FROM `'.BIBLIOGRAPHIE_PREFIX.'users`')->fetch(PDO::FETCH_COLUMN, 0)?> users</li>
+	</ul>
+	The cache currently contains <strong><?php echo round($cacheSize / 1024 /1024, 2)?> MByte</strong> of data.<br />
+	You can <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=about&amp;purgeCache=1">purge the cache</a> now.
+</p>
+<h3>Libraries</h3>
+<ul>
+	<li>(JS) <a href="http://jquery.com">jQuery</a> &amp; <a href="">jQuery UI</a></li>
+	<li>(JS) <a href="https://github.com/malsup/blockui/">jQuery BlockUI</a></li>
+	<li>(JS) <a href="http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html">jQuery Highlight</a></li>
+	<li>(JS) <a href="https://github.com/loopj/jquery-tokeninput">jQuery TokenInput</a></li>
+	<li>(PHP) <a href="http://pear.php.net/package/Structures_BibTex">Structures_Bibtex</a> (heavily modified, to work without PEAR)</li>
+	<li>(CSS) Silk Icons Sprite</li>
+</ul>
+<?php
 	break;
 }
 
