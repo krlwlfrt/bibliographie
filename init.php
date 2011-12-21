@@ -481,12 +481,12 @@ if($_GET['purgeCache'] == 1)
 			unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
 
 /**
- * Make sure contents of cache are renewed every second day.
+ * Make sure contents of cache are renewed every half hour.
  */
 foreach(scandir(dirname(__FILE__).'/cache') as $object){
 	if($object == '.' or $object == '..')
 		continue;
 
-	if(filemtime(dirname(__FILE__).'/cache/'.$object) + (60 * 60 * 24 * 2) < time())
+	if(filemtime(dirname(__FILE__).'/cache/'.$object) + (60 * 30) < time())
 		unlink(dirname(__FILE__).'/cache/'.$object);
 }

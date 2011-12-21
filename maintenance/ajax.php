@@ -101,6 +101,32 @@ ORDER BY
 
 	case 'consistencyChecks':
 		switch($_GET['consistencyCheckID']){
+			case 'links_thatPointNowhere':
+				$deadLinks = array(
+					'Publication to author' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` WHERE `author_id` NOT IN (SELECT `author_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'author`)',
+					'Author to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Publication to tag' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` WHERE `tag_id` NOT IN (SELECT `tag_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'tags`)',
+					'Tag to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Publication to topic' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` WHERE `topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
+					'Topic to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Topic to subtopic' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'topictopiclink` WHERE `source_topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
+					'Subtopic to topic' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'topictopiclink` WHERE `target_topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
+					'Note to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'notes` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Note to user' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'notes` WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`)',
+					'Attachment to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'attachments` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Attachment to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'attachments` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
+					'Locked topics' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'lockedTopics` WHERE `topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
+					'Publication to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'publication` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
+					'Topic to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'topics` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
+					'User to bookmark' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
+					'Bookmark to user' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`)'
+				);
+
+				ksort($deadLinks);
+
+				foreach($deadLinks as $title => $query)
+					echo '<strong>'.$title.'</strong>: '.DB::getInstance()->exec($query).' dead links...<br />';
+			break;
 			case 'authors_charsetArtifacts':
 				$authors = DB::getInstance()->prepare('SELECT `author_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP "^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$" ORDER BY `surname`, `firstname`');
 				$authors->setFetchMode(PDO::FETCH_OBJ);

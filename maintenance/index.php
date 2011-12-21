@@ -13,6 +13,10 @@ $bibliographie_consistency_checks = array (
 		'withoutPublications' => 'Authors without publications'
 	),
 
+	'links' => array (
+		'thatPointNowhere' => 'Links that point nowhere'
+	),
+
 	'publications' => array (
 		'withoutTopic' => 'Publications without topic assignment',
 		'withoutTag' => 'Publications without tag assigment'
