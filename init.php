@@ -465,6 +465,8 @@ if(!bibliographie_user_get_id()){
 /**
  * Check for necessary directories.
  */
+if(!is_dir(dirname(__FILE__).'/attachments'))
+	mkdir(dirname(__FILE__).'/attachments', 0755);
 if(!is_dir(dirname(__FILE__).'/cache'))
 	mkdir(dirname(__FILE__).'/cache', 0755);
 if(!is_dir(dirname(__FILE__).'/logs'))
