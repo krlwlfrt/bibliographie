@@ -1,5 +1,7 @@
-Intents to be a bibliography management tool that derives from the database scheme of aigaion v2.1.2.
+Intents to be a bibliography management tool that derives from the database scheme of Aigaion v2.1.2.
 You can also use it with the current database scheme version v2.2, but when we began the project we started with the v2.1.2.
+
+Bibliographie aims to tackle some problems of Aigaion like the old code base, slowness for large databases, problems with multihierarchical graphs and adds some neat functionality too, that make it easier to cope with a lot of literature.
 
 # Get it running #
 ## 1. step: config file ##
