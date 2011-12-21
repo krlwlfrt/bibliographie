@@ -41,40 +41,18 @@ define('BIBLIOGRAPHIE_PREFIX', 'a2');
 
 You need a server side directory authentication, e.g. via apaches .htaccess. And the appropriate authentication names in the database table `users` with the names in the `login` field.
 If you have the user 'foobar' in your .htaccess file, you'll need a row in the `users` table with the login field having the value 'foobar'.
+For users that get authenticated by the server bibliographie will automatically create the appropriate row in the `users` table.
 
 ## 2.1 Step ##
 
-You might have to give the webserver access to the installation directory. (e.g. under Ubuntu: chown www-data /var/www/bibliographie)
+You might have to give the webserver access to the installation directory. (e.g. under Ubuntu/Linux: chown www-data /var/www/bibliographie)
 You might also have to give the files write permissions. (e.g. chmod 0775 for all files)
-Those to steps depend on your environment...
+Those two steps depend on your environment. (e.g. you don't need to take care of that on Windows)
 
 ## 3. Step ##
 
-Access the app via a browser at the path you set in the config file. Follow the instructions to convert/create the database.
+Access the app via a browser at the path you've set in the config file earlier. Follow the instructions to convert/create the database scheme.
 
 ## Reach the finish line ##
 
 All done... You can now start using bibliographie...
-
-# 3rd party libraries #
-This is a list of stuff that i didn't handcraft myself but took from other nice people because their software suits my needs.
-
-* jQuery http://www.jquery.com/
-* jQuery UI http://www.jquery-ui.com/
-* jGrowl http://plugins.jquery.com/project/jGrowl
-* jQuery TokenInput http://loopj.com/jquery-tokeninput/
-* Structures_BibTex http://pear.php.net/package/Structures_BibTex (heavily modified)
-
-## Adjust 3rd party libraries ##
-From file `resources/javascript/jquery.tokeninput.js` remove all lines where it says `cache.add(SOMETHING)`. This is already done in the file that is redistributed with bibliographie.
-
-Additionally at the block (lines 198 to 201)
-
-```js
-.blur(function () {
-	hide_dropdown();
-	$(this).val("");
-})
-```
-
-remove the line `$(this.val(""));`. This is also already done in the redistributed file.
