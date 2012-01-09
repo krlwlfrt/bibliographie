@@ -470,8 +470,11 @@ if(!bibliographie_user_get_id()){
 	} catch (PDOException $e) {
 		bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
 	}
-}else
-	DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'users` SET `last_access` = NOW() WHERE `user_id` = '.DB::getInstance()->quote(bibliographie_user_get_id()));
+}
+/**
+ * Log last access of user for statistical reasons.
+ */
+DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'users` SET `last_access` = NOW() WHERE `user_id` = '.DB::getInstance()->quote(bibliographie_user_get_id()));
 
 /**
  * If requested purge the cache.
