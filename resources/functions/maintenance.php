@@ -133,7 +133,7 @@ function bibliographie_maintenance_merge_authors ($into, $delete) {
 			array_diff(bibliographie_authors_get_publications($delete->author_id, true), bibliographie_authors_get_publications($into->author_id, true))
 		);
 
-		bibliographie_cache_purge('author_');
+		bibliographie_cache_purge();
 
 		if(count($publications) > 0){
 			if($linkPublications === null)

@@ -1739,7 +1739,7 @@ ORDER BY
 }
 
 function bibliographie_publications_delete_publication ($pub_id) {
-	/*static $deletePublication = null;
+	static $deletePublication = null;
 
 	$publication = bibliographie_publications_get_data($pub_id);
 	$return = false;
@@ -1755,10 +1755,10 @@ function bibliographie_publications_delete_publication ($pub_id) {
 		));
 
 		if($return){
-			bibliographie_cache_purge('publication_'.((int) $publication->pub_id));
+			bibliographie_cache_purge();
 			bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
 		}
 	}
 
-	return $return;*/
+	return $return;
 }

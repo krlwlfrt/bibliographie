@@ -480,9 +480,7 @@ DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'users` SET `last_acces
  * If requested purge the cache.
  */
 if($_GET['purgeCache'] == 1)
-	foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/cache') as $file)
-		if($file != '.' and $file != '..')
-			unlink(BIBLIOGRAPHIE_ROOT_PATH.'/cache/'.$file);
+	bibliographie_cache_purge();
 
 /**
  * Make sure contents of cache are renewed every half hour.

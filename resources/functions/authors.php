@@ -394,8 +394,7 @@ function bibliographie_authors_delete ($author_id) {
 			$return = $deletePerson->execute();
 
 			if($return){
-				bibliographie_cache_purge('author_'.((int) $person->author_id));
-				bibliographie_cache_purge('search_authors_');
+				bibliographie_cache_purge();
 				bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
 			}
 		}
