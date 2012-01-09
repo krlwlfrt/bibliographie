@@ -124,8 +124,10 @@ ORDER BY
 
 				ksort($deadLinks);
 
+				echo '<table class="dataContainer"><tr><th>Subject</th><th>Occurrences</th></tr>';
 				foreach($deadLinks as $title => $query)
-					echo '<strong>'.$title.'</strong>: '.DB::getInstance()->exec($query).' dead links...<br />';
+					echo '<tr><td>'.$title.'</td><td>'.DB::getInstance()->exec($query).' dead links...</td></tr>';
+				echo '</table>';
 			break;
 			case 'authors_charsetArtifacts':
 				$authors = DB::getInstance()->prepare('SELECT `author_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'author` WHERE CONCAT(`firstname`, `von`, `surname`, `jr`) NOT REGEXP "^([abcdefghijklmnopqrstuvwxyzäöüßáéíóúàèìòùç[.full-stop.][.\'.][.hyphen.][.space.]]*)\$" ORDER BY `surname`, `firstname`');
