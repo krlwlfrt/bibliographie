@@ -2,3 +2,4 @@ config.php
 attachments/
 cache/
 logs/
+/.git-rewrite/
