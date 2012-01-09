@@ -134,7 +134,7 @@ function bibliographie_icon_get ($name) {
 function bibliographie_log ($category, $action, $data) {
 	static $logAccess = null;
 
-	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('W_Y').'.log', 'a+');
+	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('Y_W').'.log', 'a+');
 	$time = date('r');
 
 	if($logAccess === null)
