@@ -1,5 +1,5 @@
 <?php
-define('BIBLIOGRAPHIE_DATABASE_VERSION', '1');
+define('BIBLIOGRAPHIE_DATABASE_VERSION', '2');
 
 /**
  * Register starting time.
@@ -26,6 +26,16 @@ date_default_timezone_set('Europe/Berlin');
 if(!file_exists(dirname(__FILE__).'/config.php'))
 	bibliographie_exit('Config file missing!', 'Sorry, but we have no config file!');
 require dirname(__FILE__).'/config.php';
+
+/**
+ * Check for necessary directories.
+ */
+if(!is_dir(dirname(__FILE__).'/attachments'))
+	mkdir(dirname(__FILE__).'/attachments', 0755);
+if(!is_dir(dirname(__FILE__).'/cache'))
+	mkdir(dirname(__FILE__).'/cache', 0755);
+if(!is_dir(dirname(__FILE__).'/logs'))
+	mkdir(dirname(__FILE__).'/logs', 0755);
 
 /**
  * Require functions.
@@ -460,17 +470,8 @@ if(!bibliographie_user_get_id()){
 	} catch (PDOException $e) {
 		bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
 	}
-}
-
-/**
- * Check for necessary directories.
- */
-if(!is_dir(dirname(__FILE__).'/attachments'))
-	mkdir(dirname(__FILE__).'/attachments', 0755);
-if(!is_dir(dirname(__FILE__).'/cache'))
-	mkdir(dirname(__FILE__).'/cache', 0755);
-if(!is_dir(dirname(__FILE__).'/logs'))
-	mkdir(dirname(__FILE__).'/logs', 0755);
+}else
+	DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'users` SET `last_access` = NOW() WHERE `user_id` = '.DB::getInstance()->quote(bibliographie_user_get_id()));
 
 /**
  * If requested purge the cache.
