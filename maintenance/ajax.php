@@ -115,7 +115,7 @@ ORDER BY
 					'Note to user' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'notes` WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`)',
 					'Attachment to publication' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'attachments` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
 					'Attachment to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'attachments` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
-					'Locked topics' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'lockedTopics` WHERE `topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
+					'Locked topics' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` WHERE `topic_id` NOT IN (SELECT `topic_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'topics`)',
 					'Publication to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'publication` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
 					'Topic to user' => 'UPDATE `'.BIBLIOGRAPHIE_PREFIX.'topics` SET `user_id` = 0 WHERE `user_id` NOT IN (SELECT `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'users`) AND `user_id` != 0',
 					'User to bookmark' => 'DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` WHERE `pub_id` NOT IN (SELECT `pub_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'publication`)',
