@@ -82,8 +82,11 @@
 				<h3><?php echo bibliographie_icon_get('cog')?> Maintenance</h3>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=mergePersons"><?php echo bibliographie_icon_get('arrow-join')?> Merge persons</a>
 				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=consistencyChecks"><?php echo bibliographie_icon_get('database')?> Consistency checks</a>
-				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
-				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
+
+
+				<h3><?php echo bibliographie_icon_get('cog')?> Administration</h3>
+				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/admin/?task=lockedTopics"><?php echo bibliographie_icon_get('lock')?> Lock topics</a>
+				<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/admin/?task=parseLog"><?php echo bibliographie_icon_get('time-linemarker')?> Parse log</a>
 			</div>
 
 			<div id="content">
