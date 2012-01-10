@@ -23,6 +23,7 @@
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.blockUI.js"></script>
 
 		<!-- bibliographie stuff -->
+		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/admin.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/authors.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/charmap.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/dodge.js"></script>

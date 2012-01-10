@@ -387,6 +387,7 @@ function bool2img ($bool) {
 /**
  * Include all needed functions...
  */
+require dirname(__FILE__).'/admin.php';
 require dirname(__FILE__).'/authors.php';
 require dirname(__FILE__).'/bookmarks.php';
 require dirname(__FILE__).'/charmap.php';

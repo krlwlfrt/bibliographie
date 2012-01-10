@@ -4,17 +4,17 @@ require dirname(__FILE__).'/../init.php';
 switch($_GET['task']){
 	case 'lockedTopics':
 		$bibliographie_title = 'Locked topics';
-		bibliographie_history_append_step('maintenance', 'Locked topics');
+		bibliographie_history_append_step('admin', 'Locked topics');
 ?>
 
-<h2>Maintenance</h2>
+<h2>admin</h2>
 <h3>Locked topics</h3>
 <?php
 		$lockedTopics = bibliographie_topics_get_locked_topics();
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 			$topics = csv2array($_POST['topics'], 'int');
-			$lockedTopics = bibliographie_maintenance_lock_topics($topics);
+			$lockedTopics = bibliographie_admin_lock_topics($topics);
 
 			'<p class="notice">'.((int) $lockedTopics).' have been locked!</p>';
 
@@ -38,7 +38,7 @@ switch($_GET['task']){
 	<tr id="topic_<?php echo $topic->topic_id?>">
 		<td><a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/topics/?task=showTopic&amp;topic_id=<?php echo (int) $topic->topic_id?>)?>"><?php echo bibliographie_topics_parse_name($topic->topic_id, array('linkProfile' => true))?></td>
 		<td><?php echo htmlspecialchars($topic->description)?></td>
-		<td><a href="javascript:;" onclick="bibliographie_maintenance_unlock_topic(<?php echo (int) $topic->topic_id?>"><?php echo bibliographie_icon_get('lock-open')?></a></td>
+		<td><a href="javascript:;" onclick="bibliographie_admin_unlock_topic(<?php echo (int) $topic->topic_id?>"><?php echo bibliographie_icon_get('lock-open')?></a></td>
 	</tr>
 <?php
 			}
@@ -50,9 +50,9 @@ switch($_GET['task']){
 			echo '<p class="notice">There are no locked topics!</p>';
 ?>
 
-<h2>Maintenance</h2>
+<h2>Admin</h2>
 <h3>Lock topics</h3>
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/maintenance/?task=lockedTopics" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/admin/?task=lockedTopics" method="post" onsubmit="return bibliographie_topics_check_submit_status()">
 	<div class="unit">
 		<label for="topics" class="block">Topics</label>
 		<div id="topicsContainer" style="background: #fff; border: 1px solid #aaa; color: #000; float: right; font-size: 0.8em; padding: 5px; width: 45%;"><em>Search for a topic in the left container!</em></div>
@@ -73,18 +73,18 @@ $(function () {
 	break;
 
 	case 'parseLog':
-		bibliographie_history_append_step('maintenance', 'Parse log');
+		bibliographie_history_append_step('admin', 'Parse log');
 		$bibliographie_title = 'Parse log';
 ?>
 
-<h2>Maintenance</h2>
+<h2>Admin</h2>
 <h3>Parse logs</h3>
 <?php
 		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs', true);
 		if(count($logContent) > 2){
 ?>
 
-<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/maintenance/'?>" method="get">
+<form action="<?php echo BIBLIOGRAPHIE_WEB_ROOT.'/admin/'?>" method="get">
 	<div class="unit">
 		<input type="hidden" id="task" name="task" value="parseLog" />
 		<label for="logFile" class="block">Choose log file</label>
