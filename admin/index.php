@@ -105,68 +105,8 @@ $(function () {
 		}else
 			echo '<p class="error">We have no log files!</p>';
 
-		if(!empty($_GET['logFile'])){
-			if(mb_strpos($_GET['logFile'], '..') === false and mb_strpos($_GET['logFile'], '/') === false and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile'])){
-?>
-
-<table class="dataContainer">
-	<tr>
-		<th>Meta</th>
-		<th>Data</th>
-	</tr>
-<?php
-				$logContent = file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']);
-
-				$categoryIcons = array (
-					'authors' => 'user',
-					'maintenance' => 'cog',
-					'notes' => 'note',
-					'publications' => 'page-white-text',
-					'tags' => 'tag-blue',
-					'topics' => 'folder'
-				);
-
-				$actionIcons = array (
-					'createTopic' => 'folder-add',
-					'createTopicRelation' => 'table-relationship',
-					'editTopic' => 'folder-edit',
-					'editAuthor' => 'user-edit',
-					'createAuthor' => 'user-create',
-					'lockTopic' => 'lock',
-					'unlockTopic' => 'lock-open',
-					'editPublication' => 'page-white-edit',
-					'createPublication' => 'page-white-create',
-					'createTag' => 'tag-blue-add',
-					'addTopic' => 'folder-add',
-					'removeTopic' => 'folder-delete',
-					'deleteAuthor' => 'user-delete',
-					'createPublication' => 'page-white-add',
-					'mergeAuthors' => 'arrow-join',
-					'createNote' => 'note-add',
-					'editNote' => 'note-edit'
-				);
-
-				foreach($logContent as $logRow){
-					$logRow = json_decode($logRow, true);
-					echo '<tr>';
-
-					echo '<td>';
-					echo 'logged action <strong>#', $logRow['id'], '</strong><br /><br />';
-					echo '<strong>', bibliographie_icon_get($categoryIcons[$logRow['category']]), ' ', $logRow['category'], '</strong><br />';
-					echo '<em>', bibliographie_icon_get($actionIcons[$logRow['action']]), ' ', $logRow['action'].'</em><br /><br />';
-					echo 'by <strong>', bibliographie_user_get_name($logRow['user']).'</strong><br />';
-					echo 'at <em>', $logRow['time'], '</em>';
-					echo '</td>';
-
-					echo '<td style="font-size: 0.7em; width: 500px"><pre style="overflow: scroll; width: 500px; height: 300px">', print_r(json_decode($logRow['data'], true), true), '</pre></td>';
-
-					echo '</tr>';
-				}
-?>
-
-</table>
-<?php
-			}
+		if(!empty($_GET['logFile']) and mb_strpos($_GET['logFile'], '..') === false and mb_strpos($_GET['logFile'], '/') === false and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile'])){
+			bibliographie_admin_log_parse(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']));
 		}
 	break;
 }

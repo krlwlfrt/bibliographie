@@ -1,10 +1,11 @@
 <?php
-define('BIBLIOGRAPHIE_DATABASE_VERSION', '2');
+define('BIBLIOGRAPHIE_DATABASE_VERSION', '3');
 
 /**
  * Register starting time.
  */
 define('BIBLIOGRAPHIE_SCRIPT_START', microtime(true));
+define('BIBLIOGRAPHIE_LOG_USING_REPLAY', false);
 
 /**
  * Start output buffering and session.
@@ -24,7 +25,7 @@ date_default_timezone_set('Europe/Berlin');
  * Check for config file.
  */
 if(!file_exists(dirname(__FILE__).'/config.php'))
-	bibliographie_exit('Config file missing!', 'Sorry, but we have no config file!');
+	exit('Sorry, but we have no config file!');
 require dirname(__FILE__).'/config.php';
 
 /**
@@ -417,10 +418,11 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
  * Get the log counter from database and compare it with the counter from log file.
  */
 if(count(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')) > 2){
-	$databaseLogCounter = DB::getInstance()->query('SELECT MAX(`log_id`) FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
-	if($databaseLogCounter < json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id)
-		bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please use log-replay to fill the gap!');
-	elseif($databaseLogCounter > json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id)
+	$logCount_database = DB::getInstance()->query('SELECT MAX(`log_id`) AS `count` FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
+	$logCount_file = json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id;
+	if($logCount_file > $logCount_database)
+		bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/admin/logReplay.php">use log-replay</a> to fill the gap!');
+	elseif($logCount_database < $logCount_file)
 		bibliographie_exit('Bibliographie log error', 'You have more database changes than logged changes. This is a serious problem, since bibliographie doesn\'nt know how to solve the problem!');
 }
 

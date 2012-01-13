@@ -134,22 +134,23 @@ function bibliographie_icon_get ($name) {
 function bibliographie_log ($category, $action, $data) {
 	static $logAccess = null;
 
-	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('Y_W').'.log', 'a+');
 	$time = date('r');
 
 	if($logAccess === null)
 		$logAccess = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'log` (
-	`log_file`,
 	`log_time`
 ) VALUES (
-	:file,
 	:time
 )');
 
 	$logAccess->execute(array(
-		'file' => 'log_'.date('Y_W').'.log',
 		'time' => $time
 	));
+
+	if(BIBLIOGRAPHIE_LOG_USING_REPLAY)
+		return true;
+
+	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('Y_W').'.log', 'a+');
 
 	$addFile = json_encode(array(
 		'id' => DB::getInstance()->lastInsertId(),
@@ -163,6 +164,8 @@ function bibliographie_log ($category, $action, $data) {
 	fwrite($logFile, $addFile.PHP_EOL);
 
 	fclose($logFile);
+
+	return true;
 }
 
 /**
