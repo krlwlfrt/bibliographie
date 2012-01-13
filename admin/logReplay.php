@@ -66,6 +66,11 @@ if($logCount_file > $logCount_database){
 					}
 				}
 
+				/**
+				 * In case some change is left out set the id correctly to ensure consistency.
+				 */
+				DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'log` SET `log_id` = '.((int) $row->id).' ORDER BY `log_id` DESC LIMIT 1');
+
 				if($result !== false)
 					echo '<p class="success">#'.$row->id.': '.$row->category.' '.$row->action.' was successfull!</p>';
 				else{
