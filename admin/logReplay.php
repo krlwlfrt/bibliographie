@@ -41,29 +41,44 @@ if($logCount_file > $logCount_database){
 		case 'replay':
 			foreach($gap as $row){
 				$row = json_decode($row);
-				$row->data = json_decode($row->data);
+				$data = json_decode($row->data);
 
 				$result = false;
 				$precheck = true;
 
 				if($row->category == 'authors'){
 					if($row->action == 'editAuthor'){
-						print_r($row->data);
-						/*$dataAfter = $row->data->dataAfter;
-						$author = bibliographie_authors_get_data($row->data->dataBefore->author_id);
-						if($author == $row->data->dataBefore){
-							$result = bibliographie_authors_edit_author($data->author_id, $data->firstname, $data->von, $data->surname, $data->jr, $data->email, $data->url, $data->institute);
+						$dataAfter = $data->dataAfter;
+						$author = bibliographie_authors_get_data($dataAfter->author_id);
+						if($author == $data->dataBefore){
+							$result = bibliographie_authors_edit_author($dataAfter->author_id, $dataAfter->firstname, $dataAfter->von, $dataAfter->surname, $dataAfter->jr, $dataAfter->email, $dataAfter->url, $dataAfter->institute);
 						}else{
 							echo '<p class="error">#'.$row->id.' Data precheck was unsuccessfull!</p>';
 							break;
-						}*/
-					}
+						}
+
+					}elseif($row->action == 'createAuthor')
+						$result = bibliographie_authors_create_author ($data->firstname, $data->von, $data->surname, $data->jr, $data->email, $data->url, $data->institute, $data->author_id);
+
+					elseif($row->action == 'deleteAuthor')
+						$result = bibliographie_authors_delete($data->dataDeleted->author_id);
+
+				}elseif($row->category == 'tags'){
+					if($row->action == 'createTag')
+						$result = bibliographie_tags_create_tag($data->tag, $data->tag_id);
+
 				}elseif($row->category == 'topics'){
-					if($row->action == 'unlockTopic'){
-						$result = bibliographie_admin_unlock_topic($row->data->topic_id);
-					}elseif($row->action == 'lockTopic'){
-						$result = bibliographie_admin_lock_topics(array($row->data->topic_id));
-					}
+					if($row->action == 'unlockTopic')
+						$result = bibliographie_admin_unlock_topic($data->topic_id);
+
+					elseif($row->action == 'lockTopic')
+						$result = bibliographie_admin_lock_topics(array($data->topic_id));
+
+					elseif($row->action == 'createTopic')
+						$result = bibliographie_topics_create_topic($data->name, $data->description, $data->url, $data->topics, $data->topic_id);
+
+					elseif($row->action == 'editTopic')
+						$result = bibliographie_topics_edit_topic($data->topic_id, $data->name, $data->description, $data->url, $data->topics);
 				}
 
 				/**
@@ -89,6 +104,10 @@ if($logCount_file > $logCount_database){
 			echo '<h2>Check changes</h2>',
 				'<p class="notice">This is a list of changes that will be written to the database. Please check them and remove those that you do not want from the files. When you are done checking you can run the log replay by pressing the button in the bottom right corner.</p>';
 			bibliographie_admin_log_parse($gap);
+?>
+
+<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/admin/logReplay.php?task=replay">Start replay</a>
+<?php
 			break;
 	}
 }else

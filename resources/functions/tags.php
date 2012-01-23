@@ -4,25 +4,29 @@
  * @param string $tag
  * @return mixed
  */
-function bibliographie_tags_create_tag ($tag) {
+function bibliographie_tags_create_tag ($tag, $tag_id = null) {
 	static $createTag = null;
 
 	if($createTag === null)
 		$createTag = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'tags` (
+	`tag_id`,
 	`tag`
 ) VALUES (
+	:tag_id
 	:tag
 )');
 
 	$return = $createTag->execute(array(
+		'tag_id' => $tag_id,
 		'tag' => $tag
 	));
 
 	if($return){
 		$return = array(
-			'tag_id' => DB::getInstance()->lastInsertId(),
 			'tag' => $tag
 		);
+		if($tag_id === null)
+			$return['tag_id'] = DB::getInstance()->lastInsertId();
 
 		bibliographie_log('tags', 'createTag', json_encode($return));
 		bibliographie_cache_purge('search_');
