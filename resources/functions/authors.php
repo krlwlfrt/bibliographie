@@ -108,16 +108,7 @@ WHERE
 	`author_id` = :author_id
 LIMIT 1');
 
-			$return = $updateAuthor->execute(array(
-				'firstname' => $firstname,
-				'von' => $von,
-				'surname' => $surname,
-				'jr' => $jr,
-				'email' => $email,
-				'url' => $url,
-				'institute' => $institute,
-				'author_id' => (int) $dataBefore['author_id']
-			));
+			$return = $updateAuthor->execute($dataAfter);
 		}else
 			$return = true;
 

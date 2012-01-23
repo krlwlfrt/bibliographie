@@ -12,7 +12,8 @@ class DB {
 	public static function getInstance () {
 		if(!self::$instance){
 			try {
-				self::$instance = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE.';charset=UTF-8', BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+				self::$instance = new PDO('mysql:host='.BIBLIOGRAPHIE_MYSQL_HOST.';dbname='.BIBLIOGRAPHIE_MYSQL_DATABASE, BIBLIOGRAPHIE_MYSQL_USER, BIBLIOGRAPHIE_MYSQL_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+				self::$instance->exec('SET CHARACTER SET utf8');
 				self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			} catch (PDOException $e) {
 				bibliographie_exit('No database connection', 'Sorry, but we have no connection to the database!<br />'.$e->getMessage());
@@ -385,6 +386,18 @@ function bool2img ($bool) {
 		return bibliographie_icon_get('tick');
 
 	return bibliographie_icon_get('cross');
+}
+
+function bibliographie_database_update ($version, $query, $description) {
+	$return = (bool) DB::getInstance()->exec($query);
+	DB::getInstance()->exec('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'settings` SET `value` = '.DB::getInstance()->quote($version).' WHERE `key` = "DATABASE_VERSION"');
+	if($return)
+		bibliographie_log('maintenance', 'Updating database scheme', json_encode(array(
+			'schemeVersion' => $version,
+			'query' => $query,
+			'description' => $description
+		)));
+	return $return;
 }
 
 /**

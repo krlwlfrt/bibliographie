@@ -844,7 +844,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	)');
 
 		$data = array(
-			'pub_id' => (int) $pub_id,
+			'pub_id' => (int) $pub_id, // 0 will be handled as NULL in MySQL, so that auto-increment works.
 			'pub_type' => $pub_type,
 			'user_id' => (int) $user_id,
 			'title' => $title,
@@ -1756,7 +1756,7 @@ function bibliographie_publications_delete_publication ($pub_id) {
 
 		if($return){
 			bibliographie_cache_purge();
-			bibliographie_log('authors', 'deleteAuthor', json_encode(array('dataDeleted' => $person)));
+			bibliographie_log('publications', 'deletePublication', json_encode(array('dataDeleted' => $publication)));
 		}
 	}
 

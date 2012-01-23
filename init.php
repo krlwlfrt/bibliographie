@@ -436,21 +436,16 @@ elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
 	try {
 		DB::getInstance()->beginTransaction();
 
-		echo '<h2>Updating database scheme</h2><p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p><ul>';
+		echo '<h2>Updating database scheme</h2>',
+			'<p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p>',
+			'<ul>';
 		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
-			echo '<li>'
-				.'<em>'.$bibliographie_database_updates[$i]['description'].'</em> '
-				.bool2img((bool) DB::getInstance()->exec($bibliographie_database_updates[$i]['query']))
-				. '</li>';
-			bibliographie_log('maintenance', 'Updating database scheme', json_encode(array(
-				'schemeVersion' => $i,
-				'query' => $bibliographie_database_updates[$i]['query'],
-				'description' => $bibliographie_database_updates[$i]['description']
-			)));
+			echo '<li>',
+				'<em>'.$bibliographie_database_updates[$i]['description'].'</em> ',
+				bool2img(bibliographie_database_update($i, $bibliographie_database_updates[$i]['query'], $bibliographie_database_updates[$i]['description'])),
+				 '</li>';
 		}
 		echo '</ul>';
-
-		DB::getInstance()->exec('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'settings` SET `value` = '.DB::getInstance()->quote(BIBLIOGRAPHIE_DATABASE_VERSION).' WHERE `key` = "DATABASE_VERSION"');
 
 		DB::getInstance()->commit();
 	} catch (PDOException $e) {
