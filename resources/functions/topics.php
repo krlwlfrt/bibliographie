@@ -48,7 +48,7 @@ function bibliographie_topics_create_topic ($name, $description, $url, array $to
 			}
 		}
 
-		$return = array(
+		$return = array (
 			'topic_id' => (int) $topic_id,
 			'name' => $name,
 			'description' => $description,
@@ -169,7 +169,7 @@ LIMIT 1');
 				}
 			}
 
-			$data = array(
+			$data = array (
 				'dataBefore' => $dataBefore,
 				'dataAfter' => array (
 					'topic_id' => (int) $dataBefore['topic_id'],
