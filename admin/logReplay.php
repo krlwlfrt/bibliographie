@@ -45,23 +45,76 @@ if($logCount_file > $logCount_database){
 
 				$result = false;
 				$precheck = true;
+				$precheckError = (string) '';
 
 				if($row->category == 'authors'){
 					if($row->action == 'editAuthor'){
 						$dataAfter = $data->dataAfter;
 						$author = bibliographie_authors_get_data($dataAfter->author_id);
-						if($author == $data->dataBefore){
+
+						if($author == $data->dataBefore)
 							$result = bibliographie_authors_edit_author($dataAfter->author_id, $dataAfter->firstname, $dataAfter->von, $dataAfter->surname, $dataAfter->jr, $dataAfter->email, $dataAfter->url, $dataAfter->institute);
-						}else{
-							echo '<p class="error">#'.$row->id.' Data precheck was unsuccessfull!</p>';
-							break;
-						}
+						else
+							$precheck = false;
 
 					}elseif($row->action == 'createAuthor')
 						$result = bibliographie_authors_create_author ($data->firstname, $data->von, $data->surname, $data->jr, $data->email, $data->url, $data->institute, $data->author_id);
 
-					elseif($row->action == 'deleteAuthor')
-						$result = bibliographie_authors_delete($data->dataDeleted->author_id);
+					elseif($row->action == 'deleteAuthor'){
+						$dataDeleted = $data->dataDeleted;
+						$author = bibliographie_authors_get_data($dataDeleted->author_id);
+
+						if($author == $dataDeleted)
+							$result = bibliographie_authors_delete($dataDeleted->author_id);
+						else
+							$precheck = false;
+					}
+
+				}elseif($row->category == 'maintenance'){
+					if($row->action == 'Updating database scheme'){
+						if(BIBLIOGRAPHIE_DATABASE_VERSION == $data->schemeVersion - 1)
+							$result = bibliographie_database_update($data->schemeVersion, $data->query, $data->description);
+						else
+							$precheck = false;
+					}
+
+					elseif($row->action == 'mergeAuthors'){
+						$into = bibliographie_authors_get_data($data->into);
+						$delete = bibliographie_authors_get_data($data->delete);
+						if(count(array_diff(bibliographie_authors_get_publications($delete), csv2array($data->publications)) == 0)
+							and count(csv2array($data->publications)) == $data->publicationsAffected
+							and is_object($into)
+							and is_object($delete))
+							$result = bibliographie_maintenance_merge_authors($data->into, $data->delete);
+						else
+							$precheck = false;
+					}
+
+				}elseif($row->category == 'notes'){
+					if($row->action == 'createNote'){
+						$user = bibliographie_user_get_name($data->user_id);
+						$publication = bibliographie_publications_get_data($data->pub_id);
+
+						if($user != 'bibliographie' and is_object($publication))
+							$result = bibliographie_notes_create_note ($data->pub_id, $data->text, $data->note_id, $data->user_id);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'editNote'){
+						$note = bibliographie_notes_get_data($data->note_id);
+						if(is_object($note))
+							$result = bibliographie_notes_edit_note ($data->note_id, $data->text);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'deleteNote'){
+						$dataDeleted = $data->dataDeleted;
+						$note = bibliographie_notes_get_data($dataDeleted->note_id);
+						if(is_object($note) and $dataDeleted == $note)
+							$result = bibliographie_notes_delete_note($dataDeleted->note_id);
+						else
+							$precheck = false;
+					}
 
 				}elseif($row->category == 'tags'){
 					if($row->action == 'createTag')
@@ -77,8 +130,13 @@ if($logCount_file > $logCount_database){
 					elseif($row->action == 'createTopic')
 						$result = bibliographie_topics_create_topic($data->name, $data->description, $data->url, $data->topics, $data->topic_id);
 
-					elseif($row->action == 'editTopic')
-						$result = bibliographie_topics_edit_topic($data->topic_id, $data->name, $data->description, $data->url, $data->topics);
+					elseif($row->action == 'editTopic'){
+						$topic = bibliographie_topics_get_data($data->topic_id);
+						$dataAfter = $data->dataAfter;
+
+						if(is_object($topic) and $topic == $data->dataBefore)
+							$result = bibliographie_topics_edit_topic($dataAfter->topic_id, $dataAfter->name, $dataAfter->description, $dataAfter->url, $dataAfter->topics);
+					}
 				}
 
 				/**
@@ -94,6 +152,8 @@ if($logCount_file > $logCount_database){
 				}
 				if($precheck === false){
 					echo '<p class="error">#'.$row->id.' Data precheck was unsuccessfull.</p>';
+					if(!empty($precheckError))
+						echo '<p>'.$precheckError.'</p>';
 					break;
 				}
 			}

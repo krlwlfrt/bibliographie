@@ -210,7 +210,7 @@ function bibliographie_notes_print_note ($note_id) {
 	return $return;
 }
 
-function bibliographie_notes_create_note ($pub_id, $text) {
+function bibliographie_notes_create_note ($pub_id, $text, $note_id = null, $user_id = null) {
 	static $createNote = null;
 
 	$return = false;
@@ -223,24 +223,34 @@ function bibliographie_notes_create_note ($pub_id, $text) {
 INTO
 	`'.BIBLIOGRAPHIE_PREFIX.'notes`
 (
+	`note_id`,
 	`pub_id`,
 	`user_id`,
 	`text`
 ) VALUES (
+	:note_id,
 	:pub_id,
 	:user_id,
 	:text
 )');
+		if($user_id === null)
+			$user_id = bibliographie_user_get_id();
+
 		$data = array (
+			'note_id' => (int) $note_id,
 			'pub_id' => (int) $publication->pub_id,
-			'user_id' => (int) bibliographie_user_get_id(),
+			'user_id' => (int) $user_id,
 			'text' => $text
 		);
+
 		if($createNote->execute($data)){
+			if($note_id === null)
+				$data['note_id'] = DB::getInstance()->lastInsertId();
+
 			bibliographie_cache_purge('search_notes_'.bibliographie_user_get_id());
 			bibliographie_cache_purge('notes_'.((int) bibliographie_user_get_id()));
 			bibliographie_log('notes', 'createNote', json_encode($data));
-			$return = true;
+			$return = $data;
 		}
 	}
 
