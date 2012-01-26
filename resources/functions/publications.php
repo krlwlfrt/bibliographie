@@ -782,7 +782,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 
 		if(!($createPublication instanceof PDOStatement))
 			$createPublication = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'publication` (
-		`pub_id`
+		`pub_id`,
 		`pub_type`,
 		`user_id`,
 		`title`,
@@ -844,7 +844,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 	)');
 
 		$data = array(
-			'pub_id' => (int) $pub_id, // 0 will be handled as NULL in MySQL, so that auto-increment works.
+			'pub_id' => (int) $pub_id,
 			'pub_type' => $pub_type,
 			'user_id' => (int) $user_id,
 			'title' => $title,

@@ -72,8 +72,7 @@ function array2csv (array $array) {
 			else
 				$return .= $value;
 		}
-	}else
-		echo 'array is to short';
+	}
 
 	return $return;
 }
@@ -107,6 +106,9 @@ function is_mail ($mail) {
  */
 function is_csv ($csv, $type = null) {
 	if(is_string($csv)){
+		if(empty($csv))
+			return true;
+		
 		if($type == 'int')
 			return preg_match('~^[0-9]+(\,[0-9]+)*$~', $csv);
 
@@ -346,15 +348,18 @@ function bibliographie_exit ($title, $message) {
 
 function bibliographie_error_handler ($errno, $errstr, $file, $line) {
 	if($errno != E_STRICT and $errno != E_NOTICE){
-		ob_end_clean();
-		bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.basename($file).':'.$line.'</em>');
+		//bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.basename($file).':'.$line.'</em>');
+		echo $errno,
+			' ', $errstr,
+			' ', $file,
+			' ', $line;
+		exit();
 	}
 }
 
 function bibliographie_exception_handler ($exception) {
-	ob_end_clean();
-
-	bibliographie_exit('Uncaught exception', '<strong>'.$exception->getMessage().'</strong> in <em>'.basename($exception->getFile()).'</em>:'.$exception->getLine().'<br />'.$exception->getTraceAsString());
+	//bibliographie_exit('Uncaught exception', '<strong>'.$exception->getMessage().'</strong> in <em>'.basename($exception->getFile()).'</em>:'.$exception->getLine().'<br />'.$exception->getTraceAsString());
+	exit();
 }
 
 function bibliographie_options_compare (array $options, array $_options) {

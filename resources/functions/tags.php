@@ -12,7 +12,7 @@ function bibliographie_tags_create_tag ($tag, $tag_id = null) {
 	`tag_id`,
 	`tag`
 ) VALUES (
-	:tag_id
+	:tag_id,
 	:tag
 )');
 

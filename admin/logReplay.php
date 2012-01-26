@@ -54,8 +54,10 @@ if($logCount_file > $logCount_database){
 
 						if($author == $data->dataBefore)
 							$result = bibliographie_authors_edit_author($dataAfter->author_id, $dataAfter->firstname, $dataAfter->von, $dataAfter->surname, $dataAfter->jr, $dataAfter->email, $dataAfter->url, $dataAfter->institute);
-						else
+						else{
 							$precheck = false;
+							$precheckError = 'Authors current data is unequal to the logged state before.';
+						}
 
 					}elseif($row->action == 'createAuthor')
 						$result = bibliographie_authors_create_author ($data->firstname, $data->von, $data->surname, $data->jr, $data->email, $data->url, $data->institute, $data->author_id);
@@ -81,11 +83,15 @@ if($logCount_file > $logCount_database){
 					elseif($row->action == 'mergeAuthors'){
 						$into = bibliographie_authors_get_data($data->into);
 						$delete = bibliographie_authors_get_data($data->delete);
-						if(count(array_diff(bibliographie_authors_get_publications($delete), csv2array($data->publications)) == 0)
-							and count(csv2array($data->publications)) == $data->publicationsAffected
+						if(count(array_diff(bibliographie_authors_get_publications($delete->author_id), csv2array($data->publications)) == 0)
 							and is_object($into)
 							and is_object($delete))
-							$result = bibliographie_maintenance_merge_authors($data->into, $data->delete);
+							if(count(csv2array($data->publications)) == $data->publicationsAffected)
+								$result = bibliographie_maintenance_merge_authors($data->into, $data->delete);
+							else{
+								$precheck = false;
+								$precheckError = 'Publications that were affected by the merge, were unequal to the publications that should be affected!';
+							}
 						else
 							$precheck = false;
 					}
@@ -112,6 +118,65 @@ if($logCount_file > $logCount_database){
 						$note = bibliographie_notes_get_data($dataDeleted->note_id);
 						if(is_object($note) and $dataDeleted == $note)
 							$result = bibliographie_notes_delete_note($dataDeleted->note_id);
+						else
+							$precheck = false;
+					}
+
+				}elseif($row->category == 'publications'){
+					if($row->action == 'createPublication')
+						$result = bibliographie_publications_create_publication($data->pub_type, $data->author, $data->editor, $data->title, $data->month, $data->year, $data->booktitle, $data->chapter, $data->series, $data->journal, $data->volume, $data->number, $data->edition, $data->publisher, $data->location, $data->howpublished, $data->organization, $data->institution, $data->school, $data->address, $data->pages, $data->note, $data->abstract, $data->userfields, $data->bibtex_id, $data->isbn, $data->issn, $data->doi, $data->url, $data->topics, $data->tags, $data->pub_id, $data->user_id);
+
+					elseif($row->action == 'editPublication'){
+						$publication = bibliographie_publications_get_data($data->pub_id);
+
+						if(is_object($publication))
+							$result = bibliographie_publications_edit_publication ($data->pub_id, $data->pub_type, $data->author, $data->editor, $data->title, $data->month, $data->year, $data->booktitle, $data->chapter, $data->series, $data->journal, $data->volume, $data->number, $data->edition, $data->publisher, $data->location, $data->howpublished, $data->organization, $data->institution, $data->school, $data->address, $data->pages, $data->note, $data->abstract, $data->userfields, $data->bibtex_id, $data->isbn, $data->issn, $data->doi, $data->url, $data->topics, $data->tags);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'addTopic'){
+						$topic = bibliographie_topics_get_data($data->topic_id);
+						$publications = bibliographie_topics_get_publications($data->topic_id);
+
+						if(is_object($topic) and array_diff($publications, $data->publicationsBefore) == 0)
+							$result = bibliographie_publications_add_topic($data->publicationsToAdd, $data->topic_id);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'addTag'){
+						$tag = bibliographie_tags_get_data($data->tag_id);
+						$publications = bibliographie_tags_get_publications($data->tag_id);
+						if(is_object($tag) and array_diff($publications, $data->publicationsBefore) == 0)
+							$result = bibliographie_publications_add_tag($data->publicationsToAdd, $data->tag_id);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'removeTopic'){
+						$topic = bibliographie_topics_get_data($data->topic_id);
+						$publications = bibliographie_topics_get_publications($data->topic_id);
+						if(is_object($topic) and array_diff($publications, $data->publicationsBefore) == 0)
+							$result = bibliographie_publications_remove_topic($data->publicationsToRemove, $data->topic_id);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'removeTag'){
+						$tag = bibliographie_tags_get_data($data->tag_id);
+						$publications = bibliographie_topics_get_publications($data->tag_id);
+						if(is_object($tag) and array_diff($publications, $data->publicationsBefore) == 0)
+							$result = bibliographie_publications_remove_tag($data->publicationsToRemove, $data->tag_id);
+						else
+							$precheck = false;
+
+					}elseif($row->action == 'deletePublication'){
+						$dataDeleted = $data->dataDeleted;
+						$publication = bibliographie_publications_get_data($dataDeleted->pub_id);
+						$publication->author = bibliographie_publications_get_authors($dataDeleted->pub_id);
+						$publication->editor = bibliographie_publications_get_editors($dataDeleted->pub_id);
+						$publication->topics = bibliographie_publications_get_topics($dataDeleted->pub_id);
+						$publication->tags = bibliographie_publications_get_tags($dataDeleted->pub_id);
+
+						if($publication == $dataDeleted and count(bibliographie_notes_get_notes_of_publication($dataDeleted->pub_id)) == 0)
+							$result = bibliographie_publications_delete_publication($dataDeleted->pub_id);
 						else
 							$precheck = false;
 					}
@@ -147,11 +212,11 @@ if($logCount_file > $logCount_database){
 				if($result !== false)
 					echo '<p class="success">#'.$row->id.': '.$row->category.' '.$row->action.' was successfull!</p>';
 				else{
-					echo '<p class="error">#'.$row->id.' An error occurred while trying to apply logged change.</p>';
+					echo '<p class="error">#'.$row->id.': An error occurred while trying to apply logged change ('.$data->category.', '.$data->action.').</p>';
 					break;
 				}
 				if($precheck === false){
-					echo '<p class="error">#'.$row->id.' Data precheck was unsuccessfull.</p>';
+					echo '<p class="error">#'.$row->id.': Data precheck was unsuccessfull.</p>';
 					if(!empty($precheckError))
 						echo '<p>'.$precheckError.'</p>';
 					break;
