@@ -77,7 +77,11 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 
 	if(is_array($dataBefore)){
 		try {
-			DB::getInstance()->beginTransaction();
+			$higherTransaction = DB::getInstance()->inTransaction();
+
+			if(!$higherTransaction)
+				DB::getInstance()->beginTransaction();
+
 			/**
 			 * Get subtopics recursively and direct parent topics.
 			 */
@@ -188,7 +192,9 @@ LIMIT 1');
 				bibliographie_cache_purge('topic_'.((int) $dataBefore['topic_id']).'_');
 			}
 
-			DB::getInstance()->commit();
+			if(!$higherTransaction)
+				DB::getInstance()->commit();
+			
 			bibliographie_cache_purge('search_');
 			return $data;
 
