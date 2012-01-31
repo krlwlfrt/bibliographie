@@ -7,11 +7,15 @@ define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_LOG_USING_REPLAY', true);
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/resources/functions/general.php';
-ob_end_clean();
+
+/**
+ * Get log counters from files and database.
+ */
 $logCount_database = (int) DB::getInstance()->query('SELECT MAX(`log_id`) AS `log_count` FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
 $logCount_file = 0;
 if(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs') > 2)
 	$logCount_file = (int) json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id;
+
 ?><!DOCTYPE html>
 <html>
 	<head>
@@ -205,6 +209,17 @@ if($logCount_file > $logCount_database){
 
 							if(is_object($topic) and $topic == $data->dataBefore)
 								$result = bibliographie_topics_edit_topic($dataAfter->topic_id, $dataAfter->name, $dataAfter->description, $dataAfter->url, $dataAfter->topics);
+							else
+								$precheck = false;
+						}
+
+						elseif($row->action == 'deleteTopic'){
+							$topic = bibliographie_topics_get_data($data->dataDeleted->topic_id);
+
+							if(is_object($topic) and $topic == $data->dataDeleted)
+								$result = bibliographie_topics_delete($data->dataDeleted->topic_id);
+							else
+								$precheck = false;
 						}
 					}
 
@@ -248,7 +263,8 @@ if($logCount_file > $logCount_database){
 			break;
 	}
 }else
-	echo '<p class="success">Nothing to do here. Database log and file log are up to date!</p>';
+	echo '<p class="success">Nothing to do here. Database log and file log are up to date!</p>',
+		'You can <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">return to bibliographie</a> and work normally!';
 ?>
 
 		</div>

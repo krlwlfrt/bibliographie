@@ -7,6 +7,23 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <h2>Topics</h2>
 <?php
 switch($_GET['task']){
+	case 'deleteTopic':
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
+
+		if(is_object($topic)){
+			$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
+			$subTopics = bibliographie_topics_get_subtopics($topic->topic_id);
+
+			if(count($parentTopics) == 0 and count($subTopics) == 0){
+				if(bibliographie_topics_delete($topic->topic_id))
+					echo '<p class="success">The topic has been deleted!</p>';
+				else
+					echo '<p class="error">An error occurred!</p>';
+			}else
+				echo '<p class="error"><em>'.bibliographie_topics_parse_name($topic->topic_id).'</em> has parent- or subtopics and can therefore not be deleted!</p>';
+		}
+		break;
+
 	case 'topicEditor':
 		$bibliographie_title = 'Topic editor';
 ?>
@@ -17,7 +34,7 @@ switch($_GET['task']){
 		$topic = null;
 
 		if(!empty($_GET['topic_id']) and !in_array($_GET['topic_id'], bibliographie_topics_get_locked_topics()))
-			$topic = bibliographie_topics_get_data($_GET['topic_id'], 'assoc');
+			$topic = (array) bibliographie_topics_get_data($_GET['topic_id']);
 
 		if(is_array($topic))
 			bibliographie_history_append_step('topics', 'Editing topic '.$topic['name']);
@@ -157,9 +174,6 @@ $(function () {
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 
 		if(is_object($topic)){
-			/**
-			 * Set meta data for bibliographie output.
-			 */
 			bibliographie_history_append_step('topics', 'Showing topic '.$topic->name);
 			$bibliographie_title = 'Topic: '.htmlspecialchars($topic->name);
 
@@ -169,7 +183,10 @@ $(function () {
 			$family = array_merge(array($topic->topic_id), bibliographie_topics_get_parent_topics($topic->topic_id, true));
 			$lockedTopics = bibliographie_topics_get_locked_topics();
 			if(is_array($lockedTopics) and count(array_intersect($family, $lockedTopics)) == 0)
-				echo '<em style="float: right"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic->topic_id.'">'.bibliographie_icon_get('folder-edit').' Edit topic</a></em>';
+				echo '<em style="float: right;">',
+					'<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.$topic->topic_id.'">'.bibliographie_icon_get('folder-edit').' Edit topic</a>',
+					' <a href="javascript:;" onclick="bibliographie_topics_confirm_delete('.$topic->topic_id.');">'.bibliographie_icon_get('folder-delete').' Delete topic</a>',
+					'</em>';
 			else
 				echo '<p class="notice">This or at least one of the parent topics is locked against editing. If you want to edit something regarding this topic please contact your admin!</p>';
 ?>

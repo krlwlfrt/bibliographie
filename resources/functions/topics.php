@@ -194,7 +194,7 @@ LIMIT 1');
 
 			if(!$higherTransaction)
 				DB::getInstance()->commit();
-			
+
 			bibliographie_cache_purge('search_');
 			return $data;
 
@@ -689,6 +689,32 @@ ORDER BY
 			$cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_topics_'.md5($query).'_'.md5($expandedQuery).'.json', 'w+');
 			fwrite($cacheFile, json_encode($return));
 			fclose($cacheFile);
+		}
+	}
+
+	return $return;
+}
+
+function bibliographie_topics_delete ($topic_id) {
+	static $deleteTopic = null;
+
+	$topic = bibliographie_topics_get_data($topic_id);
+	$return = false;
+
+	if(is_object($topic)){
+		$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
+		$subTopics = bibliographie_topics_get_subtopics($topic->topic_id);
+		if(count($parentTopics) == 0 and count($subTopics) == 0){
+			if($deleteTopic === null)
+				$deleteTopic = DB::getInstance()->prepare('DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'topics` WHERE `topic_id` = :topic_id LIMIT 1');
+
+			$deleteTopic->bindParam('topic_id', $topic->topic_id);
+			$return = (bool) $deleteTopic->execute();
+
+			if($return){
+				bibliographie_cache_purge();
+				bibliographie_log('topics', 'deleteTopic', json_encode(array('dataDeleted' => $topic)));
+			}
 		}
 	}
 

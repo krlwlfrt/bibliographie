@@ -8,6 +8,24 @@ $title = 'An error occured!';
 $text = 'An error occured!';
 $status = 'error';
 switch($_GET['task']){
+	case 'deleteTopicConfirm':
+		$topic = bibliographie_topics_get_data($_GET['topic_id']);
+
+		if(is_object($topic)){
+			$parentTopics = bibliographie_topics_get_parent_topics($topic->topic_id);
+			$subTopics = bibliographie_topics_get_subtopics($topic->topic_id);
+
+			if(count($parentTopics) == 0 and count($subTopics) == 0){
+				$text = 'You are about to delete <em>'.bibliographie_topics_parse_name($topic->topic_id).'</em>. If you are sure, click "delete" below!'
+					.'<p class="success"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=deleteTopic&amp;topic_id='.((int) $topic->topic_id).'">'.bibliographie_icon_get('folder-delete').' Delete!</a></p>'
+					.'If you dont want to delete the topic, press "cancel" below!';
+			}else
+				$text = '<p class="error"><em>'.bibliographie_topics_parse_name($topic->topic_id).'</em> has parent- or subtopics and can therefore not be deleted!</p>';
+		}
+
+		bibliographie_dialog_create('deleteTopicConfirm_'.((int) $_GET['topic_id']), 'Confirm delete', $text);
+	break;
+
 	case 'getSubgraph':
 		$topic = bibliographie_topics_get_data($_GET['topic_id']);
 		if(is_object($topic)){

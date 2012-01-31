@@ -127,3 +127,28 @@ function bibliographie_topics_check_name (name, topic_id) {
 		}
 	})
 }
+
+function bibliographie_topics_confirm_delete (topic_id) {
+	$.ajax({
+		'url': bibliographie_web_root+'/topics/ajax.php',
+		'data': {
+			'task': 'deleteTopicConfirm',
+			'topic_id': topic_id
+		},
+		'success': function (html) {
+			$('#dialogContainer').append(html);
+			$('#deleteTopicConfirm_'+topic_id).dialog({
+				'width': 400,
+				'buttons': {
+					'cancel': function () {
+						$(this).dialog('close');
+					}
+				},
+				'close': function () {
+					$(this).remove();
+				},
+				'modal': true
+			})
+		}
+	})
+}
