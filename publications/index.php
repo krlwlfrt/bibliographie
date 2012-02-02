@@ -447,6 +447,7 @@ $(function () {
 	<select id="source" name="source" style="width: 60%;">
 		<option value="bibtexInput">BibTex direct input</option>
 		<option value="bibtexRemote">BibTex remote file</option>
+		<option value="pubmed">PubMed</option>
 <?php
 		if(BIBLIOGRAPHIE_ISBNDB_KEY != '')
 			echo '<option value="isbndb">ISBNDB.com</option>';

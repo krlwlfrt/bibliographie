@@ -413,6 +413,56 @@ WHERE
 <?php
 				}
 			}
+		}elseif($_POST['source'] == 'pubmed'){
+			if($_POST['step'] == '1'){
+?>
+
+<strong>2. step</strong> Input PubMed query... <span class="silk-icon silk-icon-hourglass"></span>
+<label for="pubmedQuery" class="block">PubMed query</label>
+<input id="pubmedQuery" name="pubmedQuery" style="width: 100%;" />
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'pubmed', 'step': '2', 'pubmedQuery': $('#pubmedQuery').val()})">Proceed & parse!</button>
+<?php
+			}elseif($_POST['step'] == '2'){
+				if(!empty($_POST['pubmedQuery'])){
+					$searchResult = new SimpleXMLElement(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=0&usehistory=y&term='.urlencode($_POST['pubmedQuery'])));
+					$dataResult = new SimpleXMLElement(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=xml&query_key='.$searchResult->QueryKey.'&WebEnv='.$searchResult->WebEnv.'&retstart=0&retmax=20'));
+					$dataResult = (array) $dataResult;
+
+					$title = 5;
+					$authors = 3;
+					$year = 0;
+					$doi = 17;
+
+					$i = 0;
+					foreach($dataResult['DocSum'] as $document){
+						$document = (array) $document;
+						$document = $document['Item'];
+						$authorsList = (array) $document[$authors]->Item;
+
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $document[$title];
+						foreach($authorsList as $author)
+							if(is_string($author))
+								$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
+									'last' => $author,
+									'first' => '',
+									'von' => '',
+									'jr' => ''
+								);
+
+						if(is_string($document[$doi]))
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['doi'] = $document[$doi];
+						if(is_string($document[$year]))
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['year'] = $document[$year];
+						$_SESSION['publication_prefetchedData_unchecked'][$i]['note'] = 'Fetched from PubMed';
+
+						$i++;
+					}
+?>
+
+					<p><span class="success">Parsing of your search was successful!</span> You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.</p>
+<?php
+				}
+			}
 		}
 	break;
 
