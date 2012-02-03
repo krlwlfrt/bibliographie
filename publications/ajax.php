@@ -501,13 +501,26 @@ LIMIT
 			$similarTitles->bindParam('pub_id', $pub_id);
 			$similarTitles->execute();
 
-			$results = array();
 			$result['count'] = $similarTitles->rowCount();
 
 			if($result['count'] > 0){
 				$similarTitles->setFetchMode(PDO::FETCH_OBJ);
 				$result['results'] = $similarTitles->fetchAll();
 			}
+
+			foreach($result['results'] as $key => $publication){
+				$sameAuthors = array_intersect(bibliographie_publications_get_authors($publication->pub_id), csv2array($_GET['author']));
+				if(count($sameAuthors) > 0){
+					$result['results'][$key]->relevancy += count($sameAuthors) * 15;
+					$result['results'][$key]->title = '<strong>'.$result['results'][$key]->title.'</strong> <em>('.count($sameAuthors).' similar authors)</em>';
+				}
+			}
+
+			usort($result['results'], function ($a, $b) {
+				if($a->relevancy == $b->relevancy)
+					return 0;
+				return ($a->relevancy < $b->relevancy) ? 1 : -1;
+			});
 		}
 
 		echo json_encode($result);

@@ -38,7 +38,13 @@ function bibliographie_authors_input_tokenized (field, prePopulate) {
 		'searchDelay': bibliographie_request_delay,
 		'minChars': bibliographie_search_min_chars,
 		'preventDuplicates': true,
-		'prePopulate': prePopulate
+		'prePopulate': prePopulate,
+		'onAdd': function () {
+			bibliographie_publications_check_title($('#title').val());
+		},
+		'onDelete': function () {
+			bibliographie_publications_check_title($('#title').val());
+		}
 	});
 }
 

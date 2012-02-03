@@ -126,13 +126,14 @@ function bibliographie_publications_create_person_form (role) {
 	})
 }
 
-function bibliographie_publications_check_title (title, pub_id) {
+function bibliographie_publications_check_title (title) {
 	$.ajax({
 		url: bibliographie_web_root+'/publications/ajax.php',
 		data: {
 			'task': 'checkTitle',
 			'title': title,
-			'pub_id': pub_id
+			'pub_id': bibliographie_publications_editor_pub_id,
+			'author': $('#author').val()
 		},
 		dataType: 'json',
 		success: function (json) {

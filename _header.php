@@ -52,7 +52,7 @@
 
 						<input type="hidden" name="task" value="simpleSearch" />
 						<input type="text" id="q" name="q" style="width: 50%" placeholder="<?php echo htmlspecialchars($_GET['q'])?>" />
-						<button id="searchSubmit"><?php bibliographie_icon_get('find')?></button>
+						<button id="searchSubmit"><?php echo bibliographie_icon_get('find')?></button>
 					</div>
 				</form>
 
@@ -125,6 +125,9 @@ $(function () {
 
 		// Increase the loading counter.
 		$('#jQueryLoadingAmount').html('('+(++bibliographie_loading)+')');
+		$.each(o, function(key, value){
+			$('#dialogContainer').append(key+': '+value+'<br />');
+		})
 	}).bind('ajaxComplete', function(){
 		// Reset cursor to normal pointer.
 		$('body').css('cursor', 'auto');
