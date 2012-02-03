@@ -18,8 +18,8 @@ function bibliographie_authors_check_name (firstname, surname, author_id) {
 				$.each(json, function (dummy, value) {
 					var str = '';
 					str += '<div>';
-					str += '<a href="'+bibliographie_web_root+'/authors/?task=authorEditor&amp;author_id='+value.id+'" style="float: right;"><span class="silk-icon silk-icon-pencil"></span></a>';
-					str += '<a href="'+bibliographie_web_root+'/authors/?task=showAuthor&amp;author_id='+value.id+'"><span class="silk-icon silk-icon-user"></span> '+value.name+'</a>';
+					str += '<a href="'+bibliographie_web_root+'/authors/?task=authorEditor&amp;author_id='+value.id+'" style="float: right;"><span class="silk-icon silk-icon-pencil" title="Edit author"></span></a>';
+					str += '<a href="'+bibliographie_web_root+'/authors/?task=showAuthor&amp;author_id='+value.id+'"><span class="silk-icon silk-icon-user" title="View profile"></span> '+value.name+'</a>';
 					str += '</div>'
 
 					$('#similarNameContainer').append(str);
@@ -71,7 +71,7 @@ function bibliographie_authors_get_co_authors (field, container) {
 			if(json.length > 0){
 				$('#'+container).html('<div style="margin-bottom: 5px;">Found <strong>'+json.length+' co-authors</strong> for this set of authors.</div>').show();
 				$.each(json, function (dummy, value) {
-					$('#'+container).append('<div><a href="javascript:;" onclick="$(\'#authors\').tokenInput(\'add\', {\'id\': '+value.id+', \'name\': \''+value.name+'\'});" style="float: right;"><span class="silk-icon silk-icon-add"></span></a> '+value.name+'</div>');
+					$('#'+container).append('<div><a href="javascript:;" onclick="$(\'#authors\').tokenInput(\'add\', {\'id\': '+value.id+', \'name\': \''+value.name+'\'});" style="float: right;"><span class="silk-icon silk-icon-add" title="Add to list"></span></a> '+value.name+'</div>');
 				});
 			}else{
 				$('#'+container).html('<em>No more co-authors were found!</em>').show();

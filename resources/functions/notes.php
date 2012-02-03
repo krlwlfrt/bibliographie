@@ -199,8 +199,8 @@ function bibliographie_notes_print_note ($note_id) {
 	if(is_object($note)){
 		$return .= '<div class="bibliographie_notes_note">';
 		$return .= '<div class="bibliographie_notes_actions">';
-		$return .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/notes/?task=noteEditor&amp;note_id='.((int) $note->note_id).'">'.bibliographie_icon_get('note-edit').'</a>';
-		$return .= '<a href="javascript:;" onclick="bibliographie_notes_confirm_delete('.((int) $note->note_id).')">'.bibliographie_icon_get('note-delete').'</a>';
+		$return .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/notes/?task=noteEditor&amp;note_id='.((int) $note->note_id).'">'.bibliographie_icon_get('note-edit', 'Edit note').'</a>';
+		$return .= '<a href="javascript:;" onclick="bibliographie_notes_confirm_delete('.((int) $note->note_id).')">'.bibliographie_icon_get('note-delete', 'Delete note').'</a>';
 		$return .= '</div>';
 		$return .= $note->text;
 		$return .= '<div class="bibliographie_notes_publication_link">'.bibliographie_publications_parse_data($note->pub_id).'</div>';

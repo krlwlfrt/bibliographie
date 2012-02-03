@@ -25,7 +25,7 @@ function bibliographie_history_parse () {
 
 	if(empty($bibliographie_history_path_identifier) or $bibliographie_history_path_identifier == $_GET['from']){
 		bibliographie_history_append_step('generic', 'Generic task');
-		$str .= ' '.bibliographie_icon_get('bug');
+		$str .= ' '.bibliographie_icon_get('bug', 'Title of page not yet set');
 	}
 
 	$str .= '<div class="history_steps">';
@@ -39,7 +39,7 @@ function bibliographie_history_parse () {
 		$step = $_SESSION['bibliographie_history_path'][$parent];
 		$parent = $step['parent'];
 
-		$str .= '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']]).' ';
+		$str .= '<div>'.bibliographie_icon_get($bibliographie_history_icons[$step['category']], $step['category']).' ';
 		if($i != 1 and !empty($step['parent']) and $step['category'] != 'generic' and $step['redoable'])
 			$str .= '<a href="'.$step['url'].'">'.htmlspecialchars($step['description']).'</a>';
 		else
@@ -53,7 +53,7 @@ function bibliographie_history_parse () {
 	} while(!empty($step['parent']) and $i < 100);
 
 	if($goBack != null)
-		echo '<a href="'.$goBack['url'].'" title="'.htmlspecialchars($goBack['description']).'">'.bibliographie_icon_get('arrow-left').'</a> ';
+		echo '<a href="'.$goBack['url'].'" title="'.htmlspecialchars($goBack['description']).'">'.bibliographie_icon_get('arrow-left', 'Go back').'</a> ';
 
 	echo $str.'</div></div>';
 }

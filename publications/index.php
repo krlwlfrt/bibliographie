@@ -262,7 +262,7 @@ ORDER BY
 
 				foreach($result as $container){
 					echo '<tr>'
-						.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($container[$fields[0]]).'&amp;year='.((int) $container['year']).'&amp;piece='.htmlspecialchars($container[$fields[1]]).'">'.bibliographie_icon_get('page-white-stack').'</a></td>'
+						.'<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=showContainerPiece&amp;type='.htmlspecialchars($_GET['type']).'&amp;container='.htmlspecialchars($container[$fields[0]]).'&amp;year='.((int) $container['year']).'&amp;piece='.htmlspecialchars($container[$fields[1]]).'">'.bibliographie_icon_get('page-white-stack', 'Show publications').'</a></td>'
 						.'<td>'.htmlspecialchars($container[$fields[0]]).'</td>'
 						.'<td>'.$container['year'].' '.$container[$fields[1]].'</td>'
 						.'<td>'.$container['count'].' article(s)</td>'

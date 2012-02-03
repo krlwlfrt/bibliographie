@@ -129,8 +129,8 @@ function bibliographie_maintenance_get_similar_persons () {
 				var str = '';
 				$.each(group, function(person_id, person){
 					str += '<li id="person_'+group_id+'_'+person.id+'">\n\
-<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
-<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
+<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'into\')"><span class="silk-icon silk-icon-flag-green" title="Put into merge position 1"></span></a>\n\
+<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', '+group_id+', \'delete\')"><span class="silk-icon silk-icon-flag-red" title="Put into merge position 2"></span></a>\n\
 '+person.name+'</li>';
 					if(groupStr != '')
 						groupStr += ',';
@@ -158,8 +158,8 @@ function bibliographie_maintenance_search_persons (q) {
 				$('#bibliographie_maintenance_select_persons').html('<div id="group_0" class="bibliographie_maintenance_person_groups"><ul></ul></div>');
 				$.each(json, function(person_id, person){
 					$('#group_0 ul').append('<li id="person_0_'+person.id+'">\n\
-	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'into\')"><span class="silk-icon silk-icon-flag-green"></span></a>\n\
-	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'delete\')"><span class="silk-icon silk-icon-flag-red"></span></a>\n\
+	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'into\')"><span class="silk-icon silk-icon-flag-green" title="Put into merge position 1"></span></a>\n\
+	<a href="javascript:;" onclick="bibliographie_maintenance_position_person('+person.id+', 0, \'delete\')"><span class="silk-icon silk-icon-flag-red" title="Put into merge position 2"></span></a>\n\
 	'+person.name+'</li>');
 				});
 			}

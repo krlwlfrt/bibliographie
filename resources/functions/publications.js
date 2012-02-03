@@ -149,8 +149,8 @@ function bibliographie_publications_check_title (title, pub_id) {
 
 				$.each(json.results, function (key, value) {
 					str += '<div>';
-					str += '<a href="'+bibliographie_web_root+'/publications/?task=showPublication&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-text"></a>';
-					str += ' <a href="'+bibliographie_web_root+'/publications/?task=publicationEditor&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-edit"></a>';
+					str += '<a href="'+bibliographie_web_root+'/publications/?task=showPublication&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-text" title="Show publication"></a>';
+					str += ' <a href="'+bibliographie_web_root+'/publications/?task=publicationEditor&amp;pub_id='+value.pub_id+'"><span class="silk-icon silk-icon-page-white-edit" title="Edit publication"></a>';
 					str += ' '+value.title+'</div>';
 				});
 

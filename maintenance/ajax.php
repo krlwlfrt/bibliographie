@@ -151,7 +151,7 @@ ORDER BY
 						$author = bibliographie_authors_get_data($author_id);
 
 						echo '<tr>';
-						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_icon_get('user-edit').'</a></td>';
+						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=authorEditor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_icon_get('user-edit', 'Edit user').'</a></td>';
 						echo '<td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/authors/?task=showAuthor&amp;author_id='.((int) $author->author_id).'">'.bibliographie_authors_parse_data($author->author_id, array('linkProfile' => true)).'</a></td>';
 						echo '</tr>';
 					}
@@ -190,7 +190,7 @@ ORDER BY
 					echo '</tr>';
 					foreach($authorsWithoutPublications as $author_id){
 						echo '<tr>';
-						echo '<td>'.bibliographie_icon_get('user-delete').'</td>';
+						echo '<td>'.bibliographie_icon_get('user-delete', 'Delete author').'</td>';
 						echo '<td>'.bibliographie_authors_parse_data($author_id, array('linkProfile' => true)).'</td>';
 						echo '</tr>';
 					}
@@ -254,7 +254,7 @@ ORDER BY
 					echo '<table class="dataContainer"><tr><th style="width: 5%"> </th><th>Name</th></tr>';
 
 					foreach($topics as $topic)
-						echo '<tr><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.((int) $topic).'">'.bibliographie_icon_get('folder-edit').'</td><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic).'">'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</td></tr>';
+						echo '<tr><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=topicEditor&amp;topic_id='.((int) $topic).'">'.bibliographie_icon_get('folder-edit', 'Edit topic').'</td><td><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/topics/?task=showTopic&amp;topic_id='.((int) $topic).'">'.bibliographie_topics_parse_name($topic, array('linkProfile' => true)).'</td></tr>';
 					echo '</table>';
 				}else
 					echo '<p class="success">Did not find loosened graphs!</p>';

@@ -600,7 +600,7 @@ function bibliographie_topics_traverse ($topic_id, $depth = 1, &$walkedBy = arra
 			echo '<li>';
 			if($topic->amount_of_subtopics > 0){
 				echo '<a href="javascript:;" id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'" class="topic" onclick="bibliographie_topics_toggle_visibility_of_subtopics('.((int) $topic->topic_id).', '.$walkedBy[$topic->topic_id].')">';
-				echo '<span class="silk-icon silk-icon-bullet-toggle-plus"> </span></a> '.$topic->name;
+				echo '<span class="silk-icon silk-icon-bullet-toggle-plus" title="Unfold"> </span></a> '.$topic->name;
 				echo '<div id="topic_'.((int) $topic->topic_id).'_'.$walkedBy[$topic->topic_id].'_subtopics" class="topic_subtopics" style="display: none">';
 				bibliographie_topics_traverse($topic->topic_id, ($depth + 1), $walkedBy, $usage);
 				echo '</div>';

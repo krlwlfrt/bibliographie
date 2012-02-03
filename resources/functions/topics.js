@@ -111,8 +111,8 @@ function bibliographie_topics_check_name (name, topic_id) {
 
 				$.each(json.results, function (key, value) {
 					str += '<div>';
-					str += '<a href="'+bibliographie_web_root+'/topics/?task=showTopic&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder"></a>';
-					str += ' <a href="'+bibliographie_web_root+'/topics/?task=topicEditor&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder-edit"></a>';
+					str += '<a href="'+bibliographie_web_root+'/topics/?task=showTopic&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder" title="Show topic"></a>';
+					str += ' <a href="'+bibliographie_web_root+'/topics/?task=topicEditor&amp;topic_id='+value.topic_id+'"><span class="silk-icon silk-icon-folder-edit" title="Edit topic"></a>';
 					str += ' <strong>'+value.name+'</strong>';
 					if(value.description != '' && value.description != null)
 						str += ' <em>'+value.description+'</em>';

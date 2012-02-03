@@ -52,7 +52,7 @@
 
 						<input type="hidden" name="task" value="simpleSearch" />
 						<input type="text" id="q" name="q" style="width: 50%" placeholder="<?php echo htmlspecialchars($_GET['q'])?>" />
-						<button id="searchSubmit"><span class="silk-icon silk-icon-find"></span></button>
+						<button id="searchSubmit"><?php bibliographie_icon_get('find')?></button>
 					</div>
 				</form>
 

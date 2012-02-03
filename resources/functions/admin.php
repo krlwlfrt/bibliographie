@@ -116,8 +116,8 @@ function bibliographie_admin_log_parse ($logContent) {
 
 		echo '<td>';
 		echo 'logged action <strong>#', $logRow['id'], '</strong><br /><br />';
-		echo '<strong>', bibliographie_icon_get($bibliographie_admin_log_category_icons[$logRow['category']]), ' ', $logRow['category'], '</strong><br />';
-		echo '<em>', bibliographie_icon_get($bibliographie_admin_log_action_icons[$logRow['action']]), ' ', $logRow['action'].'</em><br /><br />';
+		echo '<strong>', bibliographie_icon_get($bibliographie_admin_log_category_icons[$logRow['category']], $logRow['category']), ' ', $logRow['category'], '</strong><br />';
+		echo '<em>', bibliographie_icon_get($bibliographie_admin_log_action_icons[$logRow['action']], $logRow['action']), ' ', $logRow['action'].'</em><br /><br />';
 		echo 'by <strong>', bibliographie_user_get_name($logRow['user']).'</strong><br />';
 		echo 'at <em>', $logRow['time'], '</em>';
 		echo '</td>';

@@ -517,7 +517,7 @@ function bibliographie_publications_print_list (array $publications, $baseLink =
 			}
 
 			$return .= ' <a href="javascript:;" onclick="bibliographie_publications_export_choose_type(\''.$exportHash.'\')"><em>'.bibliographie_icon_get('page-white-go').' Export</em></a>';
-			$return .= ' <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.$exportHash.'">'.bibliographie_icon_get('page-white-stack').' Batch</a>';
+			$return .= ' <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=batchOperations&amp;list='.$exportHash.'"><em>'.bibliographie_icon_get('page-white-stack').' Batch</em></a>';
 
 			$return .= ' <span id="bibliographie_publications_order_'.$exportHash.'" class="bibliographie_publications_order_trigger">
 	'.bibliographie_icon_get('table').' Order

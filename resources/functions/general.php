@@ -108,7 +108,7 @@ function is_csv ($csv, $type = null) {
 	if(is_string($csv)){
 		if(empty($csv))
 			return true;
-		
+
 		if($type == 'int')
 			return preg_match('~^[0-9]+(\,[0-9]+)*$~', $csv);
 
@@ -124,8 +124,8 @@ function is_csv ($csv, $type = null) {
  * @param string $name Identification of the icon.
  * @return string HTML-snippet
  */
-function bibliographie_icon_get ($name) {
-	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'"> </span>';
+function bibliographie_icon_get ($name, $title = '') {
+	return '<span class="silk-icon silk-icon-'.htmlspecialchars($name).'" title="'.htmlspecialchars($title).'"> </span>';
 }
 
 /**
