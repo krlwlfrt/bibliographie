@@ -1518,6 +1518,10 @@ WHERE
 
 /**
  *
+ * @staticvar null $addLink
+ * @param array $publications
+ * @param type $tag_id
+ * @return type
  */
 function bibliographie_publications_add_tag (array $publications, $tag_id) {
 	static $addLink = null;
@@ -1572,6 +1576,10 @@ function bibliographie_publications_add_tag (array $publications, $tag_id) {
 
 /**
  *
+ * @staticvar null $removeLink
+ * @param array $publications
+ * @param type $tag_id
+ * @return type
  */
 function bibliographie_publications_remove_tag (array $publications, $tag_id) {
 	static $removeLink = null;
@@ -1612,6 +1620,12 @@ WHERE
 	return $return;
 }
 
+/**
+ *
+ * @param type $query
+ * @param type $expandedQuery
+ * @return type
+ */
 function bibliographie_publications_search_publications ($query, $expandedQuery = '') {
 	$return = array();
 
@@ -1622,20 +1636,34 @@ function bibliographie_publications_search_publications ($query, $expandedQuery 
 		if(BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_publications_'.md5($query).'_'.md5($expandedQuery).'.json'))
 			return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH.'/cache/search_publications_'.md5($query).'_'.md5($expandedQuery).'.json'));
 
+		preg_match('~from\:([0-9]{4})~', $query, $fromYear);
+		preg_match('~to\:([0-9]{4})~', $query, $toYear);
+		preg_match('~in\:([0-9]{4})~', $query, $inYear);
+
+		$addQuery = '';
+		if(isset($fromYear[1]) and mb_strlen($fromYear[1]) == 4)
+			$addQuery .= ' AND `year` >= '.((int) $fromYear[1]);
+		if(isset($toYear[1]) and mb_strlen($toYear[1]) == 4)
+			$addQuery .= ' AND `year` <= '.((int) $toYear[1]);
+		if(isset($inYear[1]) and mb_strlen($inYear[1]) == 4)
+			$addQuery = ' AND `year` = '.((int) $inYear[1]);
+
 		$publications = DB::getInstance()->prepare('SELECT
 	`pub_id`,
 	`title`,
-	`relevancy`
+	`relevancy`,
+	`year`
 FROM (
 	SELECT
 		`pub_id`,
 		`title`,
-		MATCH(`title`, `abstract`, `note`) AGAINST (:expanded_query) AS `relevancy`
+		MATCH(`title`, `abstract`, `note`) AGAINST (:expanded_query) AS `relevancy`,
+		`year`
 	FROM
 		`'.BIBLIOGRAPHIE_PREFIX.'publication`
 ) fullTextSearch
 WHERE
-	`relevancy` > 0
+	`relevancy` > 0'.$addQuery.'
 ORDER BY
 	`relevancy` DESC,
 	`title`');
@@ -1655,6 +1683,12 @@ ORDER BY
 	return $return;
 }
 
+/**
+ *
+ * @param type $query
+ * @param type $expandedQuery
+ * @return type
+ */
 function bibliographie_publications_search_books ($query, $expandedQuery = '') {
 	$return = array();
 
@@ -1700,6 +1734,12 @@ ORDER BY
 	return $return;
 }
 
+/**
+ *
+ * @param type $query
+ * @param type $expandedQuery
+ * @return type
+ */
 function bibliographie_publications_search_journals ($query, $expandedQuery = '') {
 	$return = array();
 
@@ -1745,6 +1785,12 @@ ORDER BY
 	return $return;
 }
 
+/**
+ *
+ * @staticvar null $deletePublication
+ * @param type $pub_id
+ * @return type
+ */
 function bibliographie_publications_delete_publication ($pub_id) {
 	static $deletePublication = null;
 
