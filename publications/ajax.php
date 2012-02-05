@@ -511,7 +511,7 @@ LIMIT
 			foreach($result['results'] as $key => $publication){
 				$sameAuthors = array_intersect(bibliographie_publications_get_authors($publication->pub_id), csv2array($_GET['author']));
 				if(count($sameAuthors) > 0){
-					$result['results'][$key]->relevancy += count($sameAuthors) * 15;
+					$result['results'][$key]->relevancy += count($sameAuthors) * 30;
 					$result['results'][$key]->title = '<strong>'.$result['results'][$key]->title.'</strong> <em>('.count($sameAuthors).' similar authors)</em>';
 				}
 			}
