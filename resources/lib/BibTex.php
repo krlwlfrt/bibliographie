@@ -1445,10 +1445,11 @@ class Structures_BibTex {
 					$value = $this->_removeCurlyBraces($value);
 				}
 
-				$value = str_replace(array_values($this->escapedChars), array_keys($this->escapedChars), $value);
-
 				$position = strrpos($entry, ',');
 				$field = strtolower(trim(substr($entry, $position + 1)));
+
+				if($field != 'author' and $field != 'editor')
+					$value = str_replace(array_values($this->escapedChars), array_keys($this->escapedChars), $value);
 
 				$ret[$field] = $value;
 				$entry = substr($entry, 0, $position);
@@ -2195,5 +2196,4 @@ class Structures_BibTex {
 		$ret .= "</p>\n";
 		return $ret;
 	}
-
 }

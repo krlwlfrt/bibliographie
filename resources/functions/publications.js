@@ -217,6 +217,7 @@ function bibliographie_publications_export_choose_type (exportList) {
  ****************************************/
 
 function bibliographie_publications_fetch_data_proceed (data) {
+	setLoading('#fetchData_container');
 	$.ajax({
 		url: bibliographie_web_root+'/publications/ajax.php?task=fetchData_proceed',
 		data: data,

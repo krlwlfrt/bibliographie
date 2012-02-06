@@ -472,7 +472,7 @@ function bibliographie_publications_parse_list (array $publications, $type = 'ht
  * @param array $publications
  * @param array $options
  */
-function bibliographie_publications_print_list (array $publications, $baseLink = '', array $options = array()) {
+function bibliographie_publications_print_list (array $publications, $baseLink = '', array $options = array())	{
 	$return = (string) '';
 	if(count($publications) > 0){
 		if(!empty($_GET['orderBy']))

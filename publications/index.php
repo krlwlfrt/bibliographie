@@ -436,15 +436,10 @@ $(function () {
 		unset($_SESSION['publication_prefetchedData_unchecked']);
 ?>
 
-<span style="float: right">
-	<a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=fetchData&amp;selectSource=1">Use other source</a>
-</span>
 <h3>Fetch data for publication creation</h3>
-<div id="fetchData_container">
-	<strong>1. step</strong> Select source... <span class="silk-icon silk-icon-hourglass"></span><br />
-
-	<label for="source" class="block">Source</label>
-	<select id="source" name="source" style="width: 60%;">
+<div id="fetchData_sourceSelect">
+	<label for="source" class="block"><?php echo bibliographie_icon_get('page-white-get')?> Select the source of which you want to import from!</label>
+	<select id="source" name="source" style="width: 50%;">
 		<option value="bibtexInput">BibTex direct input</option>
 		<option value="bibtexRemote">BibTex remote file</option>
 		<option value="pubmed">PubMed</option>
@@ -452,24 +447,23 @@ $(function () {
 		if(BIBLIOGRAPHIE_ISBNDB_KEY != '')
 			echo '<option value="isbndb">ISBNDB.com</option>';
 ?>
+
 	</select>
-
-	<button onclick="bibliographie_publications_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select & proceed!</button>
+	<button onclick="bibliographie_publications_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})">Select!</button>
 </div>
-
-<?php
-		if($_GET['selectSource'] != '1'){
-?>
-
+<p><hr /></p>
+<div id="fetchData_container"></div>
 <script type="text/javascript">
 	/* <![CDATA[ */
+$('#source').on('change select', function () {
+	bibliographie_publications_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})
+});
 $(function () {
 	bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '1'});
 })
 	/* ]]> */
 </script>
 <?php
-		}
 	break;
 
 	case 'publicationEditor':

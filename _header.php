@@ -125,9 +125,6 @@ $(function () {
 
 		// Increase the loading counter.
 		$('#jQueryLoadingAmount').html('('+(++bibliographie_loading)+')');
-		$.each(o, function(key, value){
-			$('#dialogContainer').append(key+': '+value+'<br />');
-		})
 	}).bind('ajaxComplete', function(){
 		// Reset cursor to normal pointer.
 		$('body').css('cursor', 'auto');
