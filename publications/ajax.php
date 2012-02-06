@@ -181,14 +181,23 @@ WHERE
 	break;
 
 	case 'fetchData_proceed':
-		if($_POST['source'] == 'bibtexInput'){
+		if($_POST['source'] == 'bibtexInput' or $_POST['source'] == 'bibtexRemote'){
 			if($_POST['step'] == '1'){
+				if($_POST['source'] == 'bibtexInput'){
 ?>
 
 <label for="bibtexInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input text containing BibTeX!</label>
 <textarea id="bibtexInput" name="bibtexInput" rows="20" cols="20" style="width: 100%;"></textarea>
 <button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse!</button>
 <?php
+				}else{
+?>
+
+<label for="bibtexInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containg BibTeX</label>
+<input id="bibtexInput" name="bibtexInput" style="width: 100%" />
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse!</button>
+<?php
+				}
 			}elseif($_POST['step'] == '2'){
 				if(empty($_POST['bibtexInput'])){
 ?>
@@ -207,13 +216,16 @@ WHERE
 					'unwrap' => true,
 					'extractAuthors' => true
 				));
-				$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
+				if($_POST['source'] == 'bibtexInput')
+					$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
+				else
+					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexRemote'])));
 
 				if($bibtex->parse() and count($bibtex->data) > 0){
 					foreach($bibtex->data as $key => $row){
 						$bibtex->data[$key]['pub_type'] = $row['entryType'];
 						$bibtex->data[$key]['bibtex_id'] = $row['cite'];
-						$bibtex->data[$key]['note'] = 'Imported from BibTeX direct input...';
+						$bibtex->data[$key]['note'] = 'Imported from '.$_POST['source'].'...';
 					}
 
 					$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
@@ -227,52 +239,6 @@ WHERE
 ?>
 
 <p class="error">There was an error while parsing! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '1'})">start again</a>!</p>
-<?php
-				}
-			}
-		}elseif($_POST['source'] == 'bibtexRemote'){
-			if($_POST['step'] == '1'){
-?>
-
-<label for="bibtexRemote" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containg BibTeX</label>
-<input id="bibtexRemote" name="bibtexRemote" style="width: 100%" />
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexRemote': $('#bibtexRemote').val()})">Parse!</button>
-<?php
-			}elseif($_POST['step'] == '2'){
-				if(empty($_POST['bibtexRemote']) or !is_url($_POST['bibtexRemote'])){
-?>
-
-<p class="error">Your input was empty or not an url! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemote', 'step': '1'})">start again</a>!</p>
-<?php
-					break;
-				}
-
-				$bibtex = new Structures_BibTex(array(
-					'stripDelimiter' => true,
-					'validate' => true,
-					'unwrap' => true,
-					'extractAuthors' => true
-				));
-				$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexRemote'])));
-
-				if($bibtex->parse() and count($bibtex->data) > 0){
-					foreach($bibtex->data as $key => $row){
-						$bibtex->data[$key]['pub_type'] = $row['entryType'];
-						$bibtex->data[$key]['bibtex_id'] = $row['cite'];
-						$bibtex->data[$key]['note'] = 'Imported from remote BibTeX...';
-					}
-
-					$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
-?>
-
-<p class="success">Parsing of your input was successful!</p>
-<p>Your input contained <strong><?php echo count($bibtex->data)?></strong> entries. You can now proceed and check your fetched entries!</p>
-<div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
-<?php
-				}else{
-?>
-
-<p class="error">There was an error while parsing! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemove', 'step': '1'})">start again</a>!</p>
 <?php
 				}
 			}
