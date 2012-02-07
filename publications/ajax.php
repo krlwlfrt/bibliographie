@@ -28,10 +28,17 @@ switch($_GET['task']){
 			$title = 'Choose export format';
 			$text = '<h3>Export publications</h3>
 <p class="notice">You\'re about to export '.count($publications).' publication(s). Please choose the format that you want to export into.</p>
-<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=bibTex&amp;exportList='.htmlspecialchars($_GET['exportList']).'" onclick="$(\'exportChooseType_'.htmlspecialchars($_GET['exportList']).'\').dialog(\'close\')">'.bibliographie_icon_get('page-white-actionscript').' BibTex</a><br />
-<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=rtf&amp;exportList='.htmlspecialchars($_GET['exportList']).'" onclick="$(\'exportChooseType_'.htmlspecialchars($_GET['exportList']).'\').dialog(\'close\')">'.bibliographie_icon_get('page-white-word').' RTF</a><br />
-<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=html&amp;exportList='.htmlspecialchars($_GET['exportList']).'" onclick="$(\'exportChooseType_'.htmlspecialchars($_GET['exportList']).'\').dialog(\'close\')">'.bibliographie_icon_get('page-white-code').' HTML</a><br />
-<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=exportPublications&amp;target=text&amp;exportList='.htmlspecialchars($_GET['exportList']).'" onclick="$(\'exportChooseType_'.htmlspecialchars($_GET['exportList']).'\').dialog(\'close\')">'.bibliographie_icon_get('page-white-text').' Text</a>';
+<label for="exportTarget" class="block">Format</label>
+<select id="exportTarget" name="exportTarget" style="width: 100%">
+	<option value="bibTex">BibTeX</option>
+	<option value="rtf">RTF</option>
+	<option value="html">HTML</option>
+	<option value="text">Text</option>
+</select>
+<label for="exportStyle" class="block">Style</label>
+<select id="exportStyle" name="exportStyle" style="width: 100%">
+	<option value="standard">Standard</option>
+</select>';
 		}
 
 		bibliographie_dialog_create('exportChooseType_'.htmlspecialchars($_GET['exportList']), $title, $text);

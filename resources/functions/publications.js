@@ -200,6 +200,10 @@ function bibliographie_publications_export_choose_type (exportList) {
 				width: 500,
 				modal: true,
 				buttons: {
+					'Export': function () {
+						window.location = bibliographie_web_root+'/publications/ajax.php?task=exportPublications&target='+$('#exportTarget').val()+'&exportList='+exportList;
+						$(this).dialog('close');
+					},
 					'Close': function () {
 						$(this).dialog('close');
 					}
