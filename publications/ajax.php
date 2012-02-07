@@ -219,7 +219,7 @@ WHERE
 				if($_POST['source'] == 'bibtexInput')
 					$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
 				else
-					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexRemote'])));
+					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexInput'])));
 
 				if($bibtex->parse() and count($bibtex->data) > 0){
 					foreach($bibtex->data as $key => $row){
