@@ -49,7 +49,7 @@ switch($_GET['task']){
 
 		if(is_array($publications) and count($publications) > 0){
 			if(in_array($_GET['target'], array('html', 'text'))){
-				bibliographie_publications_parse_list($publications, $_GET['target']);
+				bibliographie_dialog_create('bibliographie_export_'.$_GET['exportList'], 'Exported publications', '<div style="font: size: 15px; max-height: 600px; overflow-y: scroll;">'.bibliographie_publications_parse_list($publications, $_GET['target']).'</div>');
 			}else{
 				$publications = array2csv($publications);
 
@@ -124,8 +124,7 @@ WHERE
 						}
 
 						if($_GET['target'] == 'bibTex'){
-							header('Content-Type: text/plain; charset=UTF-8');
-							echo $bibtex->bibtex();
+							bibliographie_dialog_create('bibliographie_export_'.$_GET['exportList'], 'Exported publications', '<div style="font: size: 15px; max-height: 600px; overflow-y: scroll;">'.nl2br($bibtex->bibtex()).'</div>');
 						}elseif($_GET['target'] == 'rtf'){
 							$rtf = $bibtex->rtf();
 							$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');

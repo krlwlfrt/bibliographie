@@ -444,27 +444,29 @@ function bibliographie_publications_parse_data ($publication_id, $style = 'stand
  * @return type
  */
 function bibliographie_publications_parse_list (array $publications, $type = 'html') {
+	$return = false;
 	if(count($publications) > 0){
+		$return = (string) '';
 		if(!in_array($type, array('html', 'text')))
 			$type = 'html';
 
-		$newLine = '<br />'.PHP_EOL;
+		$newLine = '<br /><br />'.PHP_EOL;
 		$options = array (
 			'noLinks' => true
 		);
 		if($type == 'text'){
-			header('Content-Type: text/plain; charset=UTF-8');
-			$newLine = PHP_EOL;
+			//header('Content-Type: text/plain; charset=UTF-8');
+			//$newLine = PHP_EOL.PHP_EOL;
 			$options = array (
 				'plainText' => true
 			);
 		}
 
 		foreach($publications as $publication)
-			echo bibliographie_publications_parse_data($publication, 'standard', $options).$newLine;
+			$return .= bibliographie_publications_parse_data($publication, 'standard', $options).$newLine;
 	}
 
-	return false;
+	return $return;
 }
 
 /**
