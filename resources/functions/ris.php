@@ -17,7 +17,7 @@ class RISParser {
 	 */
 	function parse () {
 		if(!empty($this->content)){
-			$lines = explode(PHP_EOL, $this->content);
+			$lines = explode("\n", $this->content);
 			$pages = array();
 			foreach($lines as $line){
 				preg_match('~^([A-Z0-9]{2})\s+\-\s(.*)$~', $line, $match);
@@ -29,8 +29,10 @@ class RISParser {
 					elseif(in_array($key, array('AU', 'A2', 'A3', 'A4'))){
 						$value = explode(',', $value);
 						$this->data['author'][] = array (
-							'surname' => $value[0],
-							'firstname' => $value[1]
+							'last' => $value[0],
+							'von' => '',
+							'first' => $value[1],
+							'jr' => ''
 						);
 					}elseif($key == 'AB')
 						$this->data['abstract'] = $value;
@@ -59,6 +61,8 @@ class RISParser {
 						$pages[1] = $value;
 					elseif($key == 'SP')
 						$pages[0] = $value;
+					elseif($key == 'JO')
+						$this->data['journal'] = $value;
 				}
 			}
 			if(count($pages) == 2)
@@ -71,8 +75,8 @@ class RISParser {
 	 * @return mixed Returns data on successful parsing or false otherwise.
 	 */
 	function data () {
-		if(!is_array($this->data))
-			return false;
+		//if(!is_array($this->data))
+		//	return false;
 
 		return $this->data;
 	}

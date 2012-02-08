@@ -90,7 +90,6 @@ WHERE
 							'stripDelimiter' => true,
 							'validate' => true,
 							'unwrap' => true,
-							//'removeCurlyBraces' => true,
 							'extractAuthors' => true
 						));
 
@@ -388,6 +387,25 @@ WHERE
 <p class="error">Your PubMed query was empty! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'pubmed', 'step': '1'})">start again</a>!</p>
 <?php
 				}
+			}
+		}elseif($_POST['source'] == 'ris'){
+			if($_POST['step'] == '1'){
+?>
+
+<label for="risInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input RIS!</label>
+<textarea id="risInput" name="risInput" rows="20" cols="20" style="width: 100%;"></textarea>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'ris', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
+<?php
+			}elseif($_POST['step'] == '2'){
+				$ris = new RISParser($_POST['risInput']);
+				$ris->parse();
+				$_SESSION['publication_prefetchedData_unchecked'][] = $ris->data();
+?>
+
+<p class="success">Parsing of your input was successful!</p>
+<p>You can now proceed and check your fetched entries!</p>
+<div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
+<?php
 			}
 		}
 	break;
