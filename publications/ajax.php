@@ -399,7 +399,7 @@ WHERE
 			}elseif($_POST['step'] == '2'){
 				$ris = new RISParser($_POST['risInput']);
 				$ris->parse();
-				$_SESSION['publication_prefetchedData_unchecked'][] = $ris->data();
+				$_SESSION['publication_prefetchedData_unchecked'] = $ris->data();
 ?>
 
 <p class="success">Parsing of your input was successful!</p>

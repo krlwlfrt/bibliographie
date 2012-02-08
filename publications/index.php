@@ -557,12 +557,12 @@ $(function () {
 					$_POST = reset($_SESSION['publication_prefetchedData_checked']);
 					if(count($_POST['checked_author']) == count($_POST['author']) and count($_POST['checked_editor']) == count($_POST['editor'])){
 						if(is_array($_POST['checked_author']))
-							$_POST['author'] = implode(',', $_POST['checked_author']);
+							$_POST['author'] = array2csv($_POST['checked_author']);
 						else
 							$_POST['author'] = '';
 
 						if(is_array($_POST['checked_editor']))
-							$_POST['editor'] = implode(',', $_POST['checked_editor']);
+							$_POST['editor'] = array2csv($_POST['checked_editor']);
 						else
 							$_POST['editor'] = '';
 
@@ -577,19 +577,19 @@ $(function () {
 
 					$authors = bibliographie_publications_get_authors($_GET['pub_id']);
 					if(is_array($authors) and count($authors) > 0)
-						$_POST['author'] = implode(',', $authors);
+						$_POST['author'] = array2csv($authors);
 
 					$editors = bibliographie_publications_get_editors($_GET['pub_id']);
 					if(is_array($editors) and count($editors) > 0)
-						$_POST['editor'] = implode(',', $editors);
+						$_POST['editor'] = array2csv($editors);
 
 					$tags = bibliographie_publications_get_tags($_GET['pub_id']);
 					if(is_array($tags) and count($tags) > 0)
-						$_POST['tags'] = implode(',', $tags);
+						$_POST['tags'] = array2csv($tags);
 
 					$topics = bibliographie_publications_get_topics($_GET['pub_id']);
 					if(is_array($topics) and count($topics) > 0)
-						$_POST['topics'] = implode(',', $topics);
+						$_POST['topics'] = array2csv($topics);
 				}
 			}
 
