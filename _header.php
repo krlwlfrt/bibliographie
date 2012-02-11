@@ -187,7 +187,7 @@ $(function () {
 		bibliographie_editor_is_dirty = false;
 		setTimeout('bibliographie_editor_is_dirty = true;', bibliographie_request_delay);
 	});
-	$('input, select, textarea').bind('change', function () {
+	$('form input, form select, form textarea').bind('change', function () {
 		bibliographie_editor_is_dirty = true;
 	});
 });

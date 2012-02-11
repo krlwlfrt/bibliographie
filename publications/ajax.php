@@ -344,7 +344,7 @@ WHERE
 			}elseif($_POST['step'] == '2'){
 				if(!empty($_POST['pubmedQuery'])){
 					$searchResult = new SimpleXMLElement(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=0&usehistory=y&term='.urlencode($_POST['pubmedQuery'])));
-					$dataResult = new SimpleXMLElement(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=xml&query_key='.$searchResult->QueryKey.'&WebEnv='.$searchResult->WebEnv.'&retstart=0&retmax=20'));
+					$dataResult = new SimpleXMLElement(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=xml&query_key='.$searchResult->QueryKey.'&WebEnv='.$searchResult->WebEnv.'&retstart=0&retmax=50'));
 					$dataResult = (array) $dataResult;
 
 					$title = 5;
@@ -352,35 +352,54 @@ WHERE
 					$year = 0;
 					$doi = 17;
 
-					$i = 0;
-					foreach($dataResult['DocSum'] as $document){
-						$document = (array) $document;
-						$document = $document['Item'];
-						$authorsList = (array) $document[$authors]->Item;
+					if(is_array($dataResult['DocSum']) and count($dataResult['DocSum']) > 0){
+						$i = 0;
+						foreach($dataResult['DocSum'] as $document){
+							$document = (array) $document;
+							$document = $document['Item'];
+							$authorsList = (array) $document[$authors]->Item;
 
-						$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $document[$title];
-						foreach($authorsList as $author)
-							if(is_string($author))
-								$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
-									'last' => $author,
-									'first' => '',
-									'von' => '',
-									'jr' => ''
-								);
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['title'] = $document[$title];
+							foreach($authorsList as $author)
+								if(is_string($author))
+									$_SESSION['publication_prefetchedData_unchecked'][$i]['author'][] = array (
+										'last' => $author,
+										'first' => '',
+										'von' => '',
+										'jr' => ''
+									);
 
-						if(is_string($document[$doi]))
-							$_SESSION['publication_prefetchedData_unchecked'][$i]['doi'] = $document[$doi];
-						if(is_string($document[$year]))
-							$_SESSION['publication_prefetchedData_unchecked'][$i]['year'] = $document[$year];
-						$_SESSION['publication_prefetchedData_unchecked'][$i]['note'] = 'Imported from PubMed';
+							if(is_string($document[$doi]))
+								$_SESSION['publication_prefetchedData_unchecked'][$i]['doi'] = $document[$doi];
+							if(is_string($document[$year]))
+								$_SESSION['publication_prefetchedData_unchecked'][$i]['year'] = $document[$year];
+							$_SESSION['publication_prefetchedData_unchecked'][$i]['note'] = 'Imported from PubMed';
 
-						$i++;
-					}
+							$i++;
+						}
 ?>
 
-<p class="success">Parsing of your search was successful!</p>
-<p>You can now proceed and <a href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData">check your fetched data</a>.</p>
+<p class="success">Parsing of your search was successful, found <em><?php echo $searchResult->Count?></em> articles and fetching data of <?php echo count($dataResult['DocSum'])?>.</p>
+<p>Narrow down your search, if you didnt get the results you desired!</p>
+<p>
+	<strong>Translated query</strong>: <?php echo $searchResult->QueryTranslation?><br /><br />
 <?php
+						foreach($searchResult->TranslationStack->TermSet as $term)
+							echo '<strong>',
+								$term->Term,
+								'</strong> in <em>'.$term->Field.'</em> with '.$term->Count.' results...<br />';
+?>
+
+</p>
+<p>You can now proceed and check your fetched entries!</p>
+<div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
+<?php
+					}else{
+?>
+
+<p class="error">Your PubMed result was empty! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'pubmed', 'step': '1'})">start again</a>!</p>
+<?php
+					}
 				}else{
 ?>
 
