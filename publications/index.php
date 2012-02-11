@@ -917,21 +917,6 @@ $(function() {
 	</tbody>
 </table>
 
-<h4>Attachments</h4>
-<div id="attachments">
-	<div style="background: #9d9; border: 1px solid #0a0; color: #fff; float: right; margin: 0 0 10px 10px; padding: 5px;">
-		<label for="fileupload">Add files</label>
-		<input id="fileupload" type="file" name="files[]" multiple="multiple" />
-	</div>
-	This is a list of attached files. You can add new files by using the form on the right side.
-<?php
-if(is_array(bibliographie_publications_get_attachments($publication['pub_id'])))
-	foreach(bibliographie_publications_get_attachments($publication['pub_id']) as $att_id)
-		echo bibliographie_attachments_parse($att_id);
-?>
-
-</div>
-
 <?php
 $notes = bibliographie_notes_get_notes_of_publication($publication['pub_id']);
 if(count($notes) > 0){
@@ -940,6 +925,25 @@ if(count($notes) > 0){
 		echo bibliographie_notes_print_note($note->note_id);
 }
 ?>
+
+<h3>Attachments</h3>
+	<div style="background: #9d9; border: 1px solid #0a0; color: #fff; float: right; margin: 0 0 10px 10px; padding: 5px;">
+		<label for="fileupload">Add files</label>
+		<input id="fileupload" type="file" name="files[]" multiple="multiple" />
+	</div>
+	This is a list of attached files. You can add new files by using the form on the right side.
+<div id="attachments">
+<?php
+if(is_array(bibliographie_publications_get_attachments($publication['pub_id']))){
+	if(count(bibliographie_publications_get_attachments($publication['pub_id'])) > 0)
+		foreach(bibliographie_publications_get_attachments($publication['pub_id']) as $att_id)
+			echo bibliographie_attachments_parse($att_id);
+	else
+		echo '<p class="notice">No files are attached.</p>';
+}
+?>
+
+</div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
@@ -956,6 +960,9 @@ $(function () {
 });
 
 function bibliographie_publications_register_attachment (name, location, type) {
+	if($('#attachments div.bibliographie_attachment').length == 0)
+		$('#attachments').empty();
+
 	$.ajax({
 		'url': bibliographie_web_root+'/publications/ajax.php',
 		'data': {

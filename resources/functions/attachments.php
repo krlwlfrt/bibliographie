@@ -46,6 +46,7 @@ function bibliographie_attachments_parse ($att_id) {
 	$attachment = bibliographie_attachments_get_data($att_id);
 
 	if(is_object($attachment)){
+		if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/attachments/'.$attachment->location)){
 		echo '<div class="bibliographie_attachment">',
 			'<div style="float: right;">',
 			bibliographie_icon_get('cross'),
@@ -56,9 +57,13 @@ function bibliographie_attachments_parse ($att_id) {
 			$attachment->name,
 			'</a> (',
 			$attachment->mime,
-			')<br />uploaded by: ',
+			') ',
+			round(filesize(BIBLIOGRAPHIE_ROOT_PATH.'/attachments/'.$attachment->location) / 1024, 2),
+			'KByte<br />uploaded by: ',
 			bibliographie_user_get_name($attachment->user_id),
 			'</div>';
+		}else
+			echo '<p class="error">This file does not exist! ('.$attachment->location.')</p>';
 	}
 }
 
