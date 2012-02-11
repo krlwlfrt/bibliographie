@@ -402,6 +402,7 @@ function bibliographie_database_update ($version, $query, $description) {
  * Include all needed functions...
  */
 require dirname(__FILE__).'/admin.php';
+require dirname(__FILE__).'/attachments.php';
 require dirname(__FILE__).'/authors.php';
 require dirname(__FILE__).'/bookmarks.php';
 require dirname(__FILE__).'/charmap.php';
@@ -416,6 +417,7 @@ require dirname(__FILE__).'/tags.php';
 require dirname(__FILE__).'/topics.php';
 
 require dirname(__FILE__).'/../lib/BibTex.php';
+require dirname(__FILE__).'/../lib/upload.class.php';
 
 /**
  * Set error and exception handling for uncaught errors and exceptions.

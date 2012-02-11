@@ -917,6 +917,21 @@ $(function() {
 	</tbody>
 </table>
 
+<h4>Attachments</h4>
+<div id="attachments">
+	<div style="background: #9d9; border: 1px solid #0a0; color: #fff; float: right; margin: 0 0 10px 10px; padding: 5px;">
+		<label for="fileupload">Add files</label>
+		<input id="fileupload" type="file" name="files[]" multiple="multiple" />
+	</div>
+	This is a list of attached files. You can add new files by using the form on the right side.
+<?php
+if(is_array(bibliographie_publications_get_attachments($publication['pub_id'])))
+	foreach(bibliographie_publications_get_attachments($publication['pub_id']) as $att_id)
+		echo bibliographie_attachments_parse($att_id);
+?>
+
+</div>
+
 <?php
 $notes = bibliographie_notes_get_notes_of_publication($publication['pub_id']);
 if(count($notes) > 0){
@@ -930,7 +945,31 @@ if(count($notes) > 0){
 	/* <![CDATA[ */
 $(function () {
 	$('tbody').hide();
+
+	$('#fileupload').fileupload({
+		'dataType': 'json',
+		'url': bibliographie_web_root+'/publications/ajax.php?task=uploadAttachment',
+		'done': function (e, data) {
+			bibliographie_publications_register_attachment(data.result[0].original_name, data.result[0].name, data.result[0].type);
+		}
+	});
 });
+
+function bibliographie_publications_register_attachment (name, location, type) {
+	$.ajax({
+		'url': bibliographie_web_root+'/publications/ajax.php',
+		'data': {
+			'task': 'registerAttachment',
+			'name': name,
+			'location': location,
+			'type': type,
+			'pub_id': <?php echo $publication['pub_id']?>
+		},
+		'success': function (html) {
+			$('#attachments').append(html);
+		}
+	});
+}
 	/* ]]> */
 </script>
 <?php

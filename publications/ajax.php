@@ -7,6 +7,48 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 $title = 'An error occured!';
 $text = 'An error occurred...';
 switch($_GET['task']){
+	case 'registerAttachment':
+		$register = bibliographie_attachments_register($_GET['pub_id'], $_GET['name'], $_GET['location'], $_GET['type']);
+		if(is_array($register)){
+			bibliographie_attachments_parse($register['att_id']);
+		}else
+			echo '<p class="error">An error occurred!</p>';
+		break;
+
+	case 'uploadAttachment':
+		$upload_handler = new UploadHandler(
+			array(
+				'upload_dir' => BIBLIOGRAPHIE_ROOT_PATH.'/attachments/',
+				'script_url' => BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=uploadAttachment',
+				'upload_url' => BIBLIOGRAPHIE_WEB_ROOT.'/attachments/'
+			)
+		);
+
+		header('Pragma: no-cache');
+		header('Cache-Control: private, no-cache');
+		header('Content-Disposition: inline; filename="files.json"');
+		header('X-Content-Type-Options: nosniff');
+		header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
+		header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
+
+		switch ($_SERVER['REQUEST_METHOD']) {
+			case 'OPTIONS':
+				break;
+			case 'HEAD':
+			case 'GET':
+				$upload_handler->get();
+				break;
+			case 'POST':
+				$upload_handler->post();
+				break;
+			case 'DELETE':
+				$upload_handler->delete();
+				break;
+			default:
+				header('HTTP/1.1 405 Method Not Allowed');
+		}
+		break;
 	case 'deletePublicationConfirm':
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
 

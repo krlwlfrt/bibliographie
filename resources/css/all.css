@@ -475,6 +475,14 @@
 	#bibliographie_maintenance_merge_delete {
 		border: 2px solid #f00;
 	}
+
+	.bibliographie_attachment {
+		border: 1px solid #aa0;
+		background: #ffa;
+		color: #000;
+		margin: 10px 0;
+		padding: 5px;
+	}
 }
 
 @media print {

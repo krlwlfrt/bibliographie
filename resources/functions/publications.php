@@ -1814,3 +1814,41 @@ function bibliographie_publications_delete_publication ($pub_id) {
 
 	return $return;
 }
+
+/**
+ *
+ * @staticvar null $attachments
+ * @param type $pub_id
+ * @return type
+ */
+function bibliographie_publications_get_attachments ($pub_id) {
+	static $attachments = null;
+
+	$publication = bibliographie_publications_get_data($pub_id);
+
+	$return = false;
+
+	if(is_object($publication)){
+		$return = array();
+
+		if(!($attachments instanceof PDOStatement))
+			$attachments = DB::getInstance()->prepare('SELECT
+	`att_id`,
+	`name`
+FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'attachments`
+WHERE
+	`pub_id` = :pub_id
+ORDER BY
+	`name`');
+
+		$attachments->execute(array(
+			'pub_id' => $publication->pub_id
+		));
+
+		if($attachments->rowCount() > 0)
+			$return = $attachments->fetchAll(PDO::FETCH_COLUMN, 0);
+	}
+
+	return $return;
+}

@@ -21,6 +21,8 @@
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-plugins.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jrumble.js"></script>
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.blockUI.js"></script>
+		<script src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.iframe-transport.js"></script>
+		<script src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.fileupload.js"></script>
 
 		<!-- bibliographie stuff -->
 		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/admin.js"></script>
