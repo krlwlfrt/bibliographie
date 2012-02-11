@@ -100,11 +100,8 @@ bibliographie_history_parse();
 /**
  * Transfer script variables to javascript and set other options.
  */
-var bibliographie_loading = 0;
 var bibliographie_web_root = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>';
 var bibliographie_search_min_chars = <?php echo BIBLIOGRAPHIE_SEARCH_MIN_CHARS?>;
-var bibliographie_request_delay = 500;
-var bibliographie_ajax_timeout = null;
 
 $(function () {
 	$.jGrowl.defaults.position = 'bottom-left';
@@ -156,6 +153,14 @@ $(function () {
 		}
 	});
 
+	/**
+	* Attach the from for history to forms with method="get".
+	*/
+	$.each($('form'), function (ix, element) {
+		if($(element).attr('method') == 'get')
+			$(element).append('<input type="hidden" name="from" value="<?php echo $bibliographie_history_path_identifier?>" />');
+	});
+
 	/*
 	 * Toggle the history container on clicking.
 	 */
@@ -171,9 +176,19 @@ $(function () {
 			$('#q').val($('#q').attr('placeholder'));
 	});
 
-	$.each($('form'), function (ix, element) {
-		if($(element).attr('method') == 'get')
-			$(element).append('<input type="hidden" name="from" value="<?php echo $bibliographie_history_path_identifier?>" />');
+	/**
+	 * Add "isDirty?" functionality...
+	 */
+	window.onbeforeunload = function() {
+		if(bibliographie_editor_is_dirty)
+			return 'You have unsaved changes that will be lost.\nReturn by pressing "Cancel" or accept by pressing "OK".';
+	};
+	$('form').submit(function (){
+		bibliographie_editor_is_dirty = false;
+		setTimeout('bibliographie_editor_is_dirty = true;', bibliographie_request_delay);
+	});
+	$('input, select, textarea').bind('change', function () {
+		bibliographie_editor_is_dirty = true;
 	});
 });
 				/* ]]> */

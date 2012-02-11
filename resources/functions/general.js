@@ -1,4 +1,10 @@
 var bibliographie_request_timeouts = Array();
+var bibliographie_loading = 0;
+
+var bibliographie_request_delay = 500;
+var bibliographie_ajax_timeout = null;
+
+var bibliographie_editor_is_dirty = false;
 
 function delayRequest (functionName, params) {
 	if(bibliographie_request_timeouts[functionName] != null){
