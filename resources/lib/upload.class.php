@@ -30,25 +30,7 @@ class UploadHandler
             'discard_aborted_uploads' => true,
             // Set to true to rotate images based on EXIF meta data, if available:
             'orient_image' => false,
-            'image_versions' => array(
-                // Uncomment the following version to restrict the size of
-                // uploaded images. You can also add additional versions with
-                // their own upload directories:
-                /*
-                'large' => array(
-                    'upload_dir' => dirname($_SERVER['SCRIPT_FILENAME']).'/files/',
-                    'upload_url' => $this->getFullUrl().'/files/',
-                    'max_width' => 1920,
-                    'max_height' => 1200
-                ),
-                */
-                'thumbnail' => array(
-                    'upload_dir' => dirname($_SERVER['SCRIPT_FILENAME']).'/thumbnails/',
-                    'upload_url' => $this->getFullUrl().'/thumbnails/',
-                    'max_width' => 80,
-                    'max_height' => 80
-                )
-            )
+            'image_versions' => array()
         );
         if ($options) {
             $this->options = array_replace_recursive($this->options, $options);

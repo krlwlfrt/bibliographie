@@ -10,7 +10,7 @@ switch($_GET['task']){
 	case 'registerAttachment':
 		$register = bibliographie_attachments_register($_GET['pub_id'], $_GET['name'], $_GET['location'], $_GET['type']);
 		if(is_array($register)){
-			bibliographie_attachments_parse($register['att_id']);
+			echo bibliographie_attachments_parse($register['att_id']);
 		}else
 			echo '<p class="error">An error occurred!</p>';
 		break;
@@ -20,7 +20,8 @@ switch($_GET['task']){
 			array(
 				'upload_dir' => BIBLIOGRAPHIE_ROOT_PATH.'/attachments/',
 				'script_url' => BIBLIOGRAPHIE_WEB_ROOT.'/publications/ajax.php?task=uploadAttachment',
-				'upload_url' => BIBLIOGRAPHIE_WEB_ROOT.'/attachments/'
+				'upload_url' => BIBLIOGRAPHIE_WEB_ROOT.'/attachments/',
+				'image_versions' => array()
 			)
 		);
 
