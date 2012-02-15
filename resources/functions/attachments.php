@@ -1,9 +1,9 @@
 <?php
 /**
- *
+ * Get the data of an attachment.
  * @staticvar null $attachment
- * @param type $att_id
- * @return type
+ * @param int $att_id
+ * @return mixed False on error or and object on success.
  */
 function bibliographie_attachments_get_data ($att_id) {
 	static $attachment = null;
@@ -48,8 +48,9 @@ LIMIT 1');
 }
 
 /**
- *
- * @param type $att_id
+ * Parse the data of an attachment as HTML.
+ * @param int $att_id
+ * @return string
  */
 function bibliographie_attachments_parse ($att_id) {
 	$attachment = bibliographie_attachments_get_data($att_id);
@@ -64,7 +65,7 @@ function bibliographie_attachments_parse ($att_id) {
 		if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/attachments/'.$attachment->location)){
 			$return = '<div class="bibliographie_attachment">';
 			$return .= '<div style="float: right;">';
-			$return .= bibliographie_icon_get('cross');
+			$return .= '<a href="javascript:;" onclick="bibliographie_attachments_confirm_delete('.$attachment->att_id.')">'.bibliographie_icon_get('cross').'</a>';
 			$return .= '</div>';
 			$return .= '<a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/attachments/'.$attachment->location.'">';
 			$return .= bibliographie_icon_get('disk');
@@ -91,13 +92,13 @@ function bibliographie_attachments_parse ($att_id) {
 }
 
 /**
- *
+ * Register an attachment and link it to a publication.
  * @staticvar null $registerAttachment
- * @param type $pub_id
- * @param type $name
- * @param type $location
- * @param type $type
- * @return boolean
+ * @param int $pub_id
+ * @param string $name
+ * @param string $location
+ * @param string $type
+ * @return mixed False on error or and array with attachment's data on success.
  */
 function bibliographie_attachments_register ($pub_id, $name, $location, $type, $att_id = null, $user_id = null) {
 	static $registerAttachment = null;
@@ -149,6 +150,41 @@ function bibliographie_attachments_register ($pub_id, $name, $location, $type, $
 
 			bibliographie_log('attachments', 'registerAttachment', json_encode($data));
 			$return = $data;
+		}
+	}
+
+	return $return;
+}
+
+/**
+ * Delete an attachment.
+ * @staticvar null $deleteAttachment
+ * @param int $att_id
+ * @return bool False on error or true on success.
+ */
+function bibliographie_attachments_delete ($att_id) {
+	static $deleteAttachment = null;
+
+	$return = false;
+
+	$attachment = bibliographie_attachments_get_data($att_id);
+
+	if(is_object($attachment)){
+		if($deleteAttachment === null)
+			$deleteAttachment = DB::getInstance()->prepare('DELETE FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'attachments`
+WHERE
+	`att_id` = :att_id
+LIMIT 1');
+
+		$deleteAttachment->bindParam('att_id', $attachment->att_id);
+		$return = $deleteAttachment->execute();
+
+		if($return){
+			bibliographie_cache_purge();
+			if(file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/attachments/'.$attachment->location))
+				unlink(BIBLIOGRAPHIE_ROOT_PATH.'/attachments/'.$attachment->location);
+			bibliographie_log('attachments', 'deleteAttachment', json_encode(array('dataDeleted' => $attachment)));
 		}
 	}
 

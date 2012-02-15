@@ -6,39 +6,36 @@
 		<link rel="shortcut icon" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/favicon.png" type="image/png" />
 		<link rel="icon" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/favicon.png" type="image/png" />
 
-		<!-- 3rd party libs -->
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/silk-icons.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/token-input.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/token-input-facebook.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-ui.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jgrowl.css" />
-
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jgrowl.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.tokeninput.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.highlight.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery-plugins.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.jrumble.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.blockUI.js"></script>
-		<script src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.iframe-transport.js"></script>
-		<script src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/lib/jquery.fileupload.js"></script>
-
-		<!-- bibliographie stuff -->
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/admin.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/authors.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/charmap.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/dodge.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/general.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/notes.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/maintenance.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/publications.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/search.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/tags.js"></script>
-		<script type="text/javascript" src="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/functions/topics.js"></script>
-
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/all.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/resources/css/charmap.css" />
+
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery-ui.js"></script>
+
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.tokeninput.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.blockUI.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.jgrowl.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery.highlight.js"></script>
+
+		<script type="text/javascript" src="/bibliographie/resources/lib/jquery-plugins.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/admin.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/attachments.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/authors.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/charmap.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/dodge.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/general.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/maintenance.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/notes.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/publications.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/tags.js"></script>
+		<script type="text/javascript" src="/bibliographie/resources/functions/topics.js"></script>
 	</head>
 
 	<body id="top">

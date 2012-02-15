@@ -7,17 +7,27 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 <h2>Publications</h2>
 <?php
 switch($_GET['task']){
+	case 'deleteAttachment':
+		bibliographie_history_append_step('attachments', 'Delete attachment', false);
+		echo '<h3>Delete attachment</h3>';
+		$attachment = bibliographie_attachments_get_data($_GET['att_id']);
+		if(is_object($attachment)){
+			if(bibliographie_attachments_delete($attachment->att_id))
+				echo '<p class="success">Attachment was deleted!</p>';
+			else
+				echo '<p class="error">An error occurred!</p>';
+		}else
+			echo '<p class="error">Attachment was not found!</p>';
+		break;
+
 	case 'deletePublication':
 		bibliographie_history_append_step('publications', 'Delete publication', false);
 		echo '<h3>Delete publication</h3>';
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
 		if(is_object($publication)){
-			$notes = DB::getInstance()->prepare('SELECT `pub_id`, `user_id` FROM `'.BIBLIOGRAPHIE_PREFIX.'notes` WHERE `pub_id` = :pub_id GROUP BY `user_id`');
-			$notes->execute(array(
-				'pub_id' => (int) $publication->pub_id
-			));
+			$notes = bibliographie_notes_get_notes_of_publication($publication->pub_id);
 
-			if($notes->rowCount() == 0){
+			if(count($notes) == 0){
 				if(bibliographie_publications_delete_publication($publication->pub_id))
 					echo '<p class="success">Publication was deleted!</p>';
 				else

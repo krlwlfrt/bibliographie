@@ -7,6 +7,20 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
 $title = 'An error occured!';
 $text = 'An error occurred...';
 switch($_GET['task']){
+	case 'deleteAttachmentConfirm':
+		$attachment = bibliographie_attachments_get_data($_GET['att_id']);
+
+		if(is_object($attachment)){
+			$text = 'You are about to delete the following attachment.'
+				.'<p>'.bibliographie_attachments_parse($attachment->att_id).'</p>'
+				.'If you are sure, click "delete" below!'
+				.'<p class="success"><a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/publications/?task=deleteAttachment&amp;att_id='.((int) $attachment->att_id).'">'.bibliographie_icon_get('delete').' Delete!</a></p>'
+				.'If you don\'t want to delete the attachment, press "cancel" below!';
+		}
+
+		bibliographie_dialog_create('deleteAttachmentConfirm_'.((int) $_GET['att_id']), 'Confirm delete', $text);
+	break;
+
 	case 'registerAttachment':
 		$register = bibliographie_attachments_register($_GET['pub_id'], $_GET['name'], $_GET['location'], $_GET['type']);
 		if(is_array($register)){
@@ -50,6 +64,7 @@ switch($_GET['task']){
 				header('HTTP/1.1 405 Method Not Allowed');
 		}
 		break;
+
 	case 'deletePublicationConfirm':
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
 
