@@ -954,6 +954,10 @@ if(is_array(bibliographie_publications_get_attachments($publication['pub_id'])))
 ?>
 
 </div>
+<div id="dropzone" class="fade well">
+	Drop files here to attach them to the publication!
+	<div id="fileupload-progress"></div>
+</div>
 
 <script type="text/javascript">
 	/* <![CDATA[ */
@@ -966,7 +970,94 @@ $(function () {
 		'done': function (e, data) {
 			bibliographie_publications_register_attachment(data.result[0].original_name, data.result[0].name, data.result[0].type);
 		}
-	});
+	}).on('fileuploadstart', function () {
+		var widget = $(this),
+			progressElement = $('#fileupload-progress').fadeIn(),
+			interval = 500,
+			total = 0,
+			loaded = 0,
+			loadedBefore = 0,
+			progressTimer,
+			progressHandler = function (e, data) {
+				loaded = data.loaded;
+				total = data.total;
+			},
+			stopHandler = function () {
+				widget
+				.unbind('fileuploadprogressall', progressHandler)
+				.unbind('fileuploadstop', stopHandler);
+				window.clearInterval(progressTimer);
+				progressElement.fadeOut(function () {
+					progressElement.html('');
+				});
+			},
+			formatTime = function (seconds) {
+				var date = new Date(seconds * 1000);
+				return ('0' + date.getUTCHours()).slice(-2) + ':' +
+					('0' + date.getUTCMinutes()).slice(-2) + ':' +
+					('0' + date.getUTCSeconds()).slice(-2);
+			},
+			formatBytes = function (bytes) {
+				if (bytes >= 1000000000) {
+					return (bytes / 1000000000).toFixed(2) + ' GB';
+				}
+				if (bytes >= 1000000) {
+					return (bytes / 1000000).toFixed(2) + ' MB';
+				}
+				if (bytes >= 1000) {
+					return (bytes / 1000).toFixed(2) + ' KB';
+				}
+				return bytes + ' B';
+			},
+			formatPercentage = function (floatValue) {
+				return (floatValue * 100).toFixed(2) + ' %';
+			},
+			updateProgressElement = function (loaded, total, bps) {
+				progressElement.html(
+				formatBytes(bps) + 'ps | ' +
+					formatTime((total - loaded) / bps) + ' | ' +
+					formatPercentage(loaded / total) + ' | ' +
+					formatBytes(loaded) + ' / ' + formatBytes(total)
+			);
+			},
+			intervalHandler = function () {
+				var diff = loaded - loadedBefore;
+				if (!diff) {
+					return;
+				}
+				loadedBefore = loaded;
+				updateProgressElement(
+				loaded,
+				total,
+				diff * (1000 / interval)
+			);
+			};
+			widget
+			.on('fileuploadprogressall', progressHandler)
+			.on('fileuploadstop', stopHandler);
+			progressTimer = window.setInterval(intervalHandler, interval);
+		});
+});
+
+$(document).on('dragover', function (e) {
+    var dropZone = $('#dropzone'),
+        timeout = window.dropZoneTimeout;
+    if (!timeout) {
+        dropZone.addClass('in');
+    } else {
+        clearTimeout(timeout);
+    }
+    if (e.target === dropZone[0]) {
+        dropZone.addClass('hover');
+    } else {
+        dropZone.removeClass('hover');
+    }
+    window.dropZoneTimeout = setTimeout(function () {
+        window.dropZoneTimeout = null;
+        dropZone.removeClass('in hover');
+    }, 100);
+}).on('drop dragover', function (e) {
+    e.preventDefault();
 });
 
 function bibliographie_publications_register_attachment (name, location, type) {

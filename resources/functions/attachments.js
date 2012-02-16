@@ -8,7 +8,7 @@ function bibliographie_attachments_confirm_delete (att_id) {
 		'success': function (html) {
 			$('#dialogContainer').append(html);
 			$('#deleteAttachmentConfirm_'+att_id).dialog({
-				'width': 400,
+				'width': 600,
 				'buttons': {
 					'cancel': function () {
 						$(this).dialog('close');
