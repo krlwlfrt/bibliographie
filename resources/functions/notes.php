@@ -108,36 +108,6 @@ ORDER BY
 	return $return;
 }
 
-function bibliographie_notes_get_notes_of_publication ($pub_id) {
-	static $notes = null;
-
-	$return = array();
-
-	if($notes === null)
-		$notes = DB::getInstance()->prepare('SELECT
-	`note_id`,
-	`pub_id`,
-	`user_id`,
-	`text`
-FROM
-	`'.BIBLIOGRAPHIE_PREFIX.'notes`
-WHERE
-	`pub_id` = :pub_id AND
-	`user_id` = :user_id
-ORDER BY
-	`note_id`');
-
-	$notes->execute(array(
-		'pub_id' => (int) $pub_id,
-		'user_id' => (int) bibliographie_user_get_id()
-	));
-
-	if($notes->rowCount() > 0)
-		$return = $notes->fetchAll(PDO::FETCH_OBJ);
-
-	return $return;
-}
-
 function bibliographie_notes_get_publications_from_notes (array $notes) {
 	$return = array();
 

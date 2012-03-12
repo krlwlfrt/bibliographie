@@ -94,7 +94,7 @@ switch($_GET['task']){
 
 		if(count($publicationsWithNotes) > 0){
 			foreach($publicationsWithNotes as $pub_id){
-				$notes = bibliographie_notes_get_notes_of_publication($pub_id);
+				$notes = bibliographie_publications_get_notes($pub_id);
 				foreach($notes as $note)
 					echo bibliographie_notes_print_note($note->note_id);
 			}

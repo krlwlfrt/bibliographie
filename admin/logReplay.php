@@ -182,7 +182,7 @@ if($logCount_file > $logCount_database){
 							$dataDeleted = $data->dataDeleted;
 							$publication = bibliographie_publications_get_data($dataDeleted->pub_id);
 
-							if($publication == $dataDeleted and count(bibliographie_notes_get_notes_of_publication($dataDeleted->pub_id)) == 0)
+							if($publication == $dataDeleted and count(bibliographie_publications_get_notes($dataDeleted->pub_id)) == 0)
 								$result = bibliographie_publications_delete_publication($dataDeleted->pub_id);
 							else
 								$precheck = false;

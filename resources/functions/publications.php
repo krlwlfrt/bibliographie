@@ -1797,7 +1797,7 @@ function bibliographie_publications_delete_publication ($pub_id) {
 	$return = false;
 
 	if(is_object($publication)){
-		$notes = bibliographie_notes_get_notes_of_publication($pub_id);
+		$notes = bibliographie_publications_get_notes($pub_id);
 
 		if(!($deletePublication instanceof PDOStatement))
 			$deletePublication = DB::getInstance()->prepare('DELETE FROM `'.BIBLIOGRAPHIE_PREFIX.'publication` WHERE `pub_id` = :pub_id LIMIT 1');
@@ -1816,7 +1816,7 @@ function bibliographie_publications_delete_publication ($pub_id) {
 }
 
 /**
- *
+ * Get attachments of a publication.
  * @staticvar null $attachments
  * @param type $pub_id
  * @return type
@@ -1849,6 +1849,42 @@ ORDER BY
 		if($attachments->rowCount() > 0)
 			$return = $attachments->fetchAll(PDO::FETCH_COLUMN, 0);
 	}
+
+	return $return;
+}
+
+/**
+ * Get notes of a publication.
+ * @staticvar null $notes
+ * @param type $pub_id
+ * @return type
+ */
+function bibliographie_publications_get_notes ($pub_id) {
+	static $notes = null;
+
+	$return = array();
+
+	if($notes === null)
+		$notes = DB::getInstance()->prepare('SELECT
+	`note_id`,
+	`pub_id`,
+	`user_id`,
+	`text`
+FROM
+	`'.BIBLIOGRAPHIE_PREFIX.'notes`
+WHERE
+	`pub_id` = :pub_id AND
+	`user_id` = :user_id
+ORDER BY
+	`note_id`');
+
+	$notes->execute(array(
+		'pub_id' => (int) $pub_id,
+		'user_id' => (int) bibliographie_user_get_id()
+	));
+
+	if($notes->rowCount() > 0)
+		$return = $notes->fetchAll(PDO::FETCH_OBJ);
 
 	return $return;
 }

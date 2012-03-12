@@ -109,7 +109,7 @@ $(function () {
 					$publications = array_intersect(bibliographie_publications_search_publications($_GET['q'], $expandedQuery), bibliographie_notes_get_publications_with_notes());
 					if(count($publications) > 0)
 						foreach($publications as $publication)
-							foreach(bibliographie_notes_get_notes_of_publication($publication) as $note)
+							foreach(bibliographie_publications_get_notes($publication) as $note)
 								$searchResults['notes'][] = $note;
 				}
 			}

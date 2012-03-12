@@ -38,7 +38,7 @@ class RISParser {
 
 						if($key == 'TY')
 							$reference['pub_type'] = $value;
-						elseif(in_array($key, array('AU', 'A2', 'A3', 'A4'))){
+						elseif(in_array($key, array('AU', 'A1', 'A2', 'A3', 'A4'))){
 							$value = explode(',', $value);
 							$reference['author'][] = array (
 								'last' => $value[0],
@@ -90,9 +90,17 @@ class RISParser {
 	 * @return mixed Returns data on successful parsing or false otherwise.
 	 */
 	function data () {
-		//if(!is_array($this->data))
-		//	return false;
+		if(!is_array($this->data))
+			return false;
 
 		return $this->data;
+	}
+
+	function set ($data) {
+		$this->data = $data;
+	}
+
+	function export () {
+
 	}
 }

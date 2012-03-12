@@ -25,7 +25,7 @@ switch($_GET['task']){
 		echo '<h3>Delete publication</h3>';
 		$publication = bibliographie_publications_get_data($_GET['pub_id']);
 		if(is_object($publication)){
-			$notes = bibliographie_notes_get_notes_of_publication($publication->pub_id);
+			$notes = bibliographie_publications_get_notes($publication->pub_id);
 
 			if(count($notes) == 0){
 				if(bibliographie_publications_delete_publication($publication->pub_id))
@@ -928,7 +928,7 @@ $(function() {
 </table>
 
 <?php
-$notes = bibliographie_notes_get_notes_of_publication($publication['pub_id']);
+$notes = bibliographie_publications_get_notes($publication['pub_id']);
 if(count($notes) > 0){
 	echo '<h3>Notes</h3>';
 	foreach($notes as $note)
@@ -941,7 +941,7 @@ if(count($notes) > 0){
 		<label for="fileupload">Add files</label>
 		<input id="fileupload" type="file" name="files[]" multiple="multiple" />
 	</div>
-	This is a list of attached files. You can add new files by using the form on the right side.
+	This is a list of attached files. You can add new files by using the form on the right side or simply dropping them into the dropzone.
 <div id="attachments">
 <?php
 if(is_array(bibliographie_publications_get_attachments($publication['pub_id']))){
