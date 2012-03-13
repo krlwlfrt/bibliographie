@@ -576,6 +576,9 @@ $(function () {
 						else
 							$_POST['editor'] = '';
 
+						if(is_array($_POST['tags']))
+							$_POST['tags'] = array2csv($_POST['tags']);
+
 						$usingFetchedData = true;
 					}else{
 						echo '<p class="error">There was an error with the prefetched authors!</p>';

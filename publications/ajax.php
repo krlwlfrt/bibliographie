@@ -477,17 +477,13 @@ WHERE
 				$ris = new \LibRIS\RISReader();
 				$ris->parseString(str_replace("\n", "\r\n", $_POST['risInput']));
 				$risTranslator = new \bibliographie\RISTranslator();
-				$bibtex = $risTranslator->ris2bibtex($ris->getRecords());
-				echo '<pre>',
-					print_r($bibtex, true),
-					'</pre>';
-				/*$_SESSION['publication_prefetchedData_unchecked'] = $ris->data();
+				$_SESSION['publication_prefetchedData_unchecked'] = $risTranslator->ris2bibtex($ris->getRecords());
 ?>
 
 <p class="success">Parsing of your input was successful!</p>
-<p>You can now proceed and check your fetched entries!</p>
+<p>Your input contained <strong><?php echo count($_SESSION['publication_prefetchedData_unchecked'])?> entries</strong>. You can now proceed and check your fetched entries!</p>
 <div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
-<?php*/
+<?php
 			}
 		}
 	break;

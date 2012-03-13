@@ -64,12 +64,22 @@ class RISTranslator {
 		$result = array();
 
 		foreach($data as $i => $entry){
+			$result[$i] = array(
+				'editor' => array(),
+				'author' => array(),
+				'tags' => array()
+			);
 			foreach($this->allocations as $bibtex => $allocation){
 				if(is_array($allocation)){
 					foreach($allocation as $possibility){
 						if(!empty($entry[$possibility])){
 							if($bibtex == 'author')
-								$result[$i][$bibtex][] = $entry[$possibility][0];
+								$result[$i][$bibtex][] = array (
+									'last' => $entry[$possibility][0],
+									'first' => '',
+									'jr' => '',
+									'von' => ''
+								);
 							else
 								$result[$i][$bibtex] .= $entry[$possibility][0].PHP_EOL;
 						}
@@ -79,6 +89,8 @@ class RISTranslator {
 					$result[$i][$bibtex] = $entry[$allocation][0];
 				}
 			}
+			if(!empty($result[$i]['start_page']) and !empty($result[$i]['end_page']))
+				$result[$i]['pages'] = $result[$i]['start_page'].'-'.$result[$i]['end_page'];
 		}
 
 		return $result;
