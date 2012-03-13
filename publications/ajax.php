@@ -465,17 +465,32 @@ WHERE
 <?php
 				}
 			}
-		}elseif($_POST['source'] == 'ris'){
+		}elseif($_POST['source'] == 'risInput' or $_POST['source'] == 'risRemote'){
 			if($_POST['step'] == '1'){
+				if($_POST['source'] == 'risInput'){
 ?>
 
 <label for="risInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input RIS!</label>
 <textarea id="risInput" name="risInput" rows="20" cols="20" style="width: 100%;"></textarea>
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'ris', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'risInput', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
 <?php
+				}else{
+?>
+
+<label for="risInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to RIS!</label>
+<input type="text" id="risInput" name="risInput" style="width: 100%;" />
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'risRemote', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
+<?php
+				}
 			}elseif($_POST['step'] == '2'){
 				$ris = new \LibRIS\RISReader();
-				$ris->parseString(str_replace("\n", "\r\n", $_POST['risInput']));
+
+				$content = $_POST['risInput'];
+				if($_POST['source'] == 'risRemote')
+					$content = file_get_contents($_POST['risInput']);
+
+				$ris->parseString(str_replace("\n", "\r\n", $content));
+
 				$risTranslator = new \bibliographie\RISTranslator();
 				$_SESSION['publication_prefetchedData_unchecked'] = $risTranslator->ris2bibtex($ris->getRecords());
 ?>
