@@ -419,6 +419,10 @@ require dirname(__FILE__).'/topics.php';
 require dirname(__FILE__).'/../lib/BibTex.php';
 require dirname(__FILE__).'/../lib/upload.class.php';
 
+require dirname(__FILE__).'/../lib/LibRIS/RISReader.php';
+require dirname(__FILE__).'/../lib/LibRIS/RISWriter.php';
+require dirname(__FILE__).'/../lib/LibRIS/RISTags.php';
+
 /**
  * Set error and exception handling for uncaught errors and exceptions.
  */

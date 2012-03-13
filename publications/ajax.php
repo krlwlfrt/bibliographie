@@ -474,15 +474,20 @@ WHERE
 <button onclick="bibliographie_publications_fetch_data_proceed({'source': 'ris', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
 <?php
 			}elseif($_POST['step'] == '2'){
-				$ris = new RISParser($_POST['risInput']);
-				$ris->parse();
-				$_SESSION['publication_prefetchedData_unchecked'] = $ris->data();
+				$ris = new \LibRIS\RISReader();
+				$ris->parseString(str_replace("\n", "\r\n", $_POST['risInput']));
+				$risTranslator = new \bibliographie\RISTranslator();
+				$bibtex = $risTranslator->ris2bibtex($ris->getRecords());
+				echo '<pre>',
+					print_r($bibtex, true),
+					'</pre>';
+				/*$_SESSION['publication_prefetchedData_unchecked'] = $ris->data();
 ?>
 
 <p class="success">Parsing of your input was successful!</p>
 <p>You can now proceed and check your fetched entries!</p>
 <div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
-<?php
+<?php*/
 			}
 		}
 	break;

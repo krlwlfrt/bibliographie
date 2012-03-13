@@ -79,7 +79,7 @@ class RISReader {
    * @param StreamContext $context
    *  The stream context (in desired) for handling the file.
    * @retval array
-   *  An indexed array of individual sources, each of which is an 
+   *  An indexed array of individual sources, each of which is an
    *  associative array of entry details. (See LibRIS)
    */
   public function parseFile($filename, $context = NULL) {
@@ -102,7 +102,7 @@ class RISReader {
    * @param StreamContext $context
    *  The stream context (in desired) for handling the file.
    * @retval array
-   *  An indexed array of individual sources, each of which is an 
+   *  An indexed array of individual sources, each of which is an
    *  associative array of entry details. (See {@link LibRIS})
    */
   public function parseString($string) {

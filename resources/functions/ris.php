@@ -1,106 +1,87 @@
 <?php
-class RISParser {
-	private
-		$content,
-		$data;
 
-	/**
-	 * Create a new RISParser with some RIS content.
-	 * @param string $content
-	 */
-	function __construct ($content = '') {
-		$this->content = $content;
+namespace bibliographie;
+
+class RISTranslator {
+
+	private $allocations = array (
+		'pub_type' => 'TY',
+		'bibtex_id' => 'ID',
+		'title' => array (
+			'T1',
+			'TI',
+			'CT',
+			'T2'
+		),
+		'author' => array (
+			'A1',
+			'A2',
+			'AU'
+		),
+		'ris_date' => 'Y1',
+		'year' => 'PY',
+		'note' => array (
+			'N1',
+			'L1',
+			'L2',
+			'L3',
+			'L4'
+		),
+		'tags' => 'KW',
+		'start_page' => 'SP',
+		'end_page' => 'EP',
+		'journal' => array (
+			'JF',
+			'JO',
+			'JA',
+			'J1',
+			'J2'
+		),
+		'volume' => 'VL',
+		'number' => 'IS',
+		'location' => 'CY',
+		'publisher' => 'PB',
+		'series' => 'T3',
+		'abstract' => 'N2',
+		'isbn' => 'SN',
+		'location' => 'AD',
+		'url' => 'UR'
+	);
+
+	public function bibtex2ris (array $data) {
+		$result = array();
+
+		foreach($data as $key => $content)
+			if(is_array($this->allocations[$key]))
+				$result[$this->allocations[$key][0]] = $content;
+			else
+				$result[$this->allocations[$key]] = $content;
+
+		return $result;
 	}
 
-	/**
-	 * Parses given content.
-	 */
-	function parse () {
-		if(!empty($this->content)){
-			$references = array();
-			preg_match_all('~TY\s+\-.*?ER\s+-~is', $this->content, $references, PREG_SET_ORDER);
+	public function ris2bibtex (array $data) {
+		$result = array();
 
-			if(count($references) == 0)
-				return false;
-
-			foreach($references as $reference){
-				$pages = array();
-
-				preg_match_all('~([A-Z0-9]{2})\s+\-\s+(.*)~', $reference[0], $tags, PREG_SET_ORDER);
-				$reference = array(
-					'author' => array(),
-					'editor' => array()
-				);
-
-				foreach($tags as $tag){
-					if(count($tag) == 3){
-						list($line, $key, $value) = $tag;
-
-						if($key == 'TY')
-							$reference['pub_type'] = $value;
-						elseif(in_array($key, array('AU', 'A1', 'A2', 'A3', 'A4'))){
-							$value = explode(',', $value);
-							$reference['author'][] = array (
-								'last' => $value[0],
-								'von' => '',
-								'first' => $value[1],
-								'jr' => ''
-							);
-						}elseif($key == 'AB')
-							$reference['abstract'] = $value;
-						elseif($key == 'CY')
-							$reference['location'] = $value;
-						elseif($key == 'PY')
-							$reference['year'] = $value;
-						elseif($key == 'DO')
-							$reference['doi'] = $value;
-						elseif($key == 'ET')
-							$reference['edition'] = $value;
-						elseif($key == 'N1')
-							$reference['note'] = $value;
-						elseif($key == 'PB')
-							$reference['publisher'] = $value;
-						elseif($key == 'SN'){
-							$reference['isbn'] = $value;
-							$reference['issn'] = $value;
-						}elseif($key == 'TI')
-							$reference['title'] = $value;
-						elseif($key == 'UR')
-							$reference['url'] = $value;
-						elseif($key == 'VL')
-							$reference['volume'] = $value;
-						elseif($key == 'EP')
-							$pages[1] = $value;
-						elseif($key == 'SP')
-							$pages[0] = $value;
-						elseif($key == 'JO')
-							$reference['journal'] = $value;
+		foreach($data as $i => $entry){
+			foreach($this->allocations as $bibtex => $allocation){
+				if(is_array($allocation)){
+					foreach($allocation as $possibility){
+						if(!empty($entry[$possibility])){
+							if($bibtex == 'author')
+								$result[$i][$bibtex][] = $entry[$possibility][0];
+							else
+								$result[$i][$bibtex] .= $entry[$possibility][0].PHP_EOL;
+						}
 					}
-				}
-				if(count($pages) == 2)
-					$reference['pages'] = $pages[0].'-'.$pages[1];
 
-				$this->data[] = $reference;
+				}elseif(!empty($entry[$allocation])){
+					$result[$i][$bibtex] = $entry[$allocation][0];
+				}
 			}
 		}
+
+		return $result;
 	}
 
-	/**
-	 * Give the parsed data.
-	 * @return mixed Returns data on successful parsing or false otherwise.
-	 */
-	function data () {
-		if(!is_array($this->data))
-			return false;
-
-		return $this->data;
-	}
-
-	function set ($data) {
-		$this->data = $data;
-	}
-
-	function export () {
-
-	}
 }
