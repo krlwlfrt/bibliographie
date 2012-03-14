@@ -245,6 +245,16 @@ function bibliographie_publications_export (exportList, exportTarget, exportStyl
 					$(this).remove();
 				}
 			});
+
+			$('#bibliographie_export_'+exportList+'_copy').zclip({
+				path: bibliographie_web_root+'/resources/lib/zClip/ZeroClipboard.swf',
+				copy: $('#bibliographie_export_'+exportList+'_result').text(),
+				afterCopy: function () {
+					$.jGrowl('Export result copied to clipboard!');
+				}
+			}).on('click', function () {
+				$('#bibliographie_export_'+exportList).dialog('close');
+			});
 		}
 	})
 }

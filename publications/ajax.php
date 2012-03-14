@@ -108,11 +108,9 @@ switch($_GET['task']){
 
 		if(is_array($publications) and count($publications) > 0){
 			if(in_array($_GET['target'], array('html', 'text'))){
-				bibliographie_dialog_create(
-					'bibliographie_export_'.$_GET['exportList'],
-					'Exported publications',
-					'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.bibliographie_publications_parse_list($publications, $_GET['target']).'</pre>'
-				);
+				$text = bibliographie_publications_parse_list($publications, $_GET['target']);
+
+
 			}else{
 				$publications = array2csv($publications);
 
@@ -185,19 +183,15 @@ WHERE
 						}
 
 						if($_GET['target'] == 'bibTex'){
-							bibliographie_dialog_create(
-								'bibliographie_export_'.$_GET['exportList'],
-								'Exported publications',
-								'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.$bibtex->bibtex().'</pre>'
-							);
+							$text = $bibtex->bibtex();
+
+
 						}elseif($_GET['target'] == 'ris'){
 							$risTranslator = new \bibliographie\RISTranslator();
 							$risWriter = new \LibRIS\RISWriter();
-							bibliographie_dialog_create(
-								'bibliographie_export_'.$_GET['exportList'],
-								'Exported publications',
-								'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.$risWriter->writeRecords($risTranslator->bibtex2ris($bibtex->data)).'</pre>'
-							);
+							$text = $risWriter->writeRecords($risTranslator->bibtex2ris($bibtex->data));
+
+
 						}elseif($_GET['target'] == 'rtf'){
 							$rtf = $bibtex->rtf();
 							$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');
@@ -208,6 +202,13 @@ WHERE
 					}
 				}
 			}
+
+			bibliographie_dialog_create(
+				'bibliographie_export_'.$_GET['exportList'],
+				'Export result',
+				'<a id="bibliographie_export_'.$_GET['exportList'].'_copy" href="javascript:;">'.bibliographie_icon_get('briefcase').' Copy to clipboard and close dialog.</a>
+<pre id="bibliographie_export_'.$_GET['exportList'].'_result" class="bibliographie_export_result">'.$text.'</pre>'
+			);
 		}
 	break;
 
