@@ -51,11 +51,30 @@ class RISTranslator {
 	public function bibtex2ris (array $data) {
 		$result = array();
 
-		foreach($data as $key => $content)
-			if(is_array($this->allocations[$key]))
-				$result[$this->allocations[$key][0]] = $content;
-			else
-				$result[$this->allocations[$key]] = $content;
+		foreach($data as $i => $entry){
+			$entry['pub_type'] = $entry['entryType'];
+			$entry['bibtex_id'] = $entry['cite'];
+			unset($entry['entryType'], $entry['cite']);
+
+			foreach($entry as $key => $content){
+				$dummy = array();
+
+				if(is_array($content)){
+					if($key == 'author')
+						foreach($content as $author){
+							$dummy[] = $author['last'].', '.$author['first'];
+						}
+
+				}else{
+					$dummy[] = $content;
+				}
+
+				if(is_array($this->allocations[$key]))
+					$result[$i][$this->allocations[$key][0]] = $dummy;
+				else
+					$result[$i][$this->allocations[$key]] = $dummy;
+			}
+		}
 
 		return $result;
 	}
@@ -71,17 +90,18 @@ class RISTranslator {
 			);
 			foreach($this->allocations as $bibtex => $allocation){
 				if(is_array($allocation)){
-					foreach($allocation as $possibility){
-						if(!empty($entry[$possibility])){
-							if($bibtex == 'author')
-								$result[$i][$bibtex][] = array (
-									'last' => $entry[$possibility][0],
-									'first' => '',
-									'jr' => '',
-									'von' => ''
-								);
-							else
-								$result[$i][$bibtex] .= $entry[$possibility][0].PHP_EOL;
+					foreach($allocation as $risTag){
+						if(!empty($entry[$risTag])){
+							foreach($entry[$risTag] as $row)
+								if($bibtex == 'author')
+									$result[$i][$bibtex][] = array (
+										'last' => $row,
+										'first' => '',
+										'jr' => '',
+										'von' => ''
+									);
+								else
+									$result[$i][$bibtex] .= $row.PHP_EOL;
 						}
 					}
 

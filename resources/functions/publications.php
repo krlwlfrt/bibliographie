@@ -463,7 +463,7 @@ function bibliographie_publications_parse_list (array $publications, $type = 'ht
 			$return .= bibliographie_publications_parse_data($publication, 'standard', $options).PHP_EOL.PHP_EOL;
 	}
 
-	return nl2br(htmlspecialchars($return));
+	return htmlspecialchars($return);
 }
 
 /**

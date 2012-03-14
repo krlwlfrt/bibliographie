@@ -89,6 +89,7 @@ switch($_GET['task']){
 <label for="exportTarget" class="block">Format</label>
 <select id="exportTarget" name="exportTarget" style="width: 100%">
 	<option value="bibTex">BibTeX</option>
+	<option value="ris">RIS</option>
 	<option value="rtf">RTF</option>
 	<option value="html">HTML</option>
 	<option value="text">Text</option>
@@ -107,7 +108,11 @@ switch($_GET['task']){
 
 		if(is_array($publications) and count($publications) > 0){
 			if(in_array($_GET['target'], array('html', 'text'))){
-				bibliographie_dialog_create('bibliographie_export_'.$_GET['exportList'], 'Exported publications', '<div style="font: size: 15px; max-height: 600px; overflow-y: scroll;">'.bibliographie_publications_parse_list($publications, $_GET['target']).'</div>');
+				bibliographie_dialog_create(
+					'bibliographie_export_'.$_GET['exportList'],
+					'Exported publications',
+					'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.bibliographie_publications_parse_list($publications, $_GET['target']).'</pre>'
+				);
 			}else{
 				$publications = array2csv($publications);
 
@@ -143,7 +148,7 @@ WHERE
 				$result->execute();
 
 				if($result->rowCount() > 0){
-					if(in_array($_GET['target'], array('bibTex', 'rtf'))){
+					if(in_array($_GET['target'], array('bibTex', 'rtf', 'ris'))){
 						$bibtex = new Structures_BibTex(array(
 							'stripDelimiter' => true,
 							'validate' => true,
@@ -176,12 +181,23 @@ WHERE
 							foreach($publication as $key => $field)
 								if(!empty($field))
 									$_publication[$key] = $field;
-
 							$bibtex->data[] = $_publication;
 						}
 
 						if($_GET['target'] == 'bibTex'){
-							bibliographie_dialog_create('bibliographie_export_'.$_GET['exportList'], 'Exported publications', '<div style="font: size: 15px; max-height: 600px; overflow-y: scroll;">'.nl2br($bibtex->bibtex()).'</div>');
+							bibliographie_dialog_create(
+								'bibliographie_export_'.$_GET['exportList'],
+								'Exported publications',
+								'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.$bibtex->bibtex().'</pre>'
+							);
+						}elseif($_GET['target'] == 'ris'){
+							$risTranslator = new \bibliographie\RISTranslator();
+							$risWriter = new \LibRIS\RISWriter();
+							bibliographie_dialog_create(
+								'bibliographie_export_'.$_GET['exportList'],
+								'Exported publications',
+								'<pre style="font-size: 15px; max-height: 600px; overflow-y: scroll;">'.$risWriter->writeRecords($risTranslator->bibtex2ris($bibtex->data)).'</pre>'
+							);
 						}elseif($_GET['target'] == 'rtf'){
 							$rtf = $bibtex->rtf();
 							$file = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/cache/export_'.md5($rtf).'.rtf', 'w+');
@@ -490,8 +506,13 @@ WHERE
 					$content = file_get_contents($_POST['risInput']);
 
 				$ris->parseString(str_replace("\n", "\r\n", $content));
-
 				$risTranslator = new \bibliographie\RISTranslator();
+
+				echo '<pre>',
+					print_r($ris->getRecords(), true),
+					print_r($risTranslator->ris2bibtex($ris->getRecords()), true),
+					'</pre>';
+
 				$_SESSION['publication_prefetchedData_unchecked'] = $risTranslator->ris2bibtex($ris->getRecords());
 ?>
 
