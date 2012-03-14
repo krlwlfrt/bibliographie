@@ -266,14 +266,14 @@ WHERE
 				if($_POST['source'] == 'direct'){
 ?>
 
-<label for="direct" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input text containing BibTeX!</label>
+<label for="direct" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input text containing bibliographic information</label>
 <textarea id="direct" name="direct" rows="20" cols="20" style="width: 100%;"></textarea>
 <button onclick="bibliographie_publications_fetch_data_proceed({'source': 'direct', 'step': '2', 'direct': $('#direct').val()})">Parse!</button>
 <?php
 				}else{
 ?>
 
-<label for="remote" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containg BibTeX</label>
+<label for="remote" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containing bibliographic information</label>
 <input id="remote" name="remote" style="width: 100%" />
 <button onclick="bibliographie_publications_fetch_data_proceed({'source': 'remote', 'step': '2', 'remote': $('#remote').val()})">Parse!</button>
 <?php
