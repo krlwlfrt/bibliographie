@@ -136,9 +136,11 @@ class RISTranslator {
 		foreach($data as $i => $entry){
 			$entry['pub_type'] = $this->bibtexType2risType($entry['entryType']);
 			$entry['bibtex_id'] = $entry['cite'];
-			$entry['pages'] = explode('-', $entry['pages']);
-			$entry['start_page'] = $entry['pages'][0];
-			$entry['end_page'] = $entry['pages'][1];
+			if(!empty($entry['pages'])){
+				$entry['pages'] = explode('-', $entry['pages']);
+				$entry['start_page'] = $entry['pages'][0];
+				$entry['end_page'] = $entry['pages'][1];
+			}
 			unset($entry['entryType'], $entry['cite'], $entry['pages']);
 
 			foreach($entry as $key => $content){
