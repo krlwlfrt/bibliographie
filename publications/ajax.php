@@ -261,64 +261,76 @@ WHERE
 	break;
 
 	case 'fetchData_proceed':
-		if($_POST['source'] == 'bibtexInput' or $_POST['source'] == 'bibtexRemote'){
+		if($_POST['source'] == 'direct' or $_POST['source'] == 'remote'){
 			if($_POST['step'] == '1'){
-				if($_POST['source'] == 'bibtexInput'){
+				if($_POST['source'] == 'direct'){
 ?>
 
-<label for="bibtexInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input text containing BibTeX!</label>
-<textarea id="bibtexInput" name="bibtexInput" rows="20" cols="20" style="width: 100%;"></textarea>
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse!</button>
+<label for="direct" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input text containing BibTeX!</label>
+<textarea id="direct" name="direct" rows="20" cols="20" style="width: 100%;"></textarea>
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'direct', 'step': '2', 'direct': $('#direct').val()})">Parse!</button>
 <?php
 				}else{
 ?>
 
-<label for="bibtexInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containg BibTeX</label>
-<input id="bibtexInput" name="bibtexInput" style="width: 100%" />
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexRemote', 'step': '2', 'bibtexInput': $('#bibtexInput').val()})">Parse!</button>
+<label for="remote" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to text containg BibTeX</label>
+<input id="remote" name="remote" style="width: 100%" />
+<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'remote', 'step': '2', 'remote': $('#remote').val()})">Parse!</button>
 <?php
 				}
 			}elseif($_POST['step'] == '2'){
-				if(empty($_POST['bibtexInput'])){
+				if($_POST['source'] == 'direct' and empty($_POST['direct'])){
 ?>
 
-<p class="error">Your input was empty! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '1'})">start again</a>!</p>
+<p class="error">Your input was empty! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'direct', 'step': '1'})">start again</a>!</p>
 <?php
 					break;
+				}elseif($_POST['source'] == 'remote' and !is_url($_POST['remote'])){
+?>
+
+<p class="error">You did not provide a proper url. Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'direct', 'step': '1'})">start again</a>!</p>
+<?php
 				}
 
-				/**
-				 * Create new instance of parser.
-				 */
 				$bibtex = new Structures_BibTex(array(
 					'stripDelimiter' => true,
 					'validate' => true,
 					'unwrap' => true,
 					'extractAuthors' => true
 				));
-				if($_POST['source'] == 'bibtexInput')
-					$bibtex->loadContent(strip_tags($_POST['bibtexInput']));
-				else
-					$bibtex->loadContent(strip_tags(file_get_contents($_POST['bibtexInput'])));
+				$ris = new \LibRIS\RisReader();
+				$risTranslator = new \bibliographie\RISTranslator();
 
-				if($bibtex->parse() and count($bibtex->data) > 0){
+				$input = (string) '';
+				if($_POST['source'] == 'direct')
+					$input = strip_tags($_POST['direct']);
+				else
+					$input = strip_tags(file_get_contents($_POST['remote']));
+
+				$bibtex->loadContent($input);
+				$bibtex->parse();
+				$ris->parseString(str_replace("\n", \LibRIS\RISReader::RIS_EOL, $input));
+
+				if(count($bibtex->data) > 0 or count($ris->getRecords()) > 0){
 					foreach($bibtex->data as $key => $row){
 						$bibtex->data[$key]['pub_type'] = $row['entryType'];
 						$bibtex->data[$key]['bibtex_id'] = $row['cite'];
 						$bibtex->data[$key]['note'] = 'Imported from '.$_POST['source'].'...';
 					}
 
-					$_SESSION['publication_prefetchedData_unchecked'] = $bibtex->data;
+					$result = array_merge($bibtex->data, $risTranslator->ris2bibtex($ris->getRecords()));
+
+					$_SESSION['publication_prefetchedData_unchecked'] = $result;
 ?>
 
 <p class="success">Parsing of your input was successful!</p>
-<p>Your input contained <strong><?php echo count($bibtex->data)?></strong> entries. You can now proceed and check your fetched entries!</p>
+<p>Your input contained <strong><?php echo count($result)?></strong> entries. You can now proceed and check your fetched entries!</p>
 <div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
 <?php
 				}else{
 ?>
 
-<p class="error">There was an error while parsing! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '1'})">start again</a>!</p>
+<p class="error">There was an error while parsing! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': <?php echo $_GET['source']?>, 'step': '1'})">start again</a>!</p>
 <?php
 				}
 			}
@@ -481,41 +493,6 @@ WHERE
 <p class="error">Your PubMed query was empty! Please <a href="javascript:;" onclick="bibliographie_publications_fetch_data_proceed({'source': 'pubmed', 'step': '1'})">start again</a>!</p>
 <?php
 				}
-			}
-		}elseif($_POST['source'] == 'risInput' or $_POST['source'] == 'risRemote'){
-			if($_POST['step'] == '1'){
-				if($_POST['source'] == 'risInput'){
-?>
-
-<label for="risInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input RIS!</label>
-<textarea id="risInput" name="risInput" rows="20" cols="20" style="width: 100%;"></textarea>
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'risInput', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
-<?php
-				}else{
-?>
-
-<label for="risInput" class="block"><?php echo bibliographie_icon_get('page-white-code')?> Input URL to RIS!</label>
-<input type="text" id="risInput" name="risInput" style="width: 100%;" />
-<button onclick="bibliographie_publications_fetch_data_proceed({'source': 'risRemote', 'step': '2', 'risInput': $('#risInput').val()})">Parse!</button>
-<?php
-				}
-			}elseif($_POST['step'] == '2'){
-				$ris = new \LibRIS\RISReader();
-
-				$content = $_POST['risInput'];
-				if($_POST['source'] == 'risRemote')
-					$content = file_get_contents($_POST['risInput']);
-
-				$ris->parseString(str_replace("\n", \LibRIS\RisReader::RIS_EOL, $content));
-				$risTranslator = new \bibliographie\RISTranslator();
-
-				$_SESSION['publication_prefetchedData_unchecked'] = $risTranslator->ris2bibtex($ris->getRecords());
-?>
-
-<p class="success">Parsing of your input was successful!</p>
-<p>Your input contained <strong><?php echo count($_SESSION['publication_prefetchedData_unchecked'])?> entries</strong>. You can now proceed and check your fetched entries!</p>
-<div class="submit"><button onclick="window.location = '<?php echo BIBLIOGRAPHIE_WEB_ROOT?>/publications/?task=checkData';">Check fetched data</button></div>
-<?php
 			}
 		}
 	break;

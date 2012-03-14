@@ -450,10 +450,8 @@ $(function () {
 <div id="fetchData_sourceSelect">
 	<label for="source" class="block"><?php echo bibliographie_icon_get('page-white-get')?> Select the source of which you want to import from!</label>
 	<select id="source" name="source" style="width: 50%;">
-		<option value="bibtexInput">BibTex direct input</option>
-		<option value="bibtexRemote">BibTex remote file</option>
-		<option value="risInput">RIS direct input</option>
-		<option value="risRemote">RIS remote file</option>
+		<option value="direct">Direct input</option>
+		<option value="remote">Remote file</option>
 		<option value="pubmed">PubMed</option>
 <?php
 		if(BIBLIOGRAPHIE_ISBNDB_KEY != '')
@@ -471,7 +469,7 @@ $('#source').on('change select', function () {
 	bibliographie_publications_fetch_data_proceed({'source': $('#source').val(), 'step': '1'})
 });
 $(function () {
-	bibliographie_publications_fetch_data_proceed({'source': 'bibtexInput', 'step': '1'});
+	bibliographie_publications_fetch_data_proceed({'source': 'direct', 'step': '1'});
 })
 	/* ]]> */
 </script>
