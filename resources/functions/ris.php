@@ -4,7 +4,7 @@ namespace bibliographie;
 
 class RISTranslator {
 
-	private $allocations = array (
+	private $tagAllocations = array (
 		'pub_type' => 'TY',
 		'bibtex_id' => 'ID',
 		'title' => array (
@@ -46,13 +46,95 @@ class RISTranslator {
 		'isbn' => 'SN',
 		'location' => 'AD',
 		'url' => 'UR'
+	),
+	$typeAllocations = array (
+		'Misc' => array (
+			'GEN',
+			'ABST',
+			'ADVS',
+			'ART',
+			'CASE',
+			'COMP',
+			'CTLG',
+			'DATA',
+			'ELEC',
+			'HEAR',
+			'ICOMM',
+			'JFULL',
+			'JOUR',
+			'MAP',
+			'MPCT',
+			'MUSIC',
+			'NEWS',
+			'PAMP',
+			'PAT',
+			'PCOMM',
+			'SLIDE',
+			'SOUND',
+			'STAT'
+		),
+		'Article' => array (
+			'MGZN'
+		),
+		'Book' => array (
+			'BOOK'
+		),
+		'Booklet' => array (
+			'GEN'
+		),
+		'Conference' => array (
+			'GEN'
+		),
+		'Inbook' => array (
+			'CHAP'
+		),
+		'Incollection' => array (
+			'SER'
+		),
+		'Inproceedings' => array (
+			'INPR',
+		),
+		'Manual' => array (
+			'GEN'
+		),
+		'Masterthesis' => array (
+			'THES'
+		),
+		'Phdthesis' => array (
+			'THES'
+		),
+		'Proceedings' => array (
+			'CONF'
+		),
+		'Techreport' => array (
+			'RPRT',
+		),
+		'Unpublished' => array (
+			'UNPB'
+		)
 	);
+
+	private function bibtexType2risType ($type) {
+		if(isset($this->typeAllocations[ucfirst($type)][0]))
+			return $this->typeAllocations[ucfirst($type)][0];
+
+		return 'Misc';
+	}
+
+	private function risType2bibtexType ($type) {
+		foreach($this->typeAllocations as $bibtexType => $risTypes)
+			foreach($risTypes as $risType)
+				if($risType == $type)
+					return $bibtexType;
+
+		return 'GEN';
+	}
 
 	public function bibtex2ris (array $data) {
 		$result = array();
 
 		foreach($data as $i => $entry){
-			$entry['pub_type'] = $entry['entryType'];
+			$entry['pub_type'] = $this->bibtexType2risType($entry['entryType']);
 			$entry['bibtex_id'] = $entry['cite'];
 			unset($entry['entryType'], $entry['cite']);
 
@@ -69,10 +151,10 @@ class RISTranslator {
 					$dummy[] = $content;
 				}
 
-				if(is_array($this->allocations[$key]))
-					$result[$i][$this->allocations[$key][0]] = $dummy;
+				if(is_array($this->tagAllocations[$key]))
+					$result[$i][$this->tagAllocations[$key][0]] = $dummy;
 				else
-					$result[$i][$this->allocations[$key]] = $dummy;
+					$result[$i][$this->tagAllocations[$key]] = $dummy;
 			}
 		}
 
@@ -88,18 +170,20 @@ class RISTranslator {
 				'author' => array(),
 				'tags' => array()
 			);
-			foreach($this->allocations as $bibtex => $allocation){
+			foreach($this->tagAllocations as $bibtex => $allocation){
 				if(is_array($allocation)){
 					foreach($allocation as $risTag){
 						if(!empty($entry[$risTag])){
 							foreach($entry[$risTag] as $row)
-								if($bibtex == 'author')
+								if($bibtex == 'author'){
+									$row = explode(', ', $row);
 									$result[$i][$bibtex][] = array (
-										'last' => $row,
-										'first' => '',
+										'last' => $row[0],
+										'first' => $row[1],
 										'jr' => '',
 										'von' => ''
 									);
+								}
 								else
 									$result[$i][$bibtex] .= $row.PHP_EOL;
 						}
@@ -109,8 +193,11 @@ class RISTranslator {
 					$result[$i][$bibtex] = $entry[$allocation][0];
 				}
 			}
+
 			if(!empty($result[$i]['start_page']) and !empty($result[$i]['end_page']))
 				$result[$i]['pages'] = $result[$i]['start_page'].'-'.$result[$i]['end_page'];
+
+			$result[$i]['pub_type'] = $this->risType2bibtexType($result[$i]['pub_type']);
 		}
 
 		return $result;
