@@ -145,7 +145,9 @@ function bibliographie_publications_check_title (title) {
 				var str = '';
 
 				str += '<em style="float: right"><a href="javascript:;" onclick="$(\'#similarTitleContainer .bibliographie_similarity_list_container\').toggle(\'fast\');">Click to toggle!</a></em>';
-				str += '<span class="silk-icon silk-icon-exclamation"></span> Found at least <strong>'+json.results.length+'</strong> similar titles';
+				str += '<span class="silk-icon silk-icon-error"></span> Found at least <strong>'+json.results.length+'</strong> similar titles';
+				if(json.exact_match == true)
+					str += ' <span class="silk-icon silk-icon-exclamation"> </span> <span class="notice">Be careful! An exact match has been found!</span>';
 				str += '<div class="bibliographie_similarity_list_container">';
 
 				$.each(json.results, function (key, value) {

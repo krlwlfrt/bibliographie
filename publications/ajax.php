@@ -505,13 +505,8 @@ WHERE
 				if($_POST['source'] == 'risRemote')
 					$content = file_get_contents($_POST['risInput']);
 
-				$ris->parseString(str_replace("\n", "\r\n", $content));
+				$ris->parseString(str_replace("\n", \LibRIS\RisReader::RIS_EOL, $content));
 				$risTranslator = new \bibliographie\RISTranslator();
-
-				echo '<pre>',
-					print_r($ris->getRecords(), true),
-					print_r($risTranslator->ris2bibtex($ris->getRecords()), true),
-					'</pre>';
 
 				$_SESSION['publication_prefetchedData_unchecked'] = $risTranslator->ris2bibtex($ris->getRecords());
 ?>
@@ -528,13 +523,13 @@ WHERE
 		$result = array(
 			'count' => 0,
 			'results' => array(),
-			'status' => 'error'
+			'status' => 'error',
+			'exact_match' => false
 		);
 
 		if(mb_strlen($_GET['title']) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS){
 			$result['status'] = 'success';
 
-			//$expandedTitle = bibliographie_search_expand_query($_GET['title'], array('suffixes' => false, 'plurals' => true, 'umlauts' => true));
 			$expandedTitle = $_GET['title'];
 
 			$pub_id = 0;
@@ -555,20 +550,22 @@ ORDER BY
 LIMIT
 	100");
 
-			$similarTitles->bindParam('title', $expandedTitle);
-			$similarTitles->bindParam('pub_id', $pub_id);
-			$similarTitles->execute();
+			$similarTitles->execute(array(
+				'title' => $expandedTitle,
+				'pub_id' => $pub_id
+			));
 
 			$result['count'] = $similarTitles->rowCount();
 
-			if($result['count'] > 0){
-				$similarTitles->setFetchMode(PDO::FETCH_OBJ);
-				$result['results'] = $similarTitles->fetchAll();
-			}
+			if($result['count'] > 0)
+				$result['results'] = $similarTitles->fetchAll(PDO::FETCH_OBJ);
 
 			foreach($result['results'] as $key => $publication){
 				$sameAuthors = array_intersect(bibliographie_publications_get_authors($publication->pub_id), csv2array($_GET['author']));
 				if(count($sameAuthors) > 0){
+					if($result['results'][$key]->title == $_GET['title'] or count($sameAuthors) == count(csv2array($_GET['author'])))
+						$result['exact_match'] = true;
+
 					$result['results'][$key]->relevancy += count($sameAuthors) * 30;
 					$result['results'][$key]->title = '<strong>'.$result['results'][$key]->title.'</strong> <em>('.count($sameAuthors).' similar authors)</em>';
 				}
