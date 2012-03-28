@@ -19,7 +19,8 @@ class bibliographie_error_handler {
 	 */
 	public static function fatal_errors () {
 		$e = error_get_last();
-		self::errors($e['type'], $e['message'], $e['file'], $e['line']);
+		if($e !== null)
+			self::errors($e['type'], $e['message'], $e['file'], $e['line']);
 	}
 
 	/**
