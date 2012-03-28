@@ -1,8 +1,7 @@
 <?php
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
+require '../init.php';
 
 $title = 'An error occured!';
 $text = 'An error occurred...';

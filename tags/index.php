@@ -1,7 +1,5 @@
 <?php
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
-
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
+require '../init.php';
 ?>
 
 <h2>Tags</h2>

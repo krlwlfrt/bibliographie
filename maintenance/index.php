@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__).'/../init.php';
+require '../init.php';
 
 $bibliographie_consistency_checks = array (
 	'authors' => array (

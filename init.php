@@ -37,6 +37,10 @@ if(!is_dir(dirname(__FILE__).'/cache'))
 	mkdir(dirname(__FILE__).'/cache', 0755);
 if(!is_dir(dirname(__FILE__).'/logs'))
 	mkdir(dirname(__FILE__).'/logs', 0755);
+if(!is_dir(dirname(__FILE__).'/logs/errors'))
+	mkdir(dirname(__FILE__).'/logs/errors', 0755);
+if(!is_dir(dirname(__FILE__).'/logs/changesets'))
+	mkdir(dirname(__FILE__).'/logs/changesets', 0755);
 
 /**
  * Require functions.
@@ -417,9 +421,9 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 /**
  * Get the log counter from database and compare it with the counter from log file.
  */
-if(count(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')) > 2){
+if(count(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets')) > 2){
 	$logCount_database = DB::getInstance()->query('SELECT MAX(`log_id`) AS `count` FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
-	$logCount_file = json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id;
+	$logCount_file = json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets')))))->id;
 	if($logCount_file > $logCount_database)
 		bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/admin/logReplay.php">use log-replay</a> to fill the gap!');
 	elseif($logCount_database < $logCount_file)

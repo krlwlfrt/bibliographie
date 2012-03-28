@@ -1,7 +1,7 @@
 <?php
 define('BIBLIOGRAPHIE_OUTPUT_BODY', false);
 
-require dirname(__FILE__).'/../init.php';
+require '../init.php';
 
 $text = 'An error occurred!';
 $status = 'error';

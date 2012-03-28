@@ -6,7 +6,7 @@ class DB {
 	private function __construct () {}
 
 	/**
-	 *
+	 * Establishes a database connection and returns a PDO database object.
 	 * @return PDO
 	 */
 	public static function getInstance () {
@@ -24,10 +24,6 @@ class DB {
 	}
 
 	private function __clone () {}
-
-	public function status () {
-		return (bool) self::$instance;
-	}
 
 	public function close () {
 		if(self::$instance)
@@ -153,7 +149,7 @@ function bibliographie_log ($category, $action, $data) {
 	if(BIBLIOGRAPHIE_LOG_USING_REPLAY)
 		return true;
 
-	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/log_'.date('Y_W').'.log', 'a+');
+	$logFile = fopen(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/log_'.date('Y_W').'.log', 'a+');
 
 	$addFile = json_encode(array(
 		'id' => DB::getInstance()->lastInsertId(),
@@ -346,15 +342,6 @@ function bibliographie_exit ($title, $message) {
 	exit();
 }
 
-function bibliographie_error_handler ($errno, $errstr, $file, $line) {
-	if($errno != E_STRICT and $errno != E_NOTICE)
-		bibliographie_exit('PHP error', '<strong>'.$errstr.'</strong> in <em>'.basename($file).':'.$line.'</em>');
-}
-
-function bibliographie_exception_handler ($exception) {
-	bibliographie_exit('Uncaught exception', '<strong>'.$exception->getMessage().'</strong> in <em>'.basename($exception->getFile()).'</em>:'.$exception->getLine().'<br />'.$exception->getTraceAsString());
-}
-
 function bibliographie_options_compare (array $options, array $_options) {
 	foreach($options as $key => $value){
 		if(is_array($options[$key])){
@@ -406,6 +393,7 @@ require dirname(__FILE__).'/attachments.php';
 require dirname(__FILE__).'/authors.php';
 require dirname(__FILE__).'/bookmarks.php';
 require dirname(__FILE__).'/charmap.php';
+require dirname(__FILE__).'/errors.php';
 require dirname(__FILE__).'/history.php';
 require dirname(__FILE__).'/maintenance.php';
 require dirname(__FILE__).'/notes.php';
@@ -416,9 +404,12 @@ require dirname(__FILE__).'/search.php';
 require dirname(__FILE__).'/tags.php';
 require dirname(__FILE__).'/topics.php';
 
-require dirname(__FILE__).'/../lib/BibTex.php';
+/**
+ * Include libraries...
+ */
 require dirname(__FILE__).'/../lib/upload.class.php';
 
+require dirname(__FILE__).'/../lib/BibTex.php';
 require dirname(__FILE__).'/../lib/LibRIS/RISReader.php';
 require dirname(__FILE__).'/../lib/LibRIS/RISWriter.php';
 require dirname(__FILE__).'/../lib/LibRIS/RISTags.php';
@@ -426,5 +417,6 @@ require dirname(__FILE__).'/../lib/LibRIS/RISTags.php';
 /**
  * Set error and exception handling for uncaught errors and exceptions.
  */
-set_exception_handler('bibliographie_exception_handler');
-set_error_handler('bibliographie_error_handler');
+set_exception_handler(array('bibliographie_error_handler', 'exceptions'));
+set_error_handler(array('bibliographie_error_handler', 'errors'));
+register_shutdown_function(array('bibliographie_error_handler', 'fatal_errors'));

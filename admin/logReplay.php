@@ -3,7 +3,7 @@ if(!file_exists(dirname(__FILE__).'/../config.php'))
 	exit('Sorry, but we have no config file!');
 require dirname(__FILE__).'/../config.php';
 
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
+define('BIBLIOGRAPHIE_ROOT_PATH', dirname(__FILE__).'/..');
 define('BIBLIOGRAPHIE_LOG_USING_REPLAY', true);
 
 require BIBLIOGRAPHIE_ROOT_PATH.'/resources/functions/general.php';
@@ -13,8 +13,8 @@ require BIBLIOGRAPHIE_ROOT_PATH.'/resources/functions/general.php';
  */
 $logCount_database = (int) DB::getInstance()->query('SELECT MAX(`log_id`) AS `log_count` FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
 $logCount_file = 0;
-if(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs') > 2)
-	$logCount_file = (int) json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs')))))->id;
+if(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets') > 2)
+	$logCount_file = (int) json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets')))))->id;
 
 ?><!DOCTYPE html>
 <html>
@@ -31,11 +31,11 @@ if(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs') > 2)
 <?php
 if($logCount_file > $logCount_database){
 	$gap = array();
-	foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs') as $logFile){
+	foreach(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets') as $logFile){
 		if($logFile == '.' or $logFile == '..')
 			continue;
 
-		foreach(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$logFile) as $row){
+		foreach(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.$logFile) as $row){
 			$row = json_decode($row);
 			if($row->id > $logCount_database)
 				$gap[] = json_encode($row);

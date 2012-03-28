@@ -1,7 +1,5 @@
 <?php
-define('BIBLIOGRAPHIE_ROOT_PATH', '..');
-
-require BIBLIOGRAPHIE_ROOT_PATH.'/init.php';
+require '../init.php';
 ?>
 
 <h2>Topics</h2>
@@ -54,6 +52,7 @@ switch($_GET['task']){
 		}
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
+			blabla();
 			$errors = array();
 
 			if(empty($_POST['name']))

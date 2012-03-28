@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__).'/../init.php';
+require '../init.php';
 
 echo '<h2>Administration</h2>';
 switch($_GET['task']){
@@ -79,7 +79,7 @@ $(function () {
 
 <h3>Parse logs</h3>
 <?php
-		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs', true);
+		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/changesets/', true);
 		if(count($logContent) > 2){
 ?>
 
@@ -105,8 +105,8 @@ $(function () {
 		}else
 			echo '<p class="error">We have no log files!</p>';
 
-		if(!empty($_GET['logFile']) and mb_strpos($_GET['logFile'], '..') === false and mb_strpos($_GET['logFile'], '/') === false and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile'])){
-			bibliographie_admin_log_parse(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/'.$_GET['logFile']));
+		if(!empty($_GET['logFile']) and mb_strpos($_GET['logFile'], '..') === false and mb_strpos($_GET['logFile'], '/') === false and file_exists(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.$_GET['logFile'])){
+			bibliographie_admin_log_parse(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.$_GET['logFile']));
 		}
 	break;
 }
