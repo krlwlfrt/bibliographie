@@ -14,6 +14,9 @@ class bibliographie_error_handler {
 		}
 	}
 
+	/**
+	 * Handle fatal errors.
+	 */
 	public static function fatal_errors () {
 		$e = error_get_last();
 		self::errors($e['type'], $e['message'], $e['file'], $e['line']);
@@ -44,6 +47,6 @@ class bibliographie_error_handler {
 	 */
 	private static function stop () {
 		ob_end_clean();
-		exit('<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Error</h1><p>An error occured!</p></body></html>');
+		bibliographie_exit('An error occurred!', 'Sorry, an error occurred that makes it impossible to continue the execution of bibliographie.');
 	}
 }

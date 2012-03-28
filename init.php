@@ -94,7 +94,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 <?php
 		}elseif($_GET['makeScheme'] == 1){
 			try {
-				DB::getInstance()->beginTransaction();
+				DB::beginTransaction();
 
 				DB::getInstance()->exec('DROP TABLE `'.BIBLIOGRAPHIE_PREFIX.'aigaiongeneral`, `'.BIBLIOGRAPHIE_PREFIX.'availablerights`, `'.BIBLIOGRAPHIE_PREFIX.'changehistory`, `'.BIBLIOGRAPHIE_PREFIX.'config`, `'.BIBLIOGRAPHIE_PREFIX.'grouprightsprofilelink`, `'.BIBLIOGRAPHIE_PREFIX.'logintegration`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofilerightlink`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofiles`, `'.BIBLIOGRAPHIE_PREFIX.'usergrouplink`, `'.BIBLIOGRAPHIE_PREFIX.'userrights`;');
 
@@ -138,12 +138,12 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 
 				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
 
-				DB::getInstance()->commit();
+				DB::commit();
 
 				echo '<p>Scheme has been modified!</p>';
 				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
 			} catch (PDOException $e) {
-				DB::getInstance()->rollBack();
+				DB::rollBack();
 				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
 			}
 		}
@@ -157,7 +157,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 <?php
 		}elseif($_GET['makeScheme'] == 1){
 			try {
-				DB::getInstance()->beginTransaction();
+				DB::beginTransaction();
 				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'attachments` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   `location` varchar(255) NOT NULL DEFAULT "",
@@ -400,12 +400,12 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'topics` (`name`, `description`) VALUES ("Top", "Meta-topic as top of the topic hierarchy.");');
 				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
 
-				DB::getInstance()->commit();
+				DB::commit();
 
 				echo '<p>Scheme has been created!</p>';
 				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
 			} catch (PDOException $e) {
-				DB::getInstance()->rollBack();
+				DB::rollBack();
 				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
 			}
 		}
@@ -438,7 +438,7 @@ if(BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
 	bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
 elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
 	try {
-		DB::getInstance()->beginTransaction();
+		DB::beginTransaction();
 
 		echo '<h2>Updating database scheme</h2>',
 			'<p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p>',
@@ -451,9 +451,9 @@ elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
 		}
 		echo '</ul>';
 
-		DB::getInstance()->commit();
+		DB::commit();
 	} catch (PDOException $e) {
-		DB::getInstance()->rollBack();
+		DB::rollBack();
 		bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />'.$e->__toString());
 	}
 }

@@ -42,9 +42,9 @@ function bibliographie_admin_lock_topics (array $topics) {
 		if(!($lockTopic instanceof PDOStatement))
 			$lockTopic = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (`topic_id`) VALUES (:topic_id)');
 
-		$higherTransaction = DB::getInstance()->inTransaction();
+		$higherTransaction = DB::inTransaction();
 		if(!$higherTransaction)
-			DB::getInstance()->beginTransaction();
+			DB::beginTransaction();
 
 		foreach($topics as $topic_id)
 			if(!in_array($topic_id, bibliographie_topics_get_locked_topics()) and $lockTopic->execute(array('topic_id' => (int) $topic_id))){
@@ -53,12 +53,12 @@ function bibliographie_admin_lock_topics (array $topics) {
 			}
 
 		if(!$higherTransaction)
-			DB::getInstance()->commit();
+			DB::commit();
 
 		if($lockedTopics > 0)
 			bibliographie_cache_purge('topics_locked');
 	} catch (PDOException $e) {
-		DB::getInstance()->rollBack();
+		DB::rollBack();
 		echo '<p>An error occured while locking topics.! '.$e->getMessage().'</p>';
 		return false;
 	}

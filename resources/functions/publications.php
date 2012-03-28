@@ -774,9 +774,9 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 		sort($tags);
 		sort($topics);
 
-		$higherTransaction = DB::getInstance()->inTransaction();
+		$higherTransaction = DB::inTransaction();
 		if(!$higherTransaction)
-			DB::getInstance()->beginTransaction();
+			DB::beginTransaction();
 
 		if($user_id == null)
 			$user_id = bibliographie_user_get_id ();
@@ -992,7 +992,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 		}
 
 		if(!$higherTransaction)
-			DB::getInstance()->commit();
+			DB::commit();
 
 		if($return){
 			bibliographie_cache_purge('search_publications_');
@@ -1000,7 +1000,7 @@ function bibliographie_publications_create_publication ($pub_type, array $author
 			$return = $data;
 		}
 	} catch (PDOException $e) {
-		DB::getInstance()->rollBack();
+		DB::rollBack();
 		$return = false;
 	}
 
@@ -1061,10 +1061,10 @@ function bibliographie_publications_edit_publication ($pub_id, $pub_type, array 
 			sort($tags);
 			sort($topics);
 
-			$higherTransaction = DB::getInstance()->inTransaction();
+			$higherTransaction = DB::inTransaction();
 
 			if(!higherTransaction)
-				DB::getInstance()->beginTransaction();
+				DB::beginTransaction();
 
 			if(!($editPublication instanceof PDOStatement))
 				$editPublication = DB::getInstance()->prepare('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'publication` SET
@@ -1286,7 +1286,7 @@ LIMIT
 			}
 
 			if(!higherTransaction)
-				DB::getInstance()->commit();
+				DB::commit();
 
 			if($return){
 				bibliographie_cache_purge('publication_'.((int) $pub_id));
@@ -1295,7 +1295,7 @@ LIMIT
 				$return = $data;
 			}
 		} catch (PDOException $e){
-			DB::getInstance()->rollBack();
+			DB::rollBack();
 			$return = false;
 		}
 	}

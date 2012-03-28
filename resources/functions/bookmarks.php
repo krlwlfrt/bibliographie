@@ -176,7 +176,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $publications) {
 		if(count($notBookmarkedPublications) > 0){
 			$return = count($notBookmarkedPublications);
 			try {
-				DB::getInstance()->beginTransaction();
+				DB::beginTransaction();
 
 				foreach($notBookmarkedPublications as $pub_id){
 					if($bookmark === null)
@@ -194,7 +194,7 @@ function bibliographie_bookmarks_set_bookmarks_for_list (array $publications) {
 					));
 				}
 
-				DB::getInstance()->commit();
+				DB::commit();
 
 				bibliographie_cache_purge('bookmarks_'.((int) bibliographie_user_get_id()));
 			} catch (PDOException $e) {

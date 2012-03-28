@@ -1,9 +1,14 @@
 <?php
 class DB {
-	private
-		static $instance = null;
+	private static
+		$instance = null,
+		$inTransaction = false;
 
+	/**
+	 * Set __construct() and __clone() to private to avoid singleton misuse.
+	 */
 	private function __construct () {}
+	private function __clone () {}
 
 	/**
 	 * Establishes a database connection and returns a PDO database object.
@@ -23,8 +28,44 @@ class DB {
 		return self::$instance;
 	}
 
-	private function __clone () {}
+	/**
+	 * Check if in a transaction or not.
+	 * @return bool
+	 */
+	public static function inTransaction () {
+		return self::$inTransaction;
+	}
 
+	/**
+	 * If not in a transaction, begin one.
+	 */
+	public static function beginTransaction () {
+		if(!self::$inTransaction)
+			self::getInstance()->beginTransaction();
+		self::$inTransaction = true;
+	}
+
+	/**
+	 * If in a transaction commit it.
+	 */
+	public static function commit () {
+		if(self::$inTransaction)
+			self::getInstance()->commit();
+		self::$inTransaction = false;
+	}
+
+	/**
+	 * If in a transaction roll it back.
+	 */
+	public static function rollBack () {
+		if(self::$inTransaction)
+			self::getInstance()->rollBack();
+		self::$inTransaction = false;
+	}
+
+	/**
+	 * Close connection.
+	 */
 	public function close () {
 		if(self::$instance)
 			self::$instance = null;

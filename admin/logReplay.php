@@ -46,7 +46,7 @@ if($logCount_file > $logCount_database){
 		case 'replay':
 			foreach($gap as $row){
 				try {
-					DB::getInstance()->beginTransaction();
+					DB::beginTransaction();
 
 					$row = json_decode($row);
 					$data = json_decode($row->data);
@@ -230,7 +230,7 @@ if($logCount_file > $logCount_database){
 					if($result !== false){
 						echo '<p>#'.$row->id.' '.bibliographie_icon_get('tick').' <strong>'.$row->category.', '.$row->action.'</strong> was successfull!</p>';
 						DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'log` SET `log_id` = '.((int) $row->id).' ORDER BY `log_id` DESC LIMIT 1');
-						DB::getInstance()->commit();
+						DB::commit();
 					}else{
 						echo '<p class="error">#'.$row->id.': An error occurred while trying to apply logged change ('.$row->category.', '.$row->action.').</p>';
 						break;
@@ -242,7 +242,7 @@ if($logCount_file > $logCount_database){
 						break;
 					}
 				} catch (PDOException $e) {
-					DB::getInstance()->rollBack();
+					DB::rollBack();
 					echo '<p class="error">'.$e.'</p>';
 				}
 			}

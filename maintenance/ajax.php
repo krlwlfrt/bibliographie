@@ -125,12 +125,12 @@ ORDER BY
 				ksort($deadLinks);
 
 				try {
-					DB::getInstance()->beginTransaction();
+					DB::beginTransaction();
 					echo '<table class="dataContainer"><tr><th>Subject</th><th>Occurrences</th></tr>';
 					foreach($deadLinks as $title => $query)
 						echo '<tr><td>'.$title.'</td><td>'.DB::getInstance()->exec($query).' dead links...</td></tr>';
 					echo '</table>';
-					DB::getInstance()->commit();
+					DB::commit();
 				} catch (PDOException $e) {
 					echo '<p class="error">An error occured!</p>';
 				}

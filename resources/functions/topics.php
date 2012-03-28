@@ -77,10 +77,10 @@ function bibliographie_topics_edit_topic ($topic_id, $name, $description, $url, 
 
 	if(is_array($dataBefore)){
 		try {
-			$higherTransaction = DB::getInstance()->inTransaction();
+			$higherTransaction = DB::inTransaction();
 
 			if(!$higherTransaction)
-				DB::getInstance()->beginTransaction();
+				DB::beginTransaction();
 
 			/**
 			 * Get subtopics recursively and direct parent topics.
@@ -193,13 +193,13 @@ LIMIT 1');
 			}
 
 			if(!$higherTransaction)
-				DB::getInstance()->commit();
+				DB::commit();
 
 			bibliographie_cache_purge('search_');
 			return $data;
 
 		} catch (PDOException $e) {
-			DB::getInstance()->rollBack();
+			DB::rollBack();
 			bibliographie_exit('Database error', 'There was an error while saving changes! '.$e->getMessage());
 		}
 	}
