@@ -79,7 +79,7 @@ $(function () {
 
 <h3>Parse logs</h3>
 <?php
-		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/changesets/', true);
+		$logContent = scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/', true);
 		if(count($logContent) > 2){
 ?>
 
