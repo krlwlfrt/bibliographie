@@ -52,7 +52,6 @@ switch($_GET['task']){
 		}
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
-			blabla();
 			$errors = array();
 
 			if(empty($_POST['name']))
