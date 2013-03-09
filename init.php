@@ -24,46 +24,46 @@ date_default_timezone_set('Europe/Berlin');
 /**
  * Check for config file.
  */
-if(!file_exists(dirname(__FILE__).'/config.php'))
-	exit('Sorry, but we have no config file!');
-require dirname(__FILE__).'/config.php';
+if (!file_exists(dirname(__FILE__) . '/config.php'))
+  exit('Sorry, but we have no config file!');
+require dirname(__FILE__) . '/config.php';
 
 /**
  * Check for necessary directories.
  */
-if(!is_dir(dirname(__FILE__).'/attachments'))
-	mkdir(dirname(__FILE__).'/attachments', 0755);
-if(!is_dir(dirname(__FILE__).'/cache'))
-	mkdir(dirname(__FILE__).'/cache', 0755);
-if(!is_dir(dirname(__FILE__).'/logs'))
-	mkdir(dirname(__FILE__).'/logs', 0755);
-if(!is_dir(dirname(__FILE__).'/logs/errors'))
-	mkdir(dirname(__FILE__).'/logs/errors', 0755);
-if(!is_dir(dirname(__FILE__).'/logs/changesets'))
-	mkdir(dirname(__FILE__).'/logs/changesets', 0755);
+if (!is_dir(dirname(__FILE__) . '/attachments'))
+  mkdir(dirname(__FILE__) . '/attachments', 0755);
+if (!is_dir(dirname(__FILE__) . '/cache'))
+  mkdir(dirname(__FILE__) . '/cache', 0755);
+if (!is_dir(dirname(__FILE__) . '/logs'))
+  mkdir(dirname(__FILE__) . '/logs', 0755);
+if (!is_dir(dirname(__FILE__) . '/logs/errors'))
+  mkdir(dirname(__FILE__) . '/logs/errors', 0755);
+if (!is_dir(dirname(__FILE__) . '/logs/changesets'))
+  mkdir(dirname(__FILE__) . '/logs/changesets', 0755);
 
 /**
  * Require functions.
  */
-require dirname(__FILE__).'/resources/functions/general.php';
+require dirname(__FILE__) . '/resources/functions/general.php';
 
 /**
  * Exit if apache authentification is void.
  */
-if(!isset($_SERVER['PHP_AUTH_USER']))
-	bibliographie_exit('Authentication error', 'It seems that there is an error with your authentication. Bibliographie can not read your login name and must therefore stop right here.');
+if (!isset($_SERVER['PHP_AUTH_USER']))
+  bibliographie_exit('Authentication error', 'It seems that there is an error with your authentication. Bibliographie can not read your login name and must therefore stop right here.');
 
 /**
  * If root path isnt defined by program file then define it now with the default value.
  */
-if(!defined('BIBLIOGRAPHIE_ROOT_PATH'))
-	define('BIBLIOGRAPHIE_ROOT_PATH', dirname(__FILE__));
+if (!defined('BIBLIOGRAPHIE_ROOT_PATH'))
+  define('BIBLIOGRAPHIE_ROOT_PATH', dirname(__FILE__));
 
 /**
  * If outputting of body isnt defined yet then define it with the default value.
  */
-if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
-	define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
+if (!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
+  define('BIBLIOGRAPHIE_OUTPUT_BODY', true);
 
 /**
  * Set global variables...
@@ -71,94 +71,94 @@ if(!defined('BIBLIOGRAPHIE_OUTPUT_BODY'))
 $bibliographie_history_path_identifier = '';
 $bibliographie_title = 'bibliographie';
 
-if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->rowCount() == 0){
-	/**
-	 * We don't have the bibliographie database scheme!
-	 */
-?>
+if (DB::getInstance()->query('SHOW TABLES LIKE "' . BIBLIOGRAPHIE_PREFIX . 'log"')->rowCount() == 0) {
+  /**
+   * We don't have the bibliographie database scheme!
+   */
+  ?>
 
-<!DOCTYPE html>
-<html lang="de">
-	<head>
-		<title>Initialize database</title>
-	</head>
-	<body>
-		<h1>Initialize database</h1>
-<?php
-	if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'publication"')->rowCount() == 1){
-		if(empty($_GET['makeScheme'])){
-?>
+  <!DOCTYPE html>
+  <html lang="de">
+    <head>
+      <title>Initialize database</title>
+    </head>
+    <body>
+      <h1>Initialize database</h1>
+      <?php
+      if (DB::getInstance()->query('SHOW TABLES LIKE "' . BIBLIOGRAPHIE_PREFIX . 'publication"')->rowCount() == 1) {
+        if (empty($_GET['makeScheme'])) {
+          ?>
 
-		<p>You have the aigaion scheme. We need to make a few changes for bibliographie.</p>
-		<p><a href="?makeScheme=1">Do it now!</a></p>
-<?php
-		}elseif($_GET['makeScheme'] == 1){
-			try {
-				DB::beginTransaction();
+          <p>You have the aigaion scheme. We need to make a few changes for bibliographie.</p>
+          <p><a href="?makeScheme=1">Do it now!</a></p>
+          <?php
+        } elseif ($_GET['makeScheme'] == 1) {
+          try {
+            DB::beginTransaction();
 
-				DB::getInstance()->exec('DROP TABLE `'.BIBLIOGRAPHIE_PREFIX.'aigaiongeneral`, `'.BIBLIOGRAPHIE_PREFIX.'availablerights`, `'.BIBLIOGRAPHIE_PREFIX.'changehistory`, `'.BIBLIOGRAPHIE_PREFIX.'config`, `'.BIBLIOGRAPHIE_PREFIX.'grouprightsprofilelink`, `'.BIBLIOGRAPHIE_PREFIX.'logintegration`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofilerightlink`, `'.BIBLIOGRAPHIE_PREFIX.'rightsprofiles`, `'.BIBLIOGRAPHIE_PREFIX.'usergrouplink`, `'.BIBLIOGRAPHIE_PREFIX.'userrights`;');
+            DB::getInstance()->exec('DROP TABLE `' . BIBLIOGRAPHIE_PREFIX . 'aigaiongeneral`, `' . BIBLIOGRAPHIE_PREFIX . 'availablerights`, `' . BIBLIOGRAPHIE_PREFIX . 'changehistory`, `' . BIBLIOGRAPHIE_PREFIX . 'config`, `' . BIBLIOGRAPHIE_PREFIX . 'grouprightsprofilelink`, `' . BIBLIOGRAPHIE_PREFIX . 'logintegration`, `' . BIBLIOGRAPHIE_PREFIX . 'rightsprofilerightlink`, `' . BIBLIOGRAPHIE_PREFIX . 'rightsprofiles`, `' . BIBLIOGRAPHIE_PREFIX . 'usergrouplink`, `' . BIBLIOGRAPHIE_PREFIX . 'userrights`;');
 
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'keywords` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publicationkeywordlink` RENAME TO `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'tags` ADD FULLTEXT INDEX `fulltext` (`tag`);');
-				DB::getInstance()->exec('ALTER TABLE `'.BIBLIOGRAPHIE_PREFIX.'notes` ADD FULLTEXT INDEX `fulltext` (`text`)');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'keywords` RENAME TO `' . BIBLIOGRAPHIE_PREFIX . 'tags`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AUTO_INCREMENT FIRST, CHANGE COLUMN `keyword` `tag` MEDIUMTEXT NOT NULL AFTER `tag_id`;');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'publicationkeywordlink` RENAME TO `' . BIBLIOGRAPHIE_PREFIX . 'publicationtaglink`, CHANGE COLUMN `keyword_id` `tag_id` INT(10) NOT NULL AFTER `pub_id`;');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'publication` ADD FULLTEXT INDEX `fulltext` (`title`, `abstract`, `note`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'publication` ADD FULLTEXT INDEX `fulltext_title` (`title`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'publication` ADD FULLTEXT INDEX `fulltext_journal` (`journal`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'publication` ADD FULLTEXT INDEX `fulltext_booktitle` (`booktitle`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'topics` ADD FULLTEXT INDEX `fulltext` (`name`, `description`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'author` ADD FULLTEXT INDEX `fulltext` (`surname`, `firstname`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'tags` ADD FULLTEXT INDEX `fulltext` (`tag`);');
+            DB::getInstance()->exec('ALTER TABLE `' . BIBLIOGRAPHIE_PREFIX . 'notes` ADD FULLTEXT INDEX `fulltext` (`text`)');
 
-				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'log` (
+            DB::getInstance()->exec('CREATE TABLE `' . BIBLIOGRAPHIE_PREFIX . 'log` (
 		`log_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 		`log_file` TEXT NOT NULL,
 		`log_time` TEXT NOT NULL,
 		PRIMARY KEY (`log_id`)
 	) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (
+            DB::getInstance()->exec('CREATE TABLE `' . BIBLIOGRAPHIE_PREFIX . 'lockedtopics` (
 		`topic_id` INT(10) UNSIGNED NOT NULL
 	) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'singulars_and_plurals` (
+            DB::getInstance()->exec('CREATE TABLE `' . BIBLIOGRAPHIE_PREFIX . 'singulars_and_plurals` (
 		`ln` VARCHAR(2) NOT NULL DEFAULT "en" COLLATE "utf8_general_ci",
 		`singular` TINYTEXT NOT NULL COLLATE "utf8_general_ci",
 		`plural` TINYTEXT NOT NULL COLLATE "utf8_general_ci"
 	) COLLATE="utf8_general_ci" ENGINE=MyISAM');
 
-				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors` (
+            DB::getInstance()->exec('CREATE TABLE `' . BIBLIOGRAPHIE_PREFIX . 'unsimilar_groups_of_authors` (
 		`group` LONGTEXT NOT NULL COLLATE "utf8_general_ci"
 	) COLLATE="utf8_general_ci" ENGINE=MyISAM');
 
-				DB::getInstance()->exec('CREATE TABLE `'.BIBLIOGRAPHIE_PREFIX.'settings` (
+            DB::getInstance()->exec('CREATE TABLE `' . BIBLIOGRAPHIE_PREFIX . 'settings` (
 	`key` TINYTEXT NOT NULL COLLATE "utf8_general_ci",
 	`value` LONGTEXT NOT NULL COLLATE "utf8_general_ci",
 	UNIQUE INDEX `UNIQUE_KEY` (`key`(100))
 ) COLLATE="utf8_general_ci" ENGINE=MyISAM;');
 
-				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
+            DB::getInstance()->exec('INSERT INTO `' . BIBLIOGRAPHIE_PREFIX . 'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
 
-				DB::commit();
+            DB::commit();
 
-				echo '<p>Scheme has been modified!</p>';
-				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
-			} catch (PDOException $e) {
-				DB::rollBack();
-				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
-			}
-		}
-	}else{
-		if(empty($_GET['makeScheme'])){
-?>
+            echo '<p>Scheme has been modified!</p>';
+            echo '<p>You can now <a href="' . BIBLIOGRAPHIE_WEB_ROOT . '">start using bibliographie!</a></p>';
+          } catch (PDOException $e) {
+            DB::rollBack();
+            echo '<p>An error occurred!</p><p>' . $e->__toString() . '</p>';
+          }
+        }
+      } else {
+        if (empty($_GET['makeScheme'])) {
+          ?>
 
-		<p>You don't seem to have an appropriate database scheme at all. I was looking for the database table <code><?php echo BIBLIOGRAPHIE_PREFIX?>publication</code>.</p>
-		<p>Do you want it to be created now?</p>
-		<p><a href="?makeScheme=1">Do it now!</a></p>
-<?php
-		}elseif($_GET['makeScheme'] == 1){
-			try {
-				DB::beginTransaction();
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'attachments` (
+          <p>You don't seem to have an appropriate database scheme at all. I was looking for the database table <code><?php echo BIBLIOGRAPHIE_PREFIX ?>publication</code>.</p>
+          <p>Do you want it to be created now?</p>
+          <p><a href="?makeScheme=1">Do it now!</a></p>
+          <?php
+        } elseif ($_GET['makeScheme'] == 1) {
+          try {
+            DB::beginTransaction();
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'attachments` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   `location` varchar(255) NOT NULL DEFAULT "",
   `note` varchar(255) NOT NULL DEFAULT "",
@@ -176,7 +176,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   PRIMARY KEY (`att_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'author` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'author` (
   `author_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `surname` varchar(255) NOT NULL DEFAULT "",
   `von` varchar(255) NOT NULL DEFAULT "",
@@ -191,23 +191,23 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   FULLTEXT KEY `fulltext` (`surname`,`firstname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'lockedtopics` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'lockedtopics` (
   `topic_id` int(10) unsigned NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'log` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'log` (
   `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `log_file` text NOT NULL,
   `log_time` text NOT NULL,
   PRIMARY KEY (`log_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'notecrossrefid` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'notecrossrefid` (
   `note_id` int(10) NOT NULL DEFAULT "0",
   `xref_id` int(10) NOT NULL DEFAULT "0"
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'notes` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'notes` (
   `note_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   `user_id` int(11) NOT NULL DEFAULT "0",
@@ -222,7 +222,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   FULLTEXT KEY `fulltext` (`text`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publication` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'publication` (
   `pub_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT "0",
   `year` varchar(127) NOT NULL DEFAULT "",
@@ -276,7 +276,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   FULLTEXT KEY `fulltext` (`title`,`abstract`,`note`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publicationauthorlink` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'publicationauthorlink` (
   `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   `author_id` int(10) unsigned NOT NULL DEFAULT "0",
   `rank` int(10) unsigned NOT NULL DEFAULT "1",
@@ -285,25 +285,25 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   KEY `pub_id` (`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'publicationtaglink` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'publicationtaglink` (
   `pub_id` int(10) NOT NULL,
   `tag_id` int(10) NOT NULL,
   PRIMARY KEY (`pub_id`,`tag_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'settings` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'settings` (
   `key` tinytext NOT NULL,
   `value` longtext NOT NULL,
   UNIQUE KEY `UNIQUE_KEY` (`key`(100))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'singulars_and_plurals` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'singulars_and_plurals` (
   `ln` varchar(2) NOT NULL DEFAULT "en",
   `singular` tinytext NOT NULL,
   `plural` tinytext NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'tags` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'tags` (
   `tag_id` int(10) NOT NULL AUTO_INCREMENT,
   `tag` mediumtext NOT NULL,
   `cleankeyword` text NOT NULL,
@@ -311,13 +311,13 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   FULLTEXT KEY `fulltext` (`tag`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topicpublicationlink` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'topicpublicationlink` (
   `topic_id` int(10) unsigned NOT NULL DEFAULT "0",
   `pub_id` int(10) unsigned NOT NULL DEFAULT "0",
   PRIMARY KEY (`topic_id`,`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topics` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'topics` (
   `topic_id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `description` mediumtext,
@@ -334,22 +334,22 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   FULLTEXT KEY `fulltext` (`name`,`description`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'topictopiclink` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'topictopiclink` (
   `source_topic_id` int(10) NOT NULL DEFAULT "0",
   `target_topic_id` int(10) NOT NULL DEFAULT "0"
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT="Hierarchy of topics; typed relations";');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'unsimilar_groups_of_authors` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'unsimilar_groups_of_authors` (
   `group` longtext NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'userbookmarklists` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'userbookmarklists` (
   `user_id` int(10) NOT NULL,
   `pub_id` int(10) NOT NULL,
   PRIMARY KEY (`user_id`,`pub_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'userpublicationmark` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'userpublicationmark` (
   `pub_id` int(10) NOT NULL DEFAULT "0",
   `user_id` int(11) NOT NULL DEFAULT "0",
   `mark` enum("","1","2","3","4","5") NOT NULL DEFAULT "3",
@@ -357,7 +357,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
   PRIMARY KEY (`pub_id`,`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'users` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'users` (
   `user_id` int(10) NOT NULL AUTO_INCREMENT,
   `theme` varchar(255) NOT NULL DEFAULT "darkdefault",
   `password_invalidated` enum("TRUE","FALSE") NOT NULL DEFAULT "FALSE",
@@ -386,7 +386,7 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
 
-				DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `'.BIBLIOGRAPHIE_PREFIX.'usertopiclink` (
+            DB::getInstance()->exec('CREATE TABLE IF NOT EXISTS `' . BIBLIOGRAPHIE_PREFIX . 'usertopiclink` (
   `collapsed` int(2) NOT NULL DEFAULT "0",
   `user_id` int(10) NOT NULL DEFAULT "0",
   `topic_id` int(10) NOT NULL DEFAULT "0",
@@ -396,100 +396,100 @@ if(DB::getInstance()->query('SHOW TABLES LIKE "'.BIBLIOGRAPHIE_PREFIX.'log"')->r
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
 
-				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'users` (`login`) VALUES ('.DB::getInstance()->quote($_SERVER['PHP_AUTH_USER']).');');
-				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'topics` (`name`, `description`) VALUES ("Top", "Meta-topic as top of the topic hierarchy.");');
-				DB::getInstance()->exec('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
+            DB::getInstance()->exec('INSERT INTO `' . BIBLIOGRAPHIE_PREFIX . 'users` (`login`) VALUES (' . DB::getInstance()->quote($_SERVER['PHP_AUTH_USER']) . ');');
+            DB::getInstance()->exec('INSERT INTO `' . BIBLIOGRAPHIE_PREFIX . 'topics` (`name`, `description`) VALUES ("Top", "Meta-topic as top of the topic hierarchy.");');
+            DB::getInstance()->exec('INSERT INTO `' . BIBLIOGRAPHIE_PREFIX . 'settings` (`key`, `value`) VALUES ("DATABASE_VERSION", "1");');
 
-				DB::commit();
+            DB::commit();
 
-				echo '<p>Scheme has been created!</p>';
-				echo '<p>You can now <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'">start using bibliographie!</a></p>';
-			} catch (PDOException $e) {
-				DB::rollBack();
-				echo '<p>An error occurred!</p><p>'.$e->__toString().'</p>';
-			}
-		}
-	}
-?>
+            echo '<p>Scheme has been created!</p>';
+            echo '<p>You can now <a href="' . BIBLIOGRAPHIE_WEB_ROOT . '">start using bibliographie!</a></p>';
+          } catch (PDOException $e) {
+            DB::rollBack();
+            echo '<p>An error occurred!</p><p>' . $e->__toString() . '</p>';
+          }
+        }
+      }
+      ?>
 
-	</body>
-</html>
-<?php
-	exit();
+    </body>
+  </html>
+  <?php
+  exit();
 }
 
 /**
  * Get the log counter from database and compare it with the counter from log file.
  */
-if(count(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets')) > 2){
-	$logCount_database = DB::getInstance()->query('SELECT MAX(`log_id`) AS `count` FROM `'.BIBLIOGRAPHIE_PREFIX.'log`')->fetch(PDO::FETCH_COLUMN, 0);
-	$logCount_file = json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets/'.end(scandir(BIBLIOGRAPHIE_ROOT_PATH.'/logs/changesets')))))->id;
-	if($logCount_file > $logCount_database)
-		bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please <a href="'.BIBLIOGRAPHIE_WEB_ROOT.'/admin/logReplay.php">use log-replay</a> to fill the gap!');
-	elseif($logCount_database < $logCount_file)
-		bibliographie_exit('Bibliographie log error', 'You have more database changes than logged changes. This is a serious problem, since bibliographie doesn\'nt know how to solve the problem!');
+if (count(scandir(BIBLIOGRAPHIE_ROOT_PATH . '/logs/changesets')) > 2) {
+  $logCount_database = DB::getInstance()->query('SELECT MAX(`log_id`) AS `count` FROM `' . BIBLIOGRAPHIE_PREFIX . 'log`')->fetch(PDO::FETCH_COLUMN, 0);
+  $logCount_file = json_decode(end(file(BIBLIOGRAPHIE_ROOT_PATH . '/logs/changesets/' . end(scandir(BIBLIOGRAPHIE_ROOT_PATH . '/logs/changesets')))))->id;
+  if ($logCount_file > $logCount_database)
+    bibliographie_exit('Bibliographie log error', 'You have more logged changes than database changes! Please <a href="' . BIBLIOGRAPHIE_WEB_ROOT . '/admin/logReplay.php">use log-replay</a> to fill the gap!');
+  elseif ($logCount_database < $logCount_file)
+    bibliographie_exit('Bibliographie log error', 'You have more database changes than logged changes. This is a serious problem, since bibliographie doesn\'nt know how to solve the problem!');
 }
 
 /**
  * Check if database scheme is the same as expected by bibliographie.
  */
-$databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `'.BIBLIOGRAPHIE_PREFIX.'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
-if(BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
-	bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
-elseif(BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion){
-	try {
-		DB::beginTransaction();
+$databaseSchemeVersion = DB::getInstance()->query('SELECT `value` FROM `' . BIBLIOGRAPHIE_PREFIX . 'settings` WHERE `key` = "DATABASE_VERSION"')->fetch(PDO::FETCH_COLUMN, 0);
+if (BIBLIOGRAPHIE_DATABASE_VERSION < $databaseSchemeVersion)
+  bibliographie_exit('Bibliographie database scheme error', 'Your program files of bibliographie are older than the database scheme! Please get an up to date copy of bibliographie!');
+elseif (BIBLIOGRAPHIE_DATABASE_VERSION > $databaseSchemeVersion) {
+  try {
+    DB::beginTransaction();
 
-		echo '<h2>Updating database scheme</h2>',
-			'<p>Your scheme is version '.((int) $databaseSchemeVersion).' while this installation of bibliographie needs version '.BIBLIOGRAPHIE_DATABASE_VERSION.'...</p>',
-			'<ul>';
-		for($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++){
-			echo '<li>',
-				'<em>'.$bibliographie_database_updates[$i]['description'].'</em> ',
-				bool2img(bibliographie_database_update($i, $bibliographie_database_updates[$i]['query'], $bibliographie_database_updates[$i]['description'])),
-				 '</li>';
-		}
-		echo '</ul>';
+    echo '<h2>Updating database scheme</h2>',
+    '<p>Your scheme is version ' . ((int) $databaseSchemeVersion) . ' while this installation of bibliographie needs version ' . BIBLIOGRAPHIE_DATABASE_VERSION . '...</p>',
+    '<ul>';
+    for ($i = $databaseSchemeVersion + 1; $i <= BIBLIOGRAPHIE_DATABASE_VERSION; $i++) {
+      echo '<li>',
+      '<em>' . $bibliographie_database_updates[$i]['description'] . '</em> ',
+      bool2img(bibliographie_database_update($i, $bibliographie_database_updates[$i]['query'], $bibliographie_database_updates[$i]['description'])),
+      '</li>';
+    }
+    echo '</ul>';
 
-		DB::commit();
-	} catch (PDOException $e) {
-		DB::rollBack();
-		bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />'.$e->__toString());
-	}
+    DB::commit();
+  } catch (PDOException $e) {
+    DB::rollBack();
+    bibliographie_exit('Database scheme update error!', 'An error occurred while trying to update the database scheme!<br /><br />' . $e->__toString());
+  }
 }
 
 /**
  * If an authed user doesn't exist create him/her.
  */
-if(!bibliographie_user_get_id()){
-	try {
-		$createUser = DB::getInstance()->prepare('INSERT INTO `'.BIBLIOGRAPHIE_PREFIX.'users` (`login`) VALUES (:login)');
-		$createUser->execute(array(
-			'login' => $_SERVER['PHP_AUTH_USER']
-		));
-		echo '<p class="success">You have been created as a new user (<em>'.htmlspecialchars($_SERVER['PHP_AUTH_USER']).'</em>)!</p>';
-	} catch (PDOException $e) {
-		bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
-	}
+if (!bibliographie_user_get_id()) {
+  try {
+    $createUser = DB::getInstance()->prepare('INSERT INTO `' . BIBLIOGRAPHIE_PREFIX . 'users` (`login`) VALUES (:login)');
+    $createUser->execute(array(
+      'login' => $_SERVER['PHP_AUTH_USER']
+    ));
+    echo '<p class="success">You have been created as a new user (<em>' . htmlspecialchars($_SERVER['PHP_AUTH_USER']) . '</em>)!</p>';
+  } catch (PDOException $e) {
+    bibliographie_exit('Error creating user', 'Bibliographie could not create you as a user!');
+  }
 }
 /**
  * Log last access of user for statistical reasons.
  */
-DB::getInstance()->query('UPDATE `'.BIBLIOGRAPHIE_PREFIX.'users` SET `last_access` = NOW() WHERE `user_id` = '.DB::getInstance()->quote(bibliographie_user_get_id()));
+DB::getInstance()->query('UPDATE `' . BIBLIOGRAPHIE_PREFIX . 'users` SET `last_access` = NOW() WHERE `user_id` = ' . DB::getInstance()->quote(bibliographie_user_get_id()));
 
 /**
  * If requested purge the cache.
  */
-if($_GET['purgeCache'] == 1)
-	bibliographie_cache_purge();
+if ($_GET['purgeCache'] == 1)
+  bibliographie_cache_purge();
 
 /**
  * Make sure contents of cache are renewed every half hour.
  */
-foreach(scandir(dirname(__FILE__).'/cache') as $object){
-	if($object == '.' or $object == '..')
-		continue;
+foreach (scandir(dirname(__FILE__) . '/cache') as $object) {
+  if ($object == '.' or $object == '..')
+    continue;
 
-	if(filemtime(dirname(__FILE__).'/cache/'.$object) + (60 * 30) < time())
-		unlink(dirname(__FILE__).'/cache/'.$object);
+  if (filemtime(dirname(__FILE__) . '/cache/' . $object) + (60 * 30) < time())
+    unlink(dirname(__FILE__) . '/cache/' . $object);
 }
