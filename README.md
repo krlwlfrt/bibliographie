@@ -59,3 +59,5 @@ Access the app via a browser at the path you've set in the config file earlier. 
 ## Reach the finish line ##
 
 All done... You can now start using bibliographie...
+
+* You'll have a meta-topic called "Top" that is used as the top of the topic graph.
