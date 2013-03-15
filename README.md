@@ -60,4 +60,5 @@ Access the app via a browser at the path you've set in the config file earlier. 
 
 All done... You can now start using bibliographie...
 
-* You'll have a meta-topic called "Top" that is used as the top of the topic graph.
+* If you're new to bibliographie and do not have an aigaion databaase you'll have a meta-topic called "Top" that is used as the top of the topic graph.
+So put all your topics in there so they'll show up in the topic graph.
