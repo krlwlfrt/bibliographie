@@ -1627,26 +1627,43 @@ WHERE
 function bibliographie_publications_search_publications($query, $expandedQuery = '') {
   $return = array();
 
-  if (mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS) {
-    if (empty($expandedQuery))
-      $expandedQuery = bibliographie_search_expand_query($query);
+  $ch = curl_init();
 
-    if (BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json'))
-      return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json'));
+  curl_setopt($ch, CURLOPT_URL, 'http://localhost:9200/bibliographie/publications/_search?pretty=true');
+  curl_setopt($ch, CURLOPT_POST, 1);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, '{"from":0,"size":1000,"query":{"filtered":{"query":{"query_string":{"query":' . json_encode($query) . '}}}}}');
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    preg_match('~from\:([0-9]{4})~', $query, $fromYear);
-    preg_match('~to\:([0-9]{4})~', $query, $toYear);
-    preg_match('~in\:([0-9]{4})~', $query, $inYear);
+  //execute post
+  $result = json_decode(curl_exec($ch));
 
-    $addQuery = '';
-    if (isset($fromYear[1]) and mb_strlen($fromYear[1]) == 4)
-      $addQuery .= ' AND `year` >= ' . ((int) $fromYear[1]);
-    if (isset($toYear[1]) and mb_strlen($toYear[1]) == 4)
-      $addQuery .= ' AND `year` <= ' . ((int) $toYear[1]);
-    if (isset($inYear[1]) and mb_strlen($inYear[1]) == 4)
-      $addQuery = ' AND `year` = ' . ((int) $inYear[1]);
+  foreach ($result->hits->hits as $publication) {
+    $return[] = $publication->_id;
+  }
 
-    $publications = DB::getInstance()->prepare('SELECT
+  return $return;
+
+  if (0 != 0) {
+    if (mb_strlen($query) >= BIBLIOGRAPHIE_SEARCH_MIN_CHARS) {
+      if (empty($expandedQuery))
+        $expandedQuery = bibliographie_search_expand_query($query);
+
+      if (BIBLIOGRAPHIE_CACHING and file_exists(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json'))
+        return json_decode(file_get_contents(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json'));
+
+      preg_match('~from\:([0-9]{4})~', $query, $fromYear);
+      preg_match('~to\:([0-9]{4})~', $query, $toYear);
+      preg_match('~in\:([0-9]{4})~', $query, $inYear);
+
+      $addQuery = '';
+      if (isset($fromYear[1]) and mb_strlen($fromYear[1]) == 4)
+        $addQuery .= ' AND `year` >= ' . ((int) $fromYear[1]);
+      if (isset($toYear[1]) and mb_strlen($toYear[1]) == 4)
+        $addQuery .= ' AND `year` <= ' . ((int) $toYear[1]);
+      if (isset($inYear[1]) and mb_strlen($inYear[1]) == 4)
+        $addQuery = ' AND `year` = ' . ((int) $inYear[1]);
+
+      $publications = DB::getInstance()->prepare('SELECT
 	`pub_id`,
 	`title`,
 	`relevancy`,
@@ -1665,16 +1682,17 @@ WHERE
 ORDER BY
 	`relevancy` DESC,
 	`title`');
-    $publications->execute(array(
-      'expanded_query' => $expandedQuery
-    ));
-    if ($publications->rowCount() > 0)
-      $return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
+      $publications->execute(array(
+        'expanded_query' => $expandedQuery
+      ));
+      if ($publications->rowCount() > 0)
+        $return = $publications->fetchAll(PDO::FETCH_COLUMN, 0);
 
-    if (BIBLIOGRAPHIE_CACHING) {
-      $cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json', 'w+');
-      fwrite($cacheFile, json_encode($return));
-      fclose($cacheFile);
+      if (BIBLIOGRAPHIE_CACHING) {
+        $cacheFile = fopen(BIBLIOGRAPHIE_ROOT_PATH . '/cache/search_publications_' . md5($query) . '_' . md5($expandedQuery) . '.json', 'w+');
+        fwrite($cacheFile, json_encode($return));
+        fclose($cacheFile);
+      }
     }
   }
 

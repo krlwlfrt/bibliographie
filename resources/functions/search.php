@@ -200,7 +200,7 @@ function bibliographie_search_expand_query($q, $_options = array(), $iteration =
  * @param stdClass $publication The publication you want to extend.
  * @return mixed Extended publication or something else.
  */
-function bibliographie_search_solr_extend_publication($publication) {
+function bibliographie_search_extend_publication($publication) {
   if (is_object($publication)) {
     $publication->authors = array();
     $publication->tags = array();
